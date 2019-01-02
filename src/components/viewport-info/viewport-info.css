@@ -1,0 +1,17 @@
+.viewport-info {
+  background: #f0f0f0;
+  padding: 6px;
+
+  position: absolute;
+  bottom: 0;
+  right: 0;
+
+  font-size: 13px;
+
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.hidden {
+  opacity: 0;
+}
