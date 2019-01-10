@@ -11,6 +11,12 @@ class Screencast extends React.Component<any, any> {
     super(props);
     this.canvasRef = React.createRef();
     this.imageRef = React.createRef();
+
+    this.state = {
+      screenOffsetTop: 0,
+      imageZoom: 1,
+      screenZoom: 1
+    }
   }
   
   public componentDidMount() {
@@ -20,20 +26,24 @@ class Screencast extends React.Component<any, any> {
   }
   
   public render() {
-    this.paint();
-    console.log('screencast.render', this.props)
+    // this.paint();
     return (
       <>
-        <img ref={this.imageRef} className="hidden" />
+        <img ref={this.imageRef} className="img-hidden" />
         <canvas className="screencast" ref={this.canvasRef} />
       </>
     );
   }
 
+  public componentWillReceiveProps() {
+    this.loadScreencastFrame();
+  }
+
   private paint() {
     const canvasElement = this.canvasRef.current;
+    const imageElement = this.imageRef.current;
 
-    if(canvasElement && this.canvasContext) {
+    if(imageElement && canvasElement && this.canvasContext) {
 
       const checkerboardPattern = this.getCheckerboardPattern(canvasElement, this.canvasContext);
       const canvasWidth = this.props.width;
@@ -45,20 +55,70 @@ class Screencast extends React.Component<any, any> {
       this.canvasContext.save();
       this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-      // Paint top and bottom gutter.
       this.canvasContext.save();
       this.canvasContext.fillStyle = checkerboardPattern;
-      this.canvasContext.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      this.canvasContext.fillRect(0, 0, canvasWidth, this.state.screenOffsetTop * this.state.screenZoom);
+      this.canvasContext.fillRect(0, this.state.screenOffsetTop * this.state.screenZoom + imageElement.naturalHeight * this.state.imageZoom, canvasWidth, canvasHeight);
+      // this.canvasContext.fillRect(0, 0, canvasWidth, canvasHeight);
       this.canvasContext.restore();
 
+      let dy = this.state.screenOffsetTop * this.state.screenZoom;
+      let dw = imageElement.naturalWidth * this.state.imageZoom;
+      let dh = imageElement.naturalHeight * this.state.imageZoom;
+
+      this.canvasContext.drawImage(imageElement, 0,  dy, dw, dh);
+      // this.canvasContext.drawImage(imageElement, 0,  0, canvasWidth, canvasHeight);
+      this.canvasContext.restore();
+
+        console.log('dy', dy)
+        console.log('dw', dw)
+        console.log('dh', dh)
+
+        console.log('imageElement', imageElement.naturalWidth, imageElement.naturalHeight);
+        console.log('canvas', canvasWidth, canvasHeight);
+        console.log('this.state.imageZoom', this.state.imageZoom);
+        console.log('this.state.screenZoom', this.state.screenZoom);
     }
 
-    // this._context.drawImage(
-    //     this._imageElement, 0, this._screenOffsetTop * this._screenZoom,
-    //     this._imageElement.naturalWidth * this._imageZoom, this._imageElement.naturalHeight * this._imageZoom);
-    // this._context.restore();  
   }  
 
+  public loadScreencastFrame() {
+    const lastFrame = this.props.frames.pop();
+    const imageElement = this.imageRef.current;
+
+    if(imageElement && lastFrame) {
+      const canvasWidth = this.props.width;
+      const canvasHeight = this.props.height;
+      const metadata = lastFrame.metadata;
+
+      const deviceSizeRatio = metadata.deviceHeight / metadata.deviceWidth;
+
+      let imageZoom = Math.min(
+        canvasWidth / imageElement.naturalWidth,
+        canvasHeight / (imageElement.naturalWidth * deviceSizeRatio));
+        
+      if (imageZoom < 1.01 / window.devicePixelRatio) {
+        imageZoom = 1 / window.devicePixelRatio;
+      }
+
+      let screenZoom = imageElement.naturalWidth * imageZoom / metadata.deviceWidth;
+        
+      this.setState({
+        imageZoom: imageZoom,
+        screenOffsetTop: metadata.offsetTop,
+        screenZoom: screenZoom,
+      })
+
+      if(imageElement) {
+        imageElement.onload = () => {
+          this.paint();
+        };
+        imageElement.src = 'data:image/jpg;base64,' + lastFrame.base64Data;
+      }
+    }
+  }
+  
   private getCheckerboardPattern(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
 
     const pattern = canvas;    

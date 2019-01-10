@@ -4,6 +4,21 @@ import './toolbar.css';
 
 import UrlInput from '../url-input/url-input';
 
+import iconBackward from '../toolbar/icons/_ionicons_svg_md-arrow-back.svg';
+const iconBackwardStyle = {
+    backgroundImage: `url(${iconBackward})`
+}
+
+import iconForward from '../toolbar/icons/_ionicons_svg_md-arrow-forward.svg';
+const iconForwardStyle = {
+    backgroundImage: `url(${iconForward})`
+}
+
+import iconRefresh from '../toolbar/icons/_ionicons_svg_md-refresh.svg';
+const iconRefreshStyle = {
+    backgroundImage: `url(${iconRefresh})`
+}
+
 interface IToolbarProps {
     url: string,
     onActionInvoked: (action: string, data: object) => void
@@ -24,9 +39,9 @@ class Toolbar extends React.Component<IToolbarProps> {
         return (
             <div className="toolbar">
                 <div className="inner">
-                    <button className="backward" onClick={this.handleBack}>Backward</button>
-                    <button className="forward" onClick={this.handleForward}>Forward</button>
-                    <button className="refresh" onClick={this.handleRefresh}>Refresh</button>
+                    <button className="backward" style={iconBackwardStyle} onClick={this.handleBack}>Backward</button>
+                    <button className="forward" style={iconForwardStyle} onClick={this.handleForward}>Forward</button>
+                    <button className="refresh" style={iconRefreshStyle} onClick={this.handleRefresh}>Refresh</button>
                     <UrlInput url={this.props.url} onUrlChanged={this.handleUrlChange} />
                 </div>
             </div>

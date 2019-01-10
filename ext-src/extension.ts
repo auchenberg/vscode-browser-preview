@@ -1,39 +1,68 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-export function activate(context: vscode.ExtensionContext) {
+import Browser from './browser'
+import BrowserPage from './browserPage';
 
+export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('browserview.showInstance', () => {
 		BrowserViewWindow.createOrShow(context.extensionPath);
 	}));
 }
 
-/**
- * Manages react webview panels
- */
 class BrowserViewWindow {
 
 	private static readonly viewType = 'browserview';
 
-	private readonly _panel: vscode.WebviewPanel;
-	private readonly _extensionPath: string;
+	private _panel: vscode.WebviewPanel | null;
+	private _extensionPath: string;
 	private _disposables: vscode.Disposable[] = [];
+	private browser: any;
+	private browserPage: BrowserPage | null;
 	
 	public static openWindows: Array<BrowserViewWindow> = [];
 	
-
 	public static createOrShow(extensionPath: string) {
-		//const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
-		const column = vscode.ViewColumn.Two;
 		
-		let window = new BrowserViewWindow(extensionPath, column);
+		let window = new BrowserViewWindow(extensionPath);
+		window.initialize();
 		this.openWindows.push(window);
 	}
 
-	private constructor(extensionPath: string, column: vscode.ViewColumn) {
+	private constructor(extensionPath: string) {
 		this._extensionPath = extensionPath;
+		this._panel = null;
+		this.browserPage = null;
+
+		if(!this.browser) {
+			this.browser = new Browser();
+		}
+	}
+
+	public async initialize() {
+		try {
+			this.browserPage = await this.browser.newPage();
+			if(this.browserPage) {
+				this.browserPage.else((type: string, params: object) => {
+					if(this._panel) {
+						this._panel.webview.postMessage({
+							type: type,
+							params: params
+						}) 
+					}
+				})
+			}
+		} catch (err) {
+			vscode.window.showErrorMessage(err)
+		}		
 
 		// Create and show a new webview panel
+		let column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.Two;
+
+		if(!column) {
+			column = vscode.ViewColumn.Two;
+		}
+
 		this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, "BrowserView", column, {
 			enableScripts: true,
 			localResourceRoots: [
@@ -48,24 +77,23 @@ class BrowserViewWindow {
 		// This happens when the user closes the panel or when the panel is closed programatically
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
-		// Handle messages from the webview
 		this._panel.webview.onDidReceiveMessage(message => {
-			switch (message.command) {
-				case 'alert':
-					vscode.window.showErrorMessage(message.text);
-					return;
+			if(this.browserPage){
+				try {
+					this.browserPage.send(message.type, message.params);
+				} 
+				catch(err) {
+					vscode.window.showErrorMessage(err)
+				}
+			
 			}
-		}, null, this._disposables);
-	}
-
-	public doRefactor() {
-		this._panel.webview.postMessage({ command: 'refactor' });
+		}, null, this._disposables);		
 	}
 
 	public dispose() {
-
-		// Clean up our resources
-		this._panel.dispose();
+		if(this._panel) {
+			this._panel.dispose();
+		}
 
 		while (this._disposables.length) {
 			const x = this._disposables.pop();
@@ -94,9 +122,7 @@ class BrowserViewWindow {
 			</head>
 
 			<body>
-				<noscript>You need to enable JavaScript to run this app.</noscript>
 				<div id="root"></div>
-				
 				<script src="${scriptUri}"></script>
 			</body>
 			</html>`;

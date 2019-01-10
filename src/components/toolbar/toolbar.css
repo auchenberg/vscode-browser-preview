@@ -41,16 +41,3 @@
   button:not([disabled]):active {
     background-color: #ddd;
   }
-
-  .backward {
-    background-image: url(./icons/_ionicons_svg_md-arrow-back.svg) ;
-  }
-
-  .forward {
-    background-image: url(./icons/_ionicons_svg_md-arrow-forward.svg) ;
-  }
-
-  .refresh {
-    background-image: url(./icons/_ionicons_svg_md-refresh.svg);
-  }
-  

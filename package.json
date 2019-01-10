@@ -19,10 +19,18 @@
     ]
   },
   "dependencies": {
+    "@types/lodash": "^4.14.119",
+    "event-emitter-enhancer": "^1.0.57",
+    "get-chrome": "0.0.2",
+    "karma-chrome-launcher": "^2.2.0",
+    "lodash": "^4.17.11",
+    "puppeteer": "^1.11.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-loading-bar": "^0.0.7",
-    "react-scripts-ts": "2.16.0"
+    "react-scripts-ts": "2.16.0",
+    "supports-color": "^6.0.0",
+    "which-chrome": "^0.1.1"
   },
   "scripts": {
     "vscode:prepublish": "react-scripts-ts build && tsc -p tsconfig.extension.json",
