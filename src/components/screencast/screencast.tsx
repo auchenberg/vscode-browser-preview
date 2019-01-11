@@ -12,6 +12,9 @@ class Screencast extends React.Component<any, any> {
     this.canvasRef = React.createRef();
     this.imageRef = React.createRef();
 
+    this.handleMouseEvent = this.handleMouseEvent.bind(this);
+    this.handleKeyEvent = this.handleKeyEvent.bind(this);
+
     this.state = {
       screenOffsetTop: 0,
       imageZoom: 1,
@@ -26,17 +29,29 @@ class Screencast extends React.Component<any, any> {
   }
   
   public render() {
-    // this.paint();
     return (
       <>
         <img ref={this.imageRef} className="img-hidden" />
-        <canvas className="screencast" ref={this.canvasRef} />
+        <canvas className="screencast" ref={this.canvasRef} 
+          onMouseDown={this.handleMouseEvent} 
+          onMouseUp={this.handleMouseEvent} 
+          onMouseMove={this.handleMouseEvent} 
+          onClick={this.handleMouseEvent} 
+          onWheel={this.handleMouseEvent} 
+          onKeyDown={this.handleKeyEvent} 
+          onKeyUp={this.handleKeyEvent} 
+          onKeyPress={this.handleKeyEvent} 
+          tabIndex={0}
+          />
       </>
     );
   }
 
-  public componentWillReceiveProps() {
-    this.loadScreencastFrame();
+
+  public componentWillReceiveProps(nextProps: any) {
+    if(nextProps.frame !== this.props.frame){
+      this.loadScreencastFrame();
+    }
   }
 
   private paint() {
@@ -84,7 +99,8 @@ class Screencast extends React.Component<any, any> {
   }  
 
   public loadScreencastFrame() {
-    const lastFrame = this.props.frames.pop();
+    const lastFrame = this.props.frame;
+
     const imageElement = this.imageRef.current;
 
     if(imageElement && lastFrame) {
@@ -142,6 +158,105 @@ class Screencast extends React.Component<any, any> {
 
     return context.createPattern(pattern, 'repeat');
   }
+
+  private handleMouseEvent(event: any) {
+    this.dispatchMouseEvent(event.nativeEvent);
+
+    if (event.type === 'mousedown') {
+      if(this.canvasRef.current) {
+        this.canvasRef.current.focus();
+        console.log('document.activeElement', document.activeElement)
+      }      
+    }
+
+  }
+
+  private handleKeyEvent(event: any) {
+    this.emitKeyEvent(event.nativeEvent);
+    if(this.canvasRef.current) {
+      this.canvasRef.current.focus();
+    }
+  }
+
+  private modifiersForEvent(event: any) {
+      return (event.altKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0) | (event.shiftKey ? 8 : 0);
+  }  
+
+  private emitKeyEvent(event: any) {
+    let type;
+    switch (event.type) {
+      case 'keydown':
+        type = 'keyDown';
+        break;
+      case 'keyup':
+        type = 'keyUp';
+        break;
+      case 'keypress':
+        type = 'char';
+        break;
+      default:
+        return;
+    }
+
+    const text = event.type === 'keypress' ? String.fromCharCode(event.charCode) : undefined;
+    var params = {
+      type: type,
+      modifiers: this.modifiersForEvent(event),
+      text: text,
+      unmodifiedText: text ? text.toLowerCase() : undefined,
+      keyIdentifier: event.keyIdentifier,
+      code: event.code,
+      key: event.key,
+      windowsVirtualKeyCode: event.keyCode,
+      nativeVirtualKeyCode: event.keyCode,
+      autoRepeat: false,
+      isKeypad: false,
+      isSystemKey: false
+    }
+
+    this.props.onInteraction('Input.dispatchKeyEvent', params)
+  
+  }    
+
+   private dispatchMouseEvent(event: any) {
+    let clickCount = 0;
+    const buttons = {0: 'none', 1: 'left', 2: 'middle', 3: 'right'};
+    const types = {
+      'mousedown': 'mousePressed',
+      'mouseup': 'mouseReleased',
+      'mousemove': 'mouseMoved',
+      'wheel': 'mouseWheel'
+    };
+
+    if (!(event.type in types)) {
+      return;
+    }
+
+    let type =  types[event.type];
+
+    if (type == 'mousePressed' || type == 'mouseReleased') {
+      clickCount = 1;
+    }    
+
+    const params = {
+      type: type,
+      x:  event.offsetX,
+      y: event.offsetY,
+      modifiers: this.modifiersForEvent(event),
+      button: buttons[event.which],
+      clickCount: clickCount,
+      deltaX: 0,
+      deltaY: 0
+    };
+
+    if (type === 'mouseWheel') {
+      //TODO: Check for reverse scroll direction on Windows/macbooks. Inversed for now.
+      params.deltaX = -event.wheelDeltaX;
+      params.deltaY = -event.wheelDeltaY;
+    } 
+
+    this.props.onInteraction('Input.dispatchMouseEvent', params)
+  }  
 
 }
 

@@ -15,6 +15,7 @@ class Viewport extends React.Component<any, any> {
     this.viewportRef = React.createRef();
 
     this.debouncedResizeHandler = _.debounce(this.handleResize.bind(this), 50);
+    this.handleScreencastInteraction = this.handleScreencastInteraction.bind(this);
   }
   
   public componentDidMount() {
@@ -30,13 +31,25 @@ class Viewport extends React.Component<any, any> {
     return (
       <div className="viewport" ref={this.viewportRef}>
         <Loading percent={this.props.loadingPercent} />      
-        <Screencast height={this.props.height} width={this.props.width} frames={this.props.frames} />
+        <Screencast 
+          height={this.props.height} 
+          width={this.props.width} 
+          frame={this.props.frame} 
+          onInteraction={this.handleScreencastInteraction}
+        />
       </div>
     );
   }
 
   private handleResize(e: any) {
     this.updateDimensions()    
+  }
+
+  private handleScreencastInteraction(action: string, params: object) {
+    this.props.onViewportChanged('interaction', {
+      action: action,
+      params: params
+    }) 
   }
 
   private updateDimensions() {

@@ -6,7 +6,7 @@ import ViewportInfo from './components/viewport-info/viewport-info';
 import Viewport from './components/viewport/viewport';
 
 interface IState {
-  frames: any[],
+  frame: object | null,
   url: string,
   viewportMetadata: {
     height: number,
@@ -18,15 +18,18 @@ interface IState {
 class App extends React.Component<any, IState> {
 
   private vscode: any;
+  // private finishedRequestsCount = 0;
+  // private startedRequestsCount = 0;
+  // private pageRequests = {};
 
   constructor(props: any){
     super(props);
     this.state = { 
-      frames: [],
+      frame: null,
       url: 'http://code.visualstudio.com',
       viewportMetadata: {
         height: 0,
-        loadingPercent: 0.8,
+        loadingPercent: 0.0,
         width: 0,
       }
     };
@@ -34,21 +37,91 @@ class App extends React.Component<any, IState> {
     this.onToolbarActionInvoked = this.onToolbarActionInvoked.bind(this)
     this.onViewportChanged = this.onViewportChanged.bind(this)
     
-    
+    this.dispatch('Page.enable');
+    // this.dispatch('Network.enable');
+
     this.dispatch('Page.navigate', {
       url: this.state.url
     });
 
     window.addEventListener('message', event => {
       switch (event.data.type) {
+
+        // case 'Network.requestWillBeSent':
+        //   let request = (event.data.params);
+        //   let requestId = event.data.params.requestId;
+
+        //   if (request.type === 'WebSocket') {
+        //     return;
+        //   }
+
+        //   this.pageRequests[requestId] = request;
+        //   ++this.startedRequestsCount;
+        //   break;
+
+        // case 'Network.loadingFinished':
+        //   if (!(event.data.params.requestId in this.pageRequests)) {
+        //     return;
+        //   }
+        //   ++this.finishedRequestsCount;
+          
+        //   // Finished requests drive the progress up to 90%.
+        //   setTimeout(() => {
+        //     this.setState({
+        //       viewportMetadata: {
+        //         ...this.state.viewportMetadata,
+        //         loadingPercent: Math.min(this.finishedRequestsCount / this.startedRequestsCount * 0.9, 1.0),
+        //       }            
+        //     })            
+        //   }, 500); // Delay to give the new requests time to start. This makes the progress smoother.
+        //   break;
+
+        case 'Page.frameNavigated':
+          const { frame} = event.data.params;
+
+          if(!frame.parentFrameId) { // Is mainframe
+
+            // this.pageRequests = [];
+            // this.startedRequestsCount = 0;
+            // this.finishedRequestsCount = 0;
+
+            this.setState({
+              viewportMetadata: {
+                ...this.state.viewportMetadata,
+                loadingPercent: 0.1,
+              }
+            })
+          }
+          break;
+
+        case 'Page.loadEventFired':
+
+          this.setState({
+            viewportMetadata: {
+              ...this.state.viewportMetadata,
+              loadingPercent: 1.0,
+            }            
+          })
+
+          setTimeout(() => {
+              this.setState({
+                viewportMetadata: {
+                  ...this.state.viewportMetadata,
+                  loadingPercent: 0,
+                }            
+              })           
+          }, 500);
+          
+          break;
+
         case 'Page.screencastFrame': 
           const {sessionId, data, metadata} = event.data.params;
           this.dispatch('Page.screencastFrameAck', {sessionId});
           this.setState({
-            frames: this.state.frames.concat([{
+            frame: {
               base64Data: data,
               metadata: metadata
-            }])
+            }
           })
         break;
       }
@@ -67,7 +140,7 @@ class App extends React.Component<any, IState> {
           width={this.state.viewportMetadata.width} 
           height={this.state.viewportMetadata.height} 
           loadingPercent={this.state.viewportMetadata.loadingPercent} 
-          frames={this.state.frames}
+          frame={this.state.frame}
           onViewportChanged={this.onViewportChanged} 
         />
         <ViewportInfo height={this.state.viewportMetadata.height} width={this.state.viewportMetadata.width} />
@@ -90,8 +163,12 @@ class App extends React.Component<any, IState> {
   private onViewportChanged(action: string, data: any) {
 
     switch(action) {
+
+      case 'interaction':
+        this.dispatch(data.action, data.params)  
+        break;
+
       case 'size':
-        
         this.stopCasting();      
 
         this.dispatch('Page.setDeviceMetricsOverride', {
@@ -110,8 +187,7 @@ class App extends React.Component<any, IState> {
         });
     
         this.startCasting();
-
-      break;
+        break;
     }
   }
 
@@ -124,13 +200,7 @@ class App extends React.Component<any, IState> {
         this.dispatch('Page.goBackward')
         break;
       case 'refresh':
-        this.dispatch('Page.reload')
-        this.setState({
-          viewportMetadata: {
-            ...this.state.viewportMetadata,
-            loadingPercent: 0.1,
-          }
-        });        
+        this.dispatch('Page.reload')      
         break;
       case 'urlChange':
         this.dispatch('Page.navigate', {
