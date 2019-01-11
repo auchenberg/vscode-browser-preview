@@ -25,13 +25,6 @@ class LoadingBar extends React.Component<any, ILoadingBarState> {
   private getBarStyle() {
     const { percent } = this.props
 
-    if(percent == 1) {
-      return {
-        display: 'none',
-        width: '100%',
-      }
-    }
-
     return {
       display: percent > 0 ? 'block': 'none',
       width: `${percent * 100}%`,
