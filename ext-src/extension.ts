@@ -3,8 +3,14 @@ import * as vscode from 'vscode';
 
 import Browser from './browser'
 import BrowserPage from './browserPage';
+import TargetTreeProvider from './targetTreeProvider';
 
 export function activate(context: vscode.ExtensionContext) {
+
+	// Samples of `window.registerTreeDataProvider`
+	const nodeDependenciesProvider = new TargetTreeProvider(vscode.workspace.rootPath || '');
+	vscode.window.registerTreeDataProvider('nodeDependencies', nodeDependenciesProvider);
+
 	context.subscriptions.push(vscode.commands.registerCommand('browserview.showInstance', () => {
 		BrowserViewWindow.createOrShow(context.extensionPath);
 	}));

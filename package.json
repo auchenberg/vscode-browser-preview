@@ -5,19 +5,38 @@
     "vscode": "^1.29.0"
   },
   "publisher": "auchenberg",
-  "activationEvents": [
+	"activationEvents": [
+    "onView:nodeDependencies",
     "onCommand:browserview.showInstance"
-  ],
-  "main": "./build/ext-src/extension.js",
-  "contributes": {
+	],
+	"main": "./out/extension.js",
+	"contributes": {
     "commands": [
       {
         "command": "browserview.showInstance",
         "title": "Show Browser View",
         "category": "Browser"
       }
-    ]
+    ],    
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "browser-view",
+					"title": "Browser View",
+					"icon": "resources/icon.svg"
+				}
+			]
+		},
+		"views": {
+			"browser-view": [
+				{
+					"id": "nodeDependencies",
+					"name": "Targets"
+				}
+			]
+		}
   },
+  "main": "./build/ext-src/extension.js",
   "dependencies": {
     "@types/lodash": "^4.14.119",
     "event-emitter-enhancer": "^1.0.57",
