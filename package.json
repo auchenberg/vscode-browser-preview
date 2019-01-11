@@ -6,45 +6,44 @@
     "vscode": "^1.29.0"
   },
   "publisher": "auchenberg",
-	"activationEvents": [
+  "activationEvents": [
     "onView:nodeDependencies",
     "onCommand:browserview.showInstance"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
+  ],
+  "main": "./build/ext-src/extension.js",
+  "contributes": {
     "commands": [
       {
         "command": "browserview.showInstance",
         "title": "Show Browser View",
         "category": "Browser"
       }
-    ],    
-		"viewsContainers": {
-			"activitybar": [
-				{
-					"id": "browser-view",
-					"title": "Browser View",
-					"icon": "resources/icon.svg"
-				}
-			]
-		},
-		"views": {
-			"browser-view": [
-				{
-					"id": "nodeDependencies",
-					"name": "Targets"
-				}
-			]
-		}
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "browser-view",
+          "title": "Browser View",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "browser-view": [
+        {
+          "id": "nodeDependencies",
+          "name": "Targets"
+        }
+      ]
+    }
   },
-  "main": "./build/ext-src/extension.js",
   "dependencies": {
     "@types/lodash": "^4.14.119",
     "event-emitter-enhancer": "^1.0.57",
     "get-chrome": "0.0.2",
     "karma-chrome-launcher": "^2.2.0",
     "lodash": "^4.17.11",
-    "puppeteer": "^1.11.0",
+    "puppeteer-core": "^1.11.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-loading-bar": "^0.0.7",

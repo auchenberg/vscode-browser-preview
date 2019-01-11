@@ -4,7 +4,7 @@ import { EventEmitter } from 'events';
 import BrowserPage from './browserPage'
 import * as whichChrome from 'which-chrome';
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
 export default class Browser extends EventEmitter {
     
