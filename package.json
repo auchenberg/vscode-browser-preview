@@ -1,5 +1,6 @@
 {
   "name": "vscode-browserview",
+  "description": "Browser view for VS Code",
   "version": "0.1.0",
   "engines": {
     "vscode": "^1.29.0"
