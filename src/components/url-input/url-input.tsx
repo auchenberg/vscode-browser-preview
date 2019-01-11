@@ -56,8 +56,16 @@ public render() {
   }  
 
   private handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.keyCode === 13) {
-      this.props.onUrlChanged(this.state.url)
+    if (e.keyCode === 13) { // Enter
+
+      let url = this.state.url;
+      let schemeRegex = /^(https?|about|chrome):/;
+
+      if (!url.match(schemeRegex)) {
+        url = 'http://' + this.state.url
+      }
+      
+      this.props.onUrlChanged(url)
     }
   }
 }
