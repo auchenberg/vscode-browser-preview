@@ -4,6 +4,7 @@ import './url-input.css';
 
 interface IUrlInputState {
   isFocused: boolean,
+  hasChanged: boolean,
   url: string
 }
 
@@ -12,6 +13,7 @@ class UrlInput extends React.Component<any, IUrlInputState> {
   constructor(props: any){
     super(props);
     this.state = { 
+      hasChanged: false,
       isFocused: false,
       url: this.props.url
     };
@@ -23,7 +25,7 @@ class UrlInput extends React.Component<any, IUrlInputState> {
   }
 
   componentWillReceiveProps(nextProps: any) {
-    if(nextProps.url) {
+    if(nextProps.url !== this.state.url && !this.state.hasChanged) {
       this.setState({
         url: nextProps.url
       })
@@ -46,7 +48,8 @@ class UrlInput extends React.Component<any, IUrlInputState> {
 
   private handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
-      url: e.target.value
+      url: e.target.value,
+      hasChanged: true
     });
   }  
 
@@ -72,6 +75,10 @@ class UrlInput extends React.Component<any, IUrlInputState> {
       if (!url.match(schemeRegex)) {
         url = 'http://' + this.state.url
       }
+
+      this.setState({
+        hasChanged: false
+      })
       
       this.props.onUrlChanged(url)
     }
