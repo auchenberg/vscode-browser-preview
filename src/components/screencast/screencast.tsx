@@ -47,11 +47,8 @@ class Screencast extends React.Component<any, any> {
     );
   }
 
-
-  public componentWillReceiveProps(nextProps: any) {
-    if(nextProps.frame !== this.props.frame){
-      this.loadScreencastFrame();
-    }
+  public componentWillReceiveProps() {
+    this.renderScreencastFrame();
   }
 
   private paint() {
@@ -75,7 +72,6 @@ class Screencast extends React.Component<any, any> {
 
       this.canvasContext.fillRect(0, 0, canvasWidth, this.state.screenOffsetTop * this.state.screenZoom);
       this.canvasContext.fillRect(0, this.state.screenOffsetTop * this.state.screenZoom + imageElement.naturalHeight * this.state.imageZoom, canvasWidth, canvasHeight);
-      // this.canvasContext.fillRect(0, 0, canvasWidth, canvasHeight);
       this.canvasContext.restore();
 
       let dy = this.state.screenOffsetTop * this.state.screenZoom;
@@ -83,30 +79,20 @@ class Screencast extends React.Component<any, any> {
       let dh = imageElement.naturalHeight * this.state.imageZoom;
 
       this.canvasContext.drawImage(imageElement, 0,  dy, dw, dh);
-      // this.canvasContext.drawImage(imageElement, 0,  0, canvasWidth, canvasHeight);
       this.canvasContext.restore();
-
-        console.log('dy', dy)
-        console.log('dw', dw)
-        console.log('dh', dh)
-
-        console.log('imageElement', imageElement.naturalWidth, imageElement.naturalHeight);
-        console.log('canvas', canvasWidth, canvasHeight);
-        console.log('this.state.imageZoom', this.state.imageZoom);
-        console.log('this.state.screenZoom', this.state.screenZoom);
     }
 
   }  
 
-  public loadScreencastFrame() {
-    const lastFrame = this.props.frame;
+  public renderScreencastFrame() {
+    const screencastFrame = this.props.frame;
 
     const imageElement = this.imageRef.current;
 
-    if(imageElement && lastFrame) {
+    if(imageElement && screencastFrame) {
       const canvasWidth = this.props.width;
       const canvasHeight = this.props.height;
-      const metadata = lastFrame.metadata;
+      const metadata = screencastFrame.metadata;
 
       const deviceSizeRatio = metadata.deviceHeight / metadata.deviceWidth;
 
@@ -130,12 +116,12 @@ class Screencast extends React.Component<any, any> {
         imageElement.onload = () => {
           this.paint();
         };
-        imageElement.src = 'data:image/jpg;base64,' + lastFrame.base64Data;
+        imageElement.src = 'data:image/jpg;base64,' + screencastFrame.base64Data;
       }
     }
   }
   
-  private getCheckerboardPattern(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) {
+  private getCheckerboardPattern(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): CanvasPattern {
 
     const pattern = canvas;    
     const size = 32;
@@ -156,7 +142,12 @@ class Screencast extends React.Component<any, any> {
       pctx.fillRect(size, size, size, size);
     }
 
-    return context.createPattern(pattern, 'repeat');
+    let result = context.createPattern(pattern, 'repeat');
+    if(result) {
+      return result;
+    } else {
+      return new CanvasPattern();
+    }
   }
 
   private handleMouseEvent(event: any) {
@@ -165,7 +156,6 @@ class Screencast extends React.Component<any, any> {
     if (event.type === 'mousedown') {
       if(this.canvasRef.current) {
         this.canvasRef.current.focus();
-        console.log('document.activeElement', document.activeElement)
       }      
     }
 
