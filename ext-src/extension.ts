@@ -67,6 +67,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 	}
 
 	public async initialize() {
+
 		try {
 			this.browserPage = await this.browser.newPage();
 			if(this.browserPage) {
@@ -114,7 +115,20 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 					vscode.window.showErrorMessage(err)
 				}
 			}
-		}, null, this._disposables);		
+		}, null, this._disposables);	
+		
+		// App Settings
+		let extensionSettings = vscode.workspace.getConfiguration('browserView');
+		let appSettings = {
+			startUrl: extensionSettings.get('startUrl') || 'http://code.visualstudio.com'
+		};
+
+		this._panel.webview.postMessage({
+			method: 'extension.appConfiguration',
+			result: {
+				settings: appSettings
+			}
+		}) 	
 	}
 
 	public dispose() {

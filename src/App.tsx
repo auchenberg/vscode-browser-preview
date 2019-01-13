@@ -96,11 +96,17 @@ class App extends React.Component<any, IState> {
       })
     });
 
-    // Initialize
-    this.connection.send('Page.enable');
-    this.connection.send('Page.navigate', {
-      url: this.state.url
-    });
+    this.connection.on('extension.appConfiguration', (result: any) => {
+      const { settings } = result;
+
+      if(settings && settings.startUrl) {
+        this.setState({
+          url: settings.startUrl
+        });
+
+        this.connection.send('Page.navigate', {
+          url: this.state.url
+        });    
 
     this.requestNavigationHistory();
   }

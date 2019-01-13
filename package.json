@@ -37,6 +37,17 @@
       ]
     }
   },
+  "configuration": {
+    "title": "BrowserView",
+    "type": "object",
+    "properties": {
+      "browserView.startUrl": {
+        "type": "string",
+        "default": "https://code.visualstudio.com",
+        "description": "The default start url for new BrowserView instances"
+      }
+    }
+  },
   "dependencies": {
     "@types/lodash": "^4.14.119",
     "event-emitter-enhancer": "^1.0.57",
