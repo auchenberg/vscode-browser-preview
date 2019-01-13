@@ -58,7 +58,10 @@ class Screencast extends React.Component<any, any> {
     const imageElement = this.imageRef.current;
 
     if (imageElement && canvasElement && this.canvasContext) {
-      const checkerboardPattern = this.getCheckerboardPattern(canvasElement, this.canvasContext);
+      const checkerboardPattern = this.getCheckerboardPattern(
+        canvasElement,
+        this.canvasContext
+      );
       const canvasWidth = this.props.width;
       const canvasHeight = this.props.height;
 
@@ -66,17 +69,26 @@ class Screencast extends React.Component<any, any> {
       canvasElement.height = window.devicePixelRatio * canvasHeight;
 
       this.canvasContext.save();
-      this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+      this.canvasContext.scale(
+        window.devicePixelRatio,
+        window.devicePixelRatio
+      );
 
       this.canvasContext.save();
       this.canvasContext.fillStyle = checkerboardPattern;
 
-      this.canvasContext.fillRect(0, 0, canvasWidth, this.state.screenOffsetTop * this.state.screenZoom);
       this.canvasContext.fillRect(
         0,
-        this.state.screenOffsetTop * this.state.screenZoom + imageElement.naturalHeight * this.state.imageZoom,
+        0,
         canvasWidth,
-        canvasHeight,
+        this.state.screenOffsetTop * this.state.screenZoom
+      );
+      this.canvasContext.fillRect(
+        0,
+        this.state.screenOffsetTop * this.state.screenZoom +
+          imageElement.naturalHeight * this.state.imageZoom,
+        canvasWidth,
+        canvasHeight
       );
       this.canvasContext.restore();
 
@@ -103,14 +115,15 @@ class Screencast extends React.Component<any, any> {
 
       let imageZoom = Math.min(
         canvasWidth / imageElement.naturalWidth,
-        canvasHeight / (imageElement.naturalWidth * deviceSizeRatio),
+        canvasHeight / (imageElement.naturalWidth * deviceSizeRatio)
       );
 
       if (imageZoom < 1.01 / window.devicePixelRatio) {
         imageZoom = 1 / window.devicePixelRatio;
       }
 
-      let screenZoom = (imageElement.naturalWidth * imageZoom) / metadata.deviceWidth;
+      let screenZoom =
+        (imageElement.naturalWidth * imageZoom) / metadata.deviceWidth;
 
       this.setState({
         imageZoom: imageZoom,
@@ -122,12 +135,16 @@ class Screencast extends React.Component<any, any> {
         imageElement.onload = () => {
           this.paint();
         };
-        imageElement.src = 'data:image/jpg;base64,' + screencastFrame.base64Data;
+        imageElement.src =
+          'data:image/jpg;base64,' + screencastFrame.base64Data;
       }
     }
   }
 
-  private getCheckerboardPattern(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): CanvasPattern {
+  private getCheckerboardPattern(
+    canvas: HTMLCanvasElement,
+    context: CanvasRenderingContext2D
+  ): CanvasPattern {
     const pattern = canvas;
     const size = 32;
     const pctx = pattern.getContext('2d');
@@ -173,7 +190,12 @@ class Screencast extends React.Component<any, any> {
   }
 
   private modifiersForEvent(event: any) {
-    return (event.altKey ? 1 : 0) | (event.ctrlKey ? 2 : 0) | (event.metaKey ? 4 : 0) | (event.shiftKey ? 8 : 0);
+    return (
+      (event.altKey ? 1 : 0) |
+      (event.ctrlKey ? 2 : 0) |
+      (event.metaKey ? 4 : 0) |
+      (event.shiftKey ? 8 : 0)
+    );
   }
 
   private emitKeyEvent(event: any) {
@@ -192,7 +214,10 @@ class Screencast extends React.Component<any, any> {
         return;
     }
 
-    const text = event.type === 'keypress' ? String.fromCharCode(event.charCode) : undefined;
+    const text =
+      event.type === 'keypress'
+        ? String.fromCharCode(event.charCode)
+        : undefined;
     var params = {
       type: type,
       modifiers: this.modifiersForEvent(event),

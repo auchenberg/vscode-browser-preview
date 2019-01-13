@@ -16,7 +16,9 @@ class Viewport extends React.Component<any, any> {
     this.viewportRef = React.createRef();
 
     this.debouncedResizeHandler = _.debounce(this.handleResize.bind(this), 50);
-    this.handleScreencastInteraction = this.handleScreencastInteraction.bind(this);
+    this.handleScreencastInteraction = this.handleScreencastInteraction.bind(
+      this
+    );
   }
 
   public componentDidMount() {

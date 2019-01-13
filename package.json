@@ -69,13 +69,15 @@
     "start": "react-scripts-ts start",
     "build": "react-scripts-ts build && tsc -p tsconfig.extension.json",
     "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "eject": "react-scripts-ts eject",
+    "prettier": "./node_modules/.bin/prettier --write src/**/{*.tsx,*.ts}"
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/node": "^10.1.2",
     "@types/react": "^16.3.14",
     "@types/react-dom": "^16.0.5",
+    "prettier": "^1.15.3",
     "typescript": "^2.8.3",
     "vscode": "^1.1.17"
   }
