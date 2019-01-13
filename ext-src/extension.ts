@@ -80,8 +80,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 			vscode.window.showErrorMessage(err)
 		}		
 
-		// Create and show a new webview panel
-		let column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : vscode.ViewColumn.Two;
+		let column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : null;
 
 		if(!column) {
 			column = vscode.ViewColumn.Two;
@@ -99,6 +98,14 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		this._panel.webview.onDidReceiveMessage(message => {
+
+			if(message.type === 'extension.updateTitle') {
+				if(this._panel) {
+					this._panel.title = message.params.title
+					return;
+				}
+			}
+
 			if(this.browserPage){
 				try {
 					this.browserPage.send(message.type, message.params, message.callbackId);

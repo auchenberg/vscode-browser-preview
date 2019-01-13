@@ -51,6 +51,7 @@ class App extends React.Component<any, IState> {
       if(isMainFrame) { 
         this.requestNavigationHistory(); 
         this.setState({
+          ...this.state,
           viewportMetadata: {
             ...this.state.viewportMetadata,
             loadingPercent: 0.1,
@@ -61,6 +62,7 @@ class App extends React.Component<any, IState> {
 
     this.connection.on('Page.loadEventFired', (params: any) => {
       this.setState({
+        ...this.state,
         viewportMetadata: {
           ...this.state.viewportMetadata,
           loadingPercent: 1.0,
@@ -69,6 +71,7 @@ class App extends React.Component<any, IState> {
 
       setTimeout(() => {
           this.setState({
+            ...this.state,
             viewportMetadata: {
               ...this.state.viewportMetadata,
               loadingPercent: 0,
@@ -81,6 +84,7 @@ class App extends React.Component<any, IState> {
       const {sessionId, data, metadata} = params;
       this.connection.send('Page.screencastFrameAck', {sessionId});
       this.setState({
+        ...this.state,
         frame: {
           base64Data: data,
           metadata: metadata
@@ -141,7 +145,8 @@ class App extends React.Component<any, IState> {
 
     let historyIndex = history.currentIndex;
     let historyEntries = history.entries;
-    let url = historyEntries[historyIndex].url;
+    let currentEntry = historyEntries[historyIndex];
+    let url = currentEntry.url;
 
     const pattern = /^http:\/\/(.+)/;
     const match = url.match(pattern);
@@ -157,6 +162,10 @@ class App extends React.Component<any, IState> {
         canGoForward: historyIndex === (historyEntries.length - 1)
       }
     });
+
+    this.connection.send('extension.updateTitle', {
+      title: `BrowserView (${currentEntry.title})`
+    })
 
   }  
 
@@ -178,6 +187,7 @@ class App extends React.Component<any, IState> {
           width: Math.round(data.width),
         }).then(() => {
           this.setState({
+            ...this.state,
             viewportMetadata: {
               ...this.state.viewportMetadata,
               height: data.height as number,
@@ -209,6 +219,7 @@ class App extends React.Component<any, IState> {
           url: data.url
         })     
         this.setState({
+          ...this.state,
           url: data.url
         })
         break;   
