@@ -4,45 +4,66 @@ import * as vscode from 'vscode';
 import Browser from './browser'
 import BrowserPage from './browserPage';
 import TargetTreeProvider from './targetTreeProvider';
+import * as EventEmitter from 'eventemitter2';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	// Samples of `window.registerTreeDataProvider`
+	const windowManager = new BrowserViewWindowManager();
 	const nodeDependenciesProvider = new TargetTreeProvider();
 	vscode.window.registerTreeDataProvider('nodeDependencies', nodeDependenciesProvider);
 
 	context.subscriptions.push(vscode.commands.registerCommand('browserview.showInstance', () => {
-		BrowserViewWindow.createOrShow(context.extensionPath);
+		windowManager.create(context.extensionPath);
 	}));
 }
 
-class BrowserViewWindow {
+class BrowserViewWindowManager {
+
+	private openWindows: Set<BrowserViewWindow>;
+	private browser: any;
+
+	constructor() {
+		this.openWindows = new Set();
+	}
+	
+	public create(extensionPath: string) {
+
+		if(!this.browser) {
+			this.browser = new Browser();
+		}
+
+		let window = new BrowserViewWindow(extensionPath, this.browser);
+		window.initialize();
+		window.once('disposed', () => {
+			this.openWindows.delete(window);
+
+			if(this.openWindows.size === 0) {
+				this.browser.dispose();
+				this.browser = null;
+			}
+		});
+		this.openWindows.add(window);
+	}
+
+}
+
+class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
 	private static readonly viewType = 'browserview';
 
 	private _panel: vscode.WebviewPanel | null;
 	private _extensionPath: string;
 	private _disposables: vscode.Disposable[] = [];
-	private browser: any;
+	
 	private browserPage: BrowserPage | null;
+	private browser: Browser;
 	
-	public static openWindows: Array<BrowserViewWindow> = [];
-	
-	public static createOrShow(extensionPath: string) {
-		
-		let window = new BrowserViewWindow(extensionPath);
-		window.initialize();
-		this.openWindows.push(window);
-	}
-
-	private constructor(extensionPath: string) {
+	constructor(extensionPath: string, browser: Browser) {
+		super();
 		this._extensionPath = extensionPath;
 		this._panel = null;
 		this.browserPage = null;
-
-		if(!this.browser) {
-			this.browser = new Browser();
-		}
+		this.browser = browser;
 	}
 
 	public async initialize() {
@@ -68,16 +89,13 @@ class BrowserViewWindow {
 
 		this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, "BrowserView", column, {
 			enableScripts: true,
+			retainContextWhenHidden: true,
 			localResourceRoots: [
 				vscode.Uri.file(path.join(this._extensionPath, 'build'))
 			]
 		});
 		
-		// Set the webview's initial html content 
 		this._panel.webview.html = this._getHtmlForWebview();
-
-		// Listen for when the panel is disposed
-		// This happens when the user closes the panel or when the panel is closed programatically
 		this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
 		this._panel.webview.onDidReceiveMessage(message => {
@@ -88,7 +106,6 @@ class BrowserViewWindow {
 				catch(err) {
 					vscode.window.showErrorMessage(err)
 				}
-			
 			}
 		}, null, this._disposables);		
 	}
@@ -98,12 +115,19 @@ class BrowserViewWindow {
 			this._panel.dispose();
 		}
 
+		if(this.browserPage) {
+			this.browserPage.dispose();
+			this.browserPage = null;
+		}
+
 		while (this._disposables.length) {
 			const x = this._disposables.pop();
 			if (x) {
 				x.dispose();
 			}
 		}
+
+		this.emit('disposed');
 	}
 
 	private _getHtmlForWebview() {

@@ -15,6 +15,13 @@ export default class BrowserPage extends EnhancedEventEmitter {
         this.browser = browser;
     }
 
+    public dispose() {
+        this.removeAllElseListeners();
+        this.removeAllListeners();
+        this.client.detach();
+        this.page.close();
+    }
+
     public async send(action: string, data: object, callbackId?: number) {
         console.log('► browserPage.send', action)
         
