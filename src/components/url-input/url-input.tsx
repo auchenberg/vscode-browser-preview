@@ -20,9 +20,17 @@ class UrlInput extends React.Component<any, IUrlInputState> {
     this.handleFocus = this.handleFocus.bind(this);
     this.handleBlur = this.handleBlur.bind(this);    
     this.handleKeyDown = this.handleKeyDown.bind(this);    
-}
+  }
 
-public render() {
+  componentWillReceiveProps(nextProps: any) {
+    if(nextProps.url) {
+      this.setState({
+        url: nextProps.url
+      })
+    }
+  }
+
+  public render() {
 
     const className = ['urlbar'];
     if (this.state.isFocused) {
