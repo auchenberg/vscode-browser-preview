@@ -28,7 +28,7 @@ class App extends React.Component<any, IState> {
     super(props);
     this.state = { 
       frame: null,
-      url: 'http://code.visualstudio.com',
+      url: 'about:blank',
       history: {
         canGoBack: false,
         canGoForward: false
@@ -46,8 +46,8 @@ class App extends React.Component<any, IState> {
     this.onToolbarActionInvoked = this.onToolbarActionInvoked.bind(this)
     this.onViewportChanged = this.onViewportChanged.bind(this)
     
-    this.connection.on('Page.frameNavigated', (params: any) => {
-      const { frame } = params;
+    this.connection.on('Page.frameNavigated', (result: any) => {
+      const { frame } = result;
       var isMainFrame = !frame.parentId;
 
       if(isMainFrame) { 
@@ -63,7 +63,7 @@ class App extends React.Component<any, IState> {
       }
     });
 
-    this.connection.on('Page.loadEventFired', (params: any) => {
+    this.connection.on('Page.loadEventFired', (result: any) => {
       this.setState({
         ...this.state,
         viewportMetadata: {
@@ -84,8 +84,8 @@ class App extends React.Component<any, IState> {
       }, 500);
     });
     
-    this.connection.on('Page.screencastFrame', (params: any) => {
-      const {sessionId, data, metadata} = params;
+    this.connection.on('Page.screencastFrame', (result: any) => {
+      const {sessionId, data, metadata} = result;
       this.connection.send('Page.screencastFrameAck', {sessionId});
       this.setState({
         ...this.state,
@@ -107,6 +107,11 @@ class App extends React.Component<any, IState> {
         this.connection.send('Page.navigate', {
           url: this.state.url
         });    
+      }
+    })
+
+    // Initialize
+    this.connection.send('Page.enable');
 
     this.requestNavigationHistory();
   }
