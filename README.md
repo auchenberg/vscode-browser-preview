@@ -3,7 +3,6 @@
   <div>
     <img src="resources/icon.svg" alt="logo" width="100">
   </div>
-  <br />
   <h1>
     VS Code BrowserView
     <br/><br/>
