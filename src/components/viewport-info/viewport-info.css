@@ -1,12 +1,13 @@
 .viewport-info {
-  background: #f0f0f0;
+  background: rgba(240, 240, 240, 0.6);
   padding: 6px;
 
   position: absolute;
-  bottom: 0;
+  top: 0;
   right: 0;
 
   font-size: 13px;
+  color: #333;
 
   opacity: 1;
   transition: opacity 0.5s ease-in-out;

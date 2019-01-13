@@ -14,9 +14,11 @@ class ViewportInfo extends React.Component<any, any> {
     }
   }
 
-  public componentWillReceiveProps() {
-    this.setState({isHidden: false}); 
-    window.clearTimeout(this.timer);
+  public componentWillReceiveProps(nextProps: any) {
+    if(nextProps.height !== this.props.height || nextProps.width !== this.props.width ) {
+      this.setState({isHidden: false}); 
+      window.clearTimeout(this.timer);
+    }
   }
 
   public render() {
@@ -24,7 +26,7 @@ class ViewportInfo extends React.Component<any, any> {
     const height = Math.round(this.props.height);
     const width = Math.round(this.props.width);
 
-    this.timer = window.setTimeout(_ => {
+    this.timer = window.setTimeout(() => {
       this.setState({isHidden: true}); 
     }, 2000);    
 
