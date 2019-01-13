@@ -40,6 +40,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.119",
     "event-emitter-enhancer": "^1.0.57",
+    "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",
     "karma-chrome-launcher": "^2.2.0",
     "lodash": "^4.17.11",
