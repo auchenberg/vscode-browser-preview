@@ -1,11 +1,11 @@
 import * as _ from 'lodash';
 import * as React from 'react';
 
-import './viewport.css';
-
 import Loading from '../loading-bar/loading-bar';
 import Screencast from '../screencast/screencast';
 import ViewportInfo from '../viewport-info/viewport-info';
+
+import './viewport.css';
 
 class Viewport extends React.Component<any, any> {
   private viewportRef: React.RefObject<HTMLDivElement>;

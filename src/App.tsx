@@ -1,9 +1,10 @@
 import * as React from 'react';
-import './App.css';
 
+import Connection from './connection';
 import Toolbar from './components/toolbar/toolbar';
 import Viewport from './components/viewport/viewport';
-import Connection from './connection';
+
+import './App.css';
 
 interface IState {
   frame: object | null;
