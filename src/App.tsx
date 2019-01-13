@@ -131,8 +131,8 @@ class App extends React.Component<any, IState> {
   public startCasting() {
     this.connection.send('Page.startScreencast', {
       format: 'jpeg',
-      maxWidth: Math.round(this.state.viewportMetadata.width * window.devicePixelRatio),
-      maxHeight: Math.round(this.state.viewportMetadata.height * window.devicePixelRatio),
+      maxWidth: Math.floor(this.state.viewportMetadata.width * window.devicePixelRatio),
+      maxHeight: Math.floor(this.state.viewportMetadata.height * window.devicePixelRatio),
     });
   }
 
@@ -184,9 +184,9 @@ class App extends React.Component<any, IState> {
 
         this.connection.send('Page.setDeviceMetricsOverride', {
           deviceScaleFactor: 2,
-          height: Math.round(data.height),
+          height: Math.floor(data.height),
           mobile: false,
-          width: Math.round(data.width),
+          width: Math.floor(data.width),
         }).then(() => {
           this.setState({
             ...this.state,
