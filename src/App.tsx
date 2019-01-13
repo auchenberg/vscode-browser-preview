@@ -2,8 +2,8 @@ import * as React from 'react';
 import './App.css';
 
 import Toolbar from './components/toolbar/toolbar';
-import ViewportInfo from './components/viewport-info/viewport-info';
 import Viewport from './components/viewport/viewport';
+import Connection  from './connection';
 
 interface IState {
   frame: object | null,
@@ -12,12 +12,16 @@ interface IState {
     height: number,
     width: number,
     loadingPercent: number
+  },
+  history: {
+    canGoBack: boolean,
+    canGoForward: boolean
   }
 }
 
 class App extends React.Component<any, IState> {
 
-  private vscode: any;
+  private connection: Connection;
   // private finishedRequestsCount = 0;
   // private startedRequestsCount = 0;
   // private pageRequests = {};
@@ -27,106 +31,81 @@ class App extends React.Component<any, IState> {
     this.state = { 
       frame: null,
       url: 'http://code.visualstudio.com',
+      history: {
+        canGoBack: false,
+        canGoForward: false
+      },   
       viewportMetadata: {
         height: 0,
         loadingPercent: 0.0,
         width: 0,
-      }
+      },
+      
     };
+
+    this.connection = new Connection();
 
     this.onToolbarActionInvoked = this.onToolbarActionInvoked.bind(this)
     this.onViewportChanged = this.onViewportChanged.bind(this)
     
-    this.dispatch('Page.enable');
+    this.connection.send('Page.enable');
     // this.dispatch('Network.enable');
 
-    this.dispatch('Page.navigate', {
+    this.connection.send('Page.navigate', {
       url: this.state.url
     });
 
-    window.addEventListener('message', event => {
-      switch (event.data.type) {
+    this.requestNavigationHistory();
 
-        // case 'Network.requestWillBeSent':
-        //   let request = (event.data.params);
-        //   let requestId = event.data.params.requestId;
+    this.connection.on('Page.frameNavigated', (params: any) => {
+      const { frame } = params;
 
-        //   if (request.type === 'WebSocket') {
-        //     return;
-        //   }
+      if(!frame.parentFrameId) { // Is mainframe
 
-        //   this.pageRequests[requestId] = request;
-        //   ++this.startedRequestsCount;
-        //   break;
-
-        // case 'Network.loadingFinished':
-        //   if (!(event.data.params.requestId in this.pageRequests)) {
-        //     return;
-        //   }
-        //   ++this.finishedRequestsCount;
-          
-        //   // Finished requests drive the progress up to 90%.
-        //   setTimeout(() => {
-        //     this.setState({
-        //       viewportMetadata: {
-        //         ...this.state.viewportMetadata,
-        //         loadingPercent: Math.min(this.finishedRequestsCount / this.startedRequestsCount * 0.9, 1.0),
-        //       }            
-        //     })            
-        //   }, 500); // Delay to give the new requests time to start. This makes the progress smoother.
-        //   break;
-
-        case 'Page.frameNavigated':
-          const { frame} = event.data.params;
-
-          if(!frame.parentFrameId) { // Is mainframe
-
-            // this.pageRequests = [];
-            // this.startedRequestsCount = 0;
-            // this.finishedRequestsCount = 0;
-
-            this.setState({
-              viewportMetadata: {
-                ...this.state.viewportMetadata,
-                loadingPercent: 0.1,
-              }
-            })
+        this.requestNavigationHistory();
+  
+        // this.pageRequests = [];
+        // this.startedRequestsCount = 0;
+        // this.finishedRequestsCount = 0;
+  
+        this.setState({
+          viewportMetadata: {
+            ...this.state.viewportMetadata,
+            loadingPercent: 0.1,
           }
-          break;
+        })
+      }
+      
+    });
 
-        case 'Page.loadEventFired':
+    this.connection.on('Page.loadEventFired', (params: any) => {
+      this.setState({
+        viewportMetadata: {
+          ...this.state.viewportMetadata,
+          loadingPercent: 1.0,
+        }            
+      })
 
+      setTimeout(() => {
           this.setState({
             viewportMetadata: {
               ...this.state.viewportMetadata,
-              loadingPercent: 1.0,
+              loadingPercent: 0,
             }            
-          })
-
-          setTimeout(() => {
-              this.setState({
-                viewportMetadata: {
-                  ...this.state.viewportMetadata,
-                  loadingPercent: 0,
-                }            
-              })           
-          }, 500);
-          
-          break;
-
-        case 'Page.screencastFrame': 
-          const {sessionId, data, metadata} = event.data.params;
-          this.dispatch('Page.screencastFrameAck', {sessionId});
-          this.setState({
-            frame: {
-              base64Data: data,
-              metadata: metadata
-            }
-          })
-        break;
-      }
-    }, false);
-
+          })           
+      }, 500);
+    });
+    
+    this.connection.on('Page.screencastFrame', (params: any) => {
+      const {sessionId, data, metadata} = params;
+      this.connection.send('Page.screencastFrameAck', {sessionId});
+      this.setState({
+        frame: {
+          base64Data: data,
+          metadata: metadata
+        }
+      })
+    });
   }
 
   public render() {
@@ -134,7 +113,12 @@ class App extends React.Component<any, IState> {
 
     return (
       <div className="App">
-        <Toolbar url={this.state.url} onActionInvoked={this.onToolbarActionInvoked} />
+        <Toolbar 
+          url={this.state.url} 
+          onActionInvoked={this.onToolbarActionInvoked}
+          canGoBack={this.state.history.canGoBack}
+          canGoForward={this.state.history.canGoForward}
+        />
         <Viewport 
           showLoading={showLoading} 
           width={this.state.viewportMetadata.width} 
@@ -143,39 +127,66 @@ class App extends React.Component<any, IState> {
           frame={this.state.frame}
           onViewportChanged={this.onViewportChanged} 
         />
-        <ViewportInfo height={this.state.viewportMetadata.height} width={this.state.viewportMetadata.width} />
       </div>
     );
   }
 
   public stopCasting() {
-    this.dispatch('Page.stopScreencast');
+    this.connection.send('Page.stopScreencast');
   }
 
   public startCasting() {
-    this.dispatch('Page.startScreencast', {
+    this.connection.send('Page.startScreencast', {
       format: 'jpeg',
-      maxWidth: this.state.viewportMetadata.width * window.devicePixelRatio,
-      maxHeight: this.state.viewportMetadata.height * window.devicePixelRatio,
+      maxWidth: Math.round(this.state.viewportMetadata.width * window.devicePixelRatio),
+      maxHeight: Math.round(this.state.viewportMetadata.height * window.devicePixelRatio),
     });
   }
+
+  private async requestNavigationHistory() {
+    const history: any = await this.connection.send('Page.getNavigationHistory')
+
+    if (!history) {
+      return;
+    }
+
+    let historyIndex = history.currentIndex;
+    let historyEntries = history.entries;
+
+    let url = historyEntries[historyIndex].url;
+
+    // const match = url.match(/^http:\/\/(.+)/);
+    // if (match)
+    //   url = match[1];
+    // }
+
+    this.setState({
+      ...this.state,
+      url: url,
+      history: {
+        canGoBack: historyIndex === 0,
+        canGoForward: historyIndex === (historyEntries.length - 1)
+      }
+    });
+
+  }  
 
   private onViewportChanged(action: string, data: any) {
 
     switch(action) {
 
       case 'interaction':
-        this.dispatch(data.action, data.params)  
+        this.connection.send(data.action, data.params)  
         break;
 
       case 'size':
         this.stopCasting();      
 
-        this.dispatch('Page.setDeviceMetricsOverride', {
+        this.connection.send('Page.setDeviceMetricsOverride', {
           deviceScaleFactor: 2,
-          height: data.height,
+          height: Math.round(data.height),
           mobile: false,
-          width: data.width,
+          width: Math.round(data.width),
         })  
 
         this.setState({
@@ -194,47 +205,24 @@ class App extends React.Component<any, IState> {
   private onToolbarActionInvoked(action: string, data: any) {
     switch(action) {
       case 'forward':
-        this.dispatch('Page.goForward')
+        this.connection.send('Page.goForward')
         break;
       case 'backward':
-        this.dispatch('Page.goBackward')
+        this.connection.send('Page.goBackward')
         break;
       case 'refresh':
-        this.dispatch('Page.reload')      
+        this.connection.send('Page.reload')      
         break;
       case 'urlChange':
-        this.dispatch('Page.navigate', {
+        this.connection.send('Page.navigate', {
           url: data.url
         })     
-
         this.setState({
           url: data.url
         })
         break;   
     }
-  
   }
-
-  private dispatch(eventName: string, params?: object) {
-
-    console.log(eventName, params)
-
-    if(!this.vscode){
-      try {
-        // @ts-ignore 
-        this.vscode = acquireVsCodeApi();
-      } catch {
-        this.vscode = null;
-      }
-    }
-
-    if(this.vscode) {
-      this.vscode.postMessage({
-        params,
-        type: eventName
-      })
-    }
-  }  
 }
 
 export default App;

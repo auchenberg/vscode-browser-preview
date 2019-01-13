@@ -8,7 +8,7 @@ import TargetTreeProvider from './targetTreeProvider';
 export function activate(context: vscode.ExtensionContext) {
 
 	// Samples of `window.registerTreeDataProvider`
-	const nodeDependenciesProvider = new TargetTreeProvider(vscode.workspace.rootPath || '');
+	const nodeDependenciesProvider = new TargetTreeProvider();
 	vscode.window.registerTreeDataProvider('nodeDependencies', nodeDependenciesProvider);
 
 	context.subscriptions.push(vscode.commands.registerCommand('browserview.showInstance', () => {
@@ -49,12 +49,9 @@ class BrowserViewWindow {
 		try {
 			this.browserPage = await this.browser.newPage();
 			if(this.browserPage) {
-				this.browserPage.else((type: string, params: object) => {
+				this.browserPage.else((data: any) => {
 					if(this._panel) {
-						this._panel.webview.postMessage({
-							type: type,
-							params: params
-						}) 
+						this._panel.webview.postMessage(data) 
 					}
 				})
 			}
@@ -86,7 +83,7 @@ class BrowserViewWindow {
 		this._panel.webview.onDidReceiveMessage(message => {
 			if(this.browserPage){
 				try {
-					this.browserPage.send(message.type, message.params);
+					this.browserPage.send(message.type, message.params, message.callbackId);
 				} 
 				catch(err) {
 					vscode.window.showErrorMessage(err)

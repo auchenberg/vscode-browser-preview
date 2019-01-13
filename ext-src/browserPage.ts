@@ -15,8 +15,8 @@ export default class BrowserPage extends EnhancedEventEmitter {
         this.browser = browser;
     }
 
-    public async send(action: string, data: object) {
-        console.log('-> browserPage.send', action)
+    public async send(action: string, data: object, callbackId?: number) {
+        console.log('► browserPage.send', action)
         
         switch (action) {
             case 'Page.goForward':
@@ -26,7 +26,17 @@ export default class BrowserPage extends EnhancedEventEmitter {
                 await this.page.goBack();
                 break;
             default:
-                await this.client.send(action, data);
+                this.client.send(action, data).then( (result:any) => {
+                    this.emit({
+                        callbackId: callbackId,
+                        result: result
+                    });
+                }).catch((err: any) => {
+                    this.emit({
+                        callbackId: callbackId,
+                        error: err.message
+                    });   
+                })
         }
     }
 
@@ -37,8 +47,11 @@ export default class BrowserPage extends EnhancedEventEmitter {
         EventEmitterEnhancer.modifyInstance(this.client);
 
         this.client.else((action: string, data: object) => {
-            console.log('<- browserPage.received', action)
-            this.emit(action, data)
+            console.log('◀ browserPage.received', action)
+            this.emit({
+                method: action,
+                result: data
+            })
         });      
     }
 
