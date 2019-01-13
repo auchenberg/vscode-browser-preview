@@ -1,14 +1,13 @@
-
 import * as React from 'react';
+
 import './loading-bar.css';
 
 interface ILoadingBarState {
-  percent: number
+  percent: number;
 }
 
 class LoadingBar extends React.Component<any, ILoadingBarState> {
-
-  constructor(props: any){
+  constructor(props: any) {
     super(props);
   }
 
@@ -19,21 +18,17 @@ class LoadingBar extends React.Component<any, ILoadingBarState> {
           <div className="peg" />
         </div>
       </div>
-    )
+    );
   }
 
   private getBarStyle() {
-    const { percent } = this.props
+    const { percent } = this.props;
 
     return {
-      display: percent > 0 ? 'block': 'none',
+      display: percent > 0 ? 'block' : 'none',
       width: `${percent * 100}%`,
-    }
+    };
   }
-
 }
 
 export default LoadingBar;
-
-
-
