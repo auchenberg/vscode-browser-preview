@@ -22,7 +22,7 @@ class LoadingBar extends React.Component<any, ILoadingBarState> {
   }
 
   private getBarStyle() {
-    const { percent } = this.props;
+    const {percent} = this.props;
 
     return {
       display: percent > 0 ? 'block' : 'none',

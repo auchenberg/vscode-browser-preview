@@ -53,11 +53,7 @@ class Toolbar extends React.Component<IToolbarProps> {
           >
             Forward
           </button>
-          <button
-            className="refresh"
-            style={iconRefreshStyle}
-            onClick={this.handleRefresh}
-          >
+          <button className="refresh" style={iconRefreshStyle} onClick={this.handleRefresh}>
             Refresh
           </button>
           <UrlInput url={this.props.url} onUrlChanged={this.handleUrlChange} />
@@ -67,7 +63,7 @@ class Toolbar extends React.Component<IToolbarProps> {
   }
 
   private handleUrlChange(url: string) {
-    this.props.onActionInvoked('urlChange', { url });
+    this.props.onActionInvoked('urlChange', {url});
   }
 
   private handleBack() {

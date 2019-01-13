@@ -46,7 +46,7 @@ class App extends React.Component<any, IState> {
     this.onViewportChanged = this.onViewportChanged.bind(this);
 
     this.connection.on('Page.frameNavigated', (result: any) => {
-      const { frame } = result;
+      const {frame} = result;
       var isMainFrame = !frame.parentId;
 
       if (isMainFrame) {
@@ -84,8 +84,8 @@ class App extends React.Component<any, IState> {
     });
 
     this.connection.on('Page.screencastFrame', (result: any) => {
-      const { sessionId, data, metadata } = result;
-      this.connection.send('Page.screencastFrameAck', { sessionId });
+      const {sessionId, data, metadata} = result;
+      this.connection.send('Page.screencastFrameAck', {sessionId});
       this.setState({
         ...this.state,
         frame: {
@@ -96,7 +96,7 @@ class App extends React.Component<any, IState> {
     });
 
     this.connection.on('extension.appConfiguration', (result: any) => {
-      const { settings } = result;
+      const {settings} = result;
 
       if (settings && settings.startUrl) {
         this.setState({
@@ -143,19 +143,13 @@ class App extends React.Component<any, IState> {
   public startCasting() {
     this.connection.send('Page.startScreencast', {
       format: 'jpeg',
-      maxWidth: Math.floor(
-        this.state.viewportMetadata.width * window.devicePixelRatio
-      ),
-      maxHeight: Math.floor(
-        this.state.viewportMetadata.height * window.devicePixelRatio
-      ),
+      maxWidth: Math.floor(this.state.viewportMetadata.width * window.devicePixelRatio),
+      maxHeight: Math.floor(this.state.viewportMetadata.height * window.devicePixelRatio),
     });
   }
 
   private async requestNavigationHistory() {
-    const history: any = await this.connection.send(
-      'Page.getNavigationHistory'
-    );
+    const history: any = await this.connection.send('Page.getNavigationHistory');
 
     if (!history) {
       return;
