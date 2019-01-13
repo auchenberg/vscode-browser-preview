@@ -22,9 +22,6 @@ interface IState {
 class App extends React.Component<any, IState> {
 
   private connection: Connection;
-  // private finishedRequestsCount = 0;
-  // private startedRequestsCount = 0;
-  // private pageRequests = {};
 
   constructor(props: any){
     super(props);
@@ -44,30 +41,15 @@ class App extends React.Component<any, IState> {
     };
 
     this.connection = new Connection();
-
     this.onToolbarActionInvoked = this.onToolbarActionInvoked.bind(this)
     this.onViewportChanged = this.onViewportChanged.bind(this)
     
-    this.connection.send('Page.enable');
-    // this.dispatch('Network.enable');
-
-    this.connection.send('Page.navigate', {
-      url: this.state.url
-    });
-
-    this.requestNavigationHistory();
-
     this.connection.on('Page.frameNavigated', (params: any) => {
       const { frame } = params;
+      var isMainFrame = !frame.parentFrameId;
 
-      if(!frame.parentFrameId) { // Is mainframe
-
-        this.requestNavigationHistory();
-  
-        // this.pageRequests = [];
-        // this.startedRequestsCount = 0;
-        // this.finishedRequestsCount = 0;
-  
+      if(isMainFrame) { 
+        this.requestNavigationHistory(); 
         this.setState({
           viewportMetadata: {
             ...this.state.viewportMetadata,
@@ -75,7 +57,6 @@ class App extends React.Component<any, IState> {
           }
         })
       }
-      
     });
 
     this.connection.on('Page.loadEventFired', (params: any) => {
@@ -106,6 +87,14 @@ class App extends React.Component<any, IState> {
         }
       })
     });
+
+    // Initialize
+    this.connection.send('Page.enable');
+    this.connection.send('Page.navigate', {
+      url: this.state.url
+    });
+
+    this.requestNavigationHistory();
   }
 
   public render() {
@@ -152,13 +141,13 @@ class App extends React.Component<any, IState> {
 
     let historyIndex = history.currentIndex;
     let historyEntries = history.entries;
-
     let url = historyEntries[historyIndex].url;
 
-    // const match = url.match(/^http:\/\/(.+)/);
-    // if (match)
-    //   url = match[1];
-    // }
+    const pattern = /^http:\/\/(.+)/;
+    const match = url.match(pattern);
+    if (match) {
+      url = match[1];    
+    }
 
     this.setState({
       ...this.state,
@@ -187,17 +176,19 @@ class App extends React.Component<any, IState> {
           height: Math.round(data.height),
           mobile: false,
           width: Math.round(data.width),
-        })  
+        }).then(() => {
+          this.setState({
+            viewportMetadata: {
+              ...this.state.viewportMetadata,
+              height: data.height as number,
+              width: data.width as number,
+            }
+          });
+      
+          this.startCasting();
+        })
 
-        this.setState({
-          viewportMetadata: {
-            ...this.state.viewportMetadata,
-            height: data.height as number,
-            width: data.width as number,
-          }
-        });
-    
-        this.startCasting();
+
         break;
     }
   }
