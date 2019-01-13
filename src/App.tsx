@@ -11,6 +11,7 @@ interface IState {
   viewportMetadata: {
     height: number,
     width: number,
+    isLoading: boolean,
     loadingPercent: number
   },
   history: {
@@ -34,6 +35,7 @@ class App extends React.Component<any, IState> {
       },   
       viewportMetadata: {
         height: 0,
+        isLoading: false,
         loadingPercent: 0.0,
         width: 0,
       },
@@ -46,7 +48,7 @@ class App extends React.Component<any, IState> {
     
     this.connection.on('Page.frameNavigated', (params: any) => {
       const { frame } = params;
-      var isMainFrame = !frame.parentFrameId;
+      var isMainFrame = !frame.parentId;
 
       if(isMainFrame) { 
         this.requestNavigationHistory(); 
@@ -54,6 +56,7 @@ class App extends React.Component<any, IState> {
           ...this.state,
           viewportMetadata: {
             ...this.state.viewportMetadata,
+            isLoading: true,
             loadingPercent: 0.1,
           }
         })
@@ -74,6 +77,7 @@ class App extends React.Component<any, IState> {
             ...this.state,
             viewportMetadata: {
               ...this.state.viewportMetadata,
+              isLoading: false,
               loadingPercent: 0,
             }            
           })           
@@ -102,8 +106,6 @@ class App extends React.Component<any, IState> {
   }
 
   public render() {
-    const showLoading = this.state.viewportMetadata.loadingPercent > 0 ? true : false;
-
     return (
       <div className="App">
         <Toolbar 
@@ -113,7 +115,7 @@ class App extends React.Component<any, IState> {
           canGoForward={this.state.history.canGoForward}
         />
         <Viewport 
-          showLoading={showLoading} 
+          showLoading={this.state.viewportMetadata.isLoading} 
           width={this.state.viewportMetadata.width} 
           height={this.state.viewportMetadata.height} 
           loadingPercent={this.state.viewportMetadata.loadingPercent} 
