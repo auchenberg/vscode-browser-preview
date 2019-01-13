@@ -20,6 +20,8 @@ const iconRefreshStyle = {
 }
 
 interface IToolbarProps {
+    canGoBack: boolean,
+    canGoForward: boolean,
     url: string,
     onActionInvoked: (action: string, data: object) => void
 }
@@ -39,8 +41,8 @@ class Toolbar extends React.Component<IToolbarProps> {
         return (
             <div className="toolbar">
                 <div className="inner">
-                    <button className="backward" style={iconBackwardStyle} onClick={this.handleBack}>Backward</button>
-                    <button className="forward" style={iconForwardStyle} onClick={this.handleForward}>Forward</button>
+                    <button className="backward" style={iconBackwardStyle} onClick={this.handleBack} disabled={this.props.canGoBack}>Backward</button>
+                    <button className="forward" style={iconForwardStyle} onClick={this.handleForward} disabled={this.props.canGoForward}>Forward</button>
                     <button className="refresh" style={iconRefreshStyle} onClick={this.handleRefresh}>Refresh</button>
                     <UrlInput url={this.props.url} onUrlChanged={this.handleUrlChange} />
                 </div>
