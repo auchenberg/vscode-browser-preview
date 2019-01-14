@@ -77,7 +77,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 				})
 			}
 		} catch (err) {
-			vscode.window.showErrorMessage(err)
+			vscode.window.showErrorMessage(err.message)
 		}		
 
 		let column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : null;
