@@ -9,8 +9,7 @@ import * as EventEmitter from 'eventemitter2';
 export function activate(context: vscode.ExtensionContext) {
 
 	const windowManager = new BrowserViewWindowManager();
-	const nodeDependenciesProvider = new TargetTreeProvider();
-	vscode.window.registerTreeDataProvider('nodeDependencies', nodeDependenciesProvider);
+	vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());
 
 	context.subscriptions.push(vscode.commands.registerCommand('browserview.showInstance', () => {
 		windowManager.create(context.extensionPath);

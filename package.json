@@ -10,7 +10,7 @@
   "version": "0.1.0",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
-    "onView:nodeDependencies",
+    "onView:targetTree",
     "onCommand:browserview.showInstance"
   ],
   "configuration": {
@@ -35,7 +35,7 @@
     "views": {
       "browser-view": [
         {
-          "id": "nodeDependencies",
+          "id": "targetTree",
           "name": "Targets"
         }
       ]
