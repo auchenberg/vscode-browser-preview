@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-    <img src="resources/icon.svg" alt="logo" width="100">
+    <img src="https://github.com/auchenberg/vscode-browserview/blob/master/resources/icon.svg?raw=true" alt="logo" width="100">
   <br>
   VS Code BrowserView
   <br>
