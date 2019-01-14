@@ -1,7 +1,7 @@
 <div align="center">
   <br />
   <div>
-    <img src="resources/icon.svg" alt="logo" width="100">
+    <img src="https://github.com/auchenberg/vscode-browserview/blob/master/resources/icon.png?raw=true" alt="logo" width="100">
   </div>
   <h1>
     VS Code BrowserView

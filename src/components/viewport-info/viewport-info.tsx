@@ -7,6 +7,7 @@ class ViewportInfo extends React.Component<any, any> {
 
   constructor(props: any) {
     super(props);
+    this.timer = 0;
 
     this.state = {
       isHidden: false,

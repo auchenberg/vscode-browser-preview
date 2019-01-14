@@ -1,84 +1,96 @@
 {
   "name": "vscode-browserview",
-  "description": "Browser view for VS Code",
-  "version": "0.1.0",
-  "engines": {
-    "vscode": "^1.29.0"
-  },
+  "displayName": "BrowserView",
+  "description": "A real browser view inside VS Code",
   "publisher": "auchenberg",
+  "engines": {
+    "vscode": "^1.30.0"
+  },
+  "license": "MIT",
+  "version": "0.1.0",
+  "main": "./build/ext-src/extension.js",
   "activationEvents": [
-    "onView:nodeDependencies",
+    "onView:targetTree",
     "onCommand:browserview.showInstance"
   ],
-  "main": "./build/ext-src/extension.js",
+  "configuration": {
+    "properties": {
+      "browserView.startUrl": {
+        "default": "https://code.visualstudio.com",
+        "description": "The default start url for new BrowserView instances",
+        "type": "string"
+      }
+    },
+    "title": "BrowserView",
+    "type": "object"
+  },
   "contributes": {
     "commands": [
       {
+        "category": "Browser",
         "command": "browserview.showInstance",
-        "title": "Show Browser View",
-        "category": "Browser"
+        "title": "Show Browser View"
       }
     ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "browser-view",
-          "title": "Browser View",
-          "icon": "resources/icon.svg"
-        }
-      ]
-    },
     "views": {
       "browser-view": [
         {
-          "id": "nodeDependencies",
+          "id": "targetTree",
           "name": "Targets"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "icon": "resources/icon.svg",
+          "id": "browser-view",
+          "title": "Browser View"
         }
       ]
     }
   },
-  "configuration": {
-    "title": "BrowserView",
-    "type": "object",
-    "properties": {
-      "browserView.startUrl": {
-        "type": "string",
-        "default": "https://code.visualstudio.com",
-        "description": "The default start url for new BrowserView instances"
-      }
-    }
-  },
   "dependencies": {
-    "@types/lodash": "^4.14.119",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",
     "karma-chrome-launcher": "^2.2.0",
     "lodash": "^4.17.11",
     "puppeteer-core": "^1.11.0",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2",
-    "react-loading-bar": "^0.0.7",
-    "react-scripts-ts": "2.16.0",
-    "supports-color": "^6.0.0",
     "which-chrome": "^0.1.1"
   },
-  "scripts": {
-    "vscode:prepublish": "react-scripts-ts build && tsc -p tsconfig.extension.json",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "start": "react-scripts-ts start",
-    "build": "react-scripts-ts build && tsc -p tsconfig.extension.json",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject",
-    "prettier": "./node_modules/.bin/prettier --write src/**/{*.tsx,*.ts}"
-  },
   "devDependencies": {
-    "@types/jest": "^22.2.3",
-    "@types/node": "^10.1.2",
-    "@types/react": "^16.3.14",
-    "@types/react-dom": "^16.0.5",
+    "@types/jest": "23.3.12",
+    "@types/lodash": "^4.14.119",
+    "@types/node": "10.12.18",
+    "@types/react": "16.7.18",
+    "@types/react-dom": "16.0.11",
     "prettier": "^1.15.3",
-    "typescript": "^2.8.3",
-    "vscode": "^1.1.17"
+    "typescript": "3.2.2",
+    "vscode": "^1.1.17",
+    "react-scripts": "2.1.3"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/auchenberg/vscode-browserview.git"
+  },
+  "scripts": {
+    "build": "react-scripts build && tsc -p tsconfig.extension.json",
+    "eject": "react-scripts eject",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "start": "react-scripts start",
+    "vscode:prepublish": "react-scripts build && tsc -p tsconfig.extension.json",
+    "prettier": "./node_modules/.bin/prettier --write src/**/{*.tsx,*.ts}"
   }
 }
