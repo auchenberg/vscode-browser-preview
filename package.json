@@ -5,6 +5,7 @@
   "engines": {
     "vscode": "^1.30.0"
   },
+  "license": "MIT",
   "version": "0.1.0",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
@@ -64,7 +65,7 @@
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-loading-bar": "^0.0.7",
-    "react-scripts-ts": "^4.0.8",
+    "react-scripts-ts": "^3.1.0",
     "supports-color": "^6.0.0",
     "which-chrome": "^0.1.1"
   },
