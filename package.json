@@ -1,33 +1,40 @@
 {
   "name": "vscode-browserview",
-  "description": "Browser view for VS Code",
-  "version": "0.1.0",
+  "publisher": "auchenberg",
   "engines": {
     "vscode": "^1.29.0"
   },
-  "publisher": "auchenberg",
+  "version": "0.1.0",
+  "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:nodeDependencies",
     "onCommand:browserview.showInstance"
   ],
-  "main": "./build/ext-src/extension.js",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "configuration": {
+    "properties": {
+      "browserView.startUrl": {
+        "default": "https://code.visualstudio.com",
+        "description": "The default start url for new BrowserView instances",
+        "type": "string"
+      }
+    },
+    "title": "BrowserView",
+    "type": "object"
+  },
   "contributes": {
     "commands": [
       {
+        "category": "Browser",
         "command": "browserview.showInstance",
-        "title": "Show Browser View",
-        "category": "Browser"
+        "title": "Show Browser View"
       }
     ],
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "browser-view",
-          "title": "Browser View",
-          "icon": "resources/icon.svg"
-        }
-      ]
-    },
     "views": {
       "browser-view": [
         {
@@ -35,17 +42,15 @@
           "name": "Targets"
         }
       ]
-    }
-  },
-  "configuration": {
-    "title": "BrowserView",
-    "type": "object",
-    "properties": {
-      "browserView.startUrl": {
-        "type": "string",
-        "default": "https://code.visualstudio.com",
-        "description": "The default start url for new BrowserView instances"
-      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "icon": "resources/icon.svg",
+          "id": "browser-view",
+          "title": "Browser View"
+        }
+      ]
     }
   },
   "dependencies": {
@@ -63,14 +68,7 @@
     "supports-color": "^6.0.0",
     "which-chrome": "^0.1.1"
   },
-  "scripts": {
-    "vscode:prepublish": "react-scripts-ts build && tsc -p tsconfig.extension.json",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "start": "react-scripts-ts start",
-    "build": "react-scripts-ts build && tsc -p tsconfig.extension.json",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
-  },
+  "description": "Browser view for VS Code",
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/node": "^10.1.2",
@@ -78,5 +76,17 @@
     "@types/react-dom": "^16.0.5",
     "typescript": "^2.8.3",
     "vscode": "^1.1.17"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/auchenberg/vscode-browserview.git"
+  },
+  "scripts": {
+    "build": "react-scripts-ts build && tsc -p tsconfig.extension.json",
+    "eject": "react-scripts-ts eject",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "start": "react-scripts-ts start",
+    "test": "react-scripts-ts test --env=jsdom",
+    "vscode:prepublish": "react-scripts-ts build && tsc -p tsconfig.extension.json"
   }
 }
