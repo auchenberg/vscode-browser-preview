@@ -1,6 +1,14 @@
 {
   "name": "vscode-browserview",
   "displayName": "BrowserView",
+  "categories": [
+    "Other"
+  ],
+  "preview": true,
+  "author": {
+    "email": "kenneth@auchenberg.dk",
+    "name": "Kenneth Auchenberg"
+  },
   "description": "A real browser view inside VS Code",
   "publisher": "auchenberg",
   "engines": {
