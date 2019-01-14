@@ -4,6 +4,7 @@
   "categories": [
     "Other"
   ],
+  "icon": "resources/icon.png",
   "preview": true,
   "author": {
     "email": "kenneth@auchenberg.dk",
