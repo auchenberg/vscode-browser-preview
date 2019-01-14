@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-    <img src="https://github.com/auchenberg/vscode-browserpreview/blob/master/resources/icon.png?raw=true" alt="logo" width="100">
+    <img src="https://github.com/auchenberg/vscode-browserpreview/blob/master/resources/icon_128_black.png?raw=true" alt="logo" width="100">
   <br>
   VS Code Browser Preview
   <br>
