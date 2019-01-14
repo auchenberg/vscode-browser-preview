@@ -1,5 +1,6 @@
 {
   "name": "vscode-browserview",
+  "description": "A real browser view inside VS Code",
   "publisher": "auchenberg",
   "engines": {
     "vscode": "^1.29.0"
@@ -68,7 +69,6 @@
     "supports-color": "^6.0.0",
     "which-chrome": "^0.1.1"
   },
-  "description": "Browser view for VS Code",
   "devDependencies": {
     "@types/jest": "^22.2.3",
     "@types/node": "^10.1.2",
