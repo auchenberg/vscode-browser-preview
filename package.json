@@ -3,7 +3,7 @@
   "description": "A real browser view inside VS Code",
   "publisher": "auchenberg",
   "engines": {
-    "vscode": "^1.29.0"
+    "vscode": "^1.30.0"
   },
   "version": "0.1.0",
   "main": "./build/ext-src/extension.js",
@@ -55,7 +55,6 @@
     }
   },
   "dependencies": {
-    "@types/lodash": "^4.14.119",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",
@@ -70,6 +69,7 @@
     "which-chrome": "^0.1.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.119",
     "@types/jest": "^22.2.3",
     "@types/node": "^10.1.2",
     "@types/react": "^16.3.14",
