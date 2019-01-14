@@ -11,6 +11,7 @@ class Screencast extends React.Component<any, any> {
     super(props);
     this.canvasRef = React.createRef();
     this.imageRef = React.createRef();
+    this.canvasContext  = null;
 
     this.handleMouseEvent = this.handleMouseEvent.bind(this);
     this.handleKeyEvent = this.handleKeyEvent.bind(this);
@@ -222,7 +223,7 @@ class Screencast extends React.Component<any, any> {
       return;
     }
 
-    let type =  types[event.type];
+    let type = (types as any)[event.type];
 
     if (type == 'mousePressed' || type == 'mouseReleased') {
       clickCount = 1;
@@ -233,7 +234,7 @@ class Screencast extends React.Component<any, any> {
       x:  event.offsetX,
       y: event.offsetY,
       modifiers: this.modifiersForEvent(event),
-      button: buttons[event.which],
+      button: (buttons as any)[event.which],
       clickCount: clickCount,
       deltaX: 0,
       deltaY: 0
