@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="130px" height="114px" viewBox="0 0 130 114" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
     <title>icon</title>
     <desc>Created with Sketch.</desc>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="icon" transform="translate(1.000000, 1.000000)">
-            <g id="background">
-                <rect id="Rectangle" x="0" y="0" width="128" height="128"></rect>
-            </g>
-            <g id="browser" fill="#FFFFFF" stroke="#000000">
-                <polygon id="Path" points="72 80 72 72 96 72 96 80"></polygon>
-                <polygon id="Path" points="72 64 72 56 112 56 112 64"></polygon>
-                <polygon id="Path" points="72 48 72 40 112 40 112 48"></polygon>
-                <rect id="Rectangle" x="16" y="40" width="40" height="40"></rect>
-                <path d="M0,0 L0,112 L127.996,112 L128,0 L0,0 Z M88,8 L88,16 L40,16 L40,8 L88,8 Z M32,8 L32,16 L24,16 L24,8 L32,8 Z M8,8 L16,8 L16,16 L8,16 L8,8 Z M119.996,104 L8,104 L8,24 L119.996,24 L119.996,104 Z M120,16 L104,16 L104,8 L120,8 L120,16 Z" id="Shape" fill-rule="nonzero"></path>
+        <g id="icon" fill="#2879FF">
+            <g id="browser">
+                <polygon id="Path" points="71 80 71 72 95 72 95 80"></polygon>
+                <polygon id="Path" points="71 64 71 56 111 56 111 64"></polygon>
+                <polygon id="Path" points="71 48 71 40 111 40 111 48"></polygon>
+                <rect id="Rectangle" x="15" y="40" width="40" height="40"></rect>
+                <path d="M0,0 L0,128 L127.996,128 L128,0 L0,0 Z M88,8 L88,16 L40,16 L40,8 L88,8 Z M32,8 L32,16 L24,16 L24,8 L32,8 Z M8,8 L16,8 L16,16 L8,16 L8,8 Z M119.996,118 L8,118 L8,24 L119.996,24 L119.996,118 Z M120,16 L104,16 L104,8 L120,8 L120,16 Z" id="Shape" fill-rule="nonzero"></path>
             </g>
         </g>
     </g>
