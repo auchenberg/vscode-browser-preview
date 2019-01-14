@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="23px" height="21px" viewBox="0 0 23 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
-    <title>icon</title>
-    <desc>Created with Sketch.</desc>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="icon">
-            <g id="background">
-                <rect id="Rectangle" x="0" y="0" width="23" height="23"></rect>
-            </g>
-            <g id="browser" fill="#000000">
+            <g id="browser" fill="#ffffff">
                 <polygon id="Path" points="12.9375 14.375 12.9375 12.9375 17.25 12.9375 17.25 14.375"></polygon>
                 <polygon id="Path" points="12.9375 11.5 12.9375 10.0625 20.125 10.0625 20.125 11.5"></polygon>
                 <polygon id="Path" points="12.9375 8.625 12.9375 7.1875 20.125 7.1875 20.125 8.625"></polygon>
