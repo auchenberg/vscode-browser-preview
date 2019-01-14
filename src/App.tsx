@@ -179,7 +179,7 @@ class App extends React.Component<any, IState> {
     let panelTitle = currentEntry.title || currentEntry.url;
 
     this.connection.send('extension.updateTitle', {
-      title: `BrowserView (${panelTitle})`
+      title: `Browser Preview (${panelTitle})`
     })
 
   }  

@@ -1,6 +1,6 @@
 {
-  "name": "vscode-browserview",
-  "displayName": "BrowserView",
+  "name": "vscode-browserpreview",
+  "displayName": "Browser Preview",
   "categories": [
     "Other"
   ],
@@ -10,7 +10,7 @@
     "email": "kenneth@auchenberg.dk",
     "name": "Kenneth Auchenberg"
   },
-  "description": "A real browser view inside VS Code",
+  "description": "A real browser preview inside VS Code",
   "publisher": "auchenberg",
   "engines": {
     "vscode": "^1.30.0"
@@ -20,29 +20,29 @@
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
-    "onCommand:browserview.showInstance"
+    "onCommand:browserpreview.showInstance"
   ],
   "configuration": {
     "properties": {
-      "browserView.startUrl": {
+      "browserPreview.startUrl": {
         "default": "https://code.visualstudio.com",
-        "description": "The default start url for new BrowserView instances",
+        "description": "The default start url for new Browser Preview instances",
         "type": "string"
       }
     },
-    "title": "BrowserView",
+    "title": "BrowserPreview",
     "type": "object"
   },
   "contributes": {
     "commands": [
       {
         "category": "Browser",
-        "command": "browserview.showInstance",
-        "title": "Show Browser View"
+        "command": "browserpreview.showInstance",
+        "title": "Show Browser Preview"
       }
     ],
     "views": {
-      "browser-view": [
+      "browser-preview": [
         {
           "id": "targetTree",
           "name": "Targets"
@@ -53,8 +53,8 @@
       "activitybar": [
         {
           "icon": "resources/icon.svg",
-          "id": "browser-view",
-          "title": "Browser View"
+          "id": "browser-preview",
+          "title": "Browser Preview"
         }
       ]
     }
@@ -91,7 +91,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/auchenberg/vscode-browserview.git"
+    "url": "https://github.com/auchenberg/vscode-browserpreview.git"
   },
   "scripts": {
     "build": "react-scripts build && tsc -p tsconfig.extension.json",

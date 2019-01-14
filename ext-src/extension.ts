@@ -11,7 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const windowManager = new BrowserViewWindowManager();
 	vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());
 
-	context.subscriptions.push(vscode.commands.registerCommand('browserview.showInstance', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('browserpreview.showInstance', () => {
 		windowManager.create(context.extensionPath);
 	}));
 }
@@ -48,7 +48,7 @@ class BrowserViewWindowManager {
 
 class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
-	private static readonly viewType = 'browserview';
+	private static readonly viewType = 'browserpreview';
 
 	private _panel: vscode.WebviewPanel | null;
 	private _extensionPath: string;
@@ -86,7 +86,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 			column = vscode.ViewColumn.Two;
 		}
 
-		this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, "BrowserView", column, {
+		this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, "BrowserPreview", column, {
 			enableScripts: true,
 			retainContextWhenHidden: true,
 			localResourceRoots: [
@@ -117,7 +117,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 		}, null, this._disposables);	
 		
 		// App Settings
-		let extensionSettings = vscode.workspace.getConfiguration('browserView');
+		let extensionSettings = vscode.workspace.getConfiguration('browserPreview');
 		let appSettings = {
 			startUrl: extensionSettings.get('startUrl') || 'http://code.visualstudio.com'
 		};

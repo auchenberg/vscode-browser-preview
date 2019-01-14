@@ -18,7 +18,7 @@ export default class TargetTreeProvider implements vscode.TreeDataProvider<objec
 	}
 
 	getChildren(element?: object): Thenable<object[]> {
-		vscode.commands.executeCommand('browserview.showInstance');
+		vscode.commands.executeCommand('browserpreview.showInstance');
 		vscode.commands.executeCommand('workbench.view.explorer');
 
 		this._onDidChangeTreeData.fire(); // Make sure collection is not cached.
