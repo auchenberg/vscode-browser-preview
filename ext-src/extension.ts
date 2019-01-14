@@ -155,9 +155,16 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 		const manifest = require(path.join(this._extensionPath, 'build', 'asset-manifest.json'));
 		const mainScript = manifest['main.js'];
 		const mainStyle = manifest['main.css'];
+		const runtimeScript = manifest['runtime~main.js'];
+		const chunkScript = manifest['static/js/1.0e8ab1f0.chunk.js'];
 
-		const scriptPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'build', mainScript));
-		const scriptUri = scriptPathOnDisk.with({ scheme: 'vscode-resource' });
+		const runtimescriptPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'build', runtimeScript));
+		const runtimescriptUri = runtimescriptPathOnDisk.with({ scheme: 'vscode-resource' });
+		const chunkScriptPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'build', chunkScript));
+		const chunkScriptUri = chunkScriptPathOnDisk.with({ scheme: 'vscode-resource' });
+		const mainScriptPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'build', mainScript));
+		const mainScriptUri = mainScriptPathOnDisk.with({ scheme: 'vscode-resource' });
+
 		const stylePathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'build', mainStyle));
 		const styleUri = stylePathOnDisk.with({ scheme: 'vscode-resource' });
 
@@ -171,7 +178,9 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
 			<body>
 				<div id="root"></div>
-				<script src="${scriptUri}"></script>
+				<script src="${runtimescriptUri}"></script>
+				<script src="${chunkScriptUri}"></script>
+				<script src="${mainScriptUri}"></script>
 			</body>
 			</html>`;
 	}
