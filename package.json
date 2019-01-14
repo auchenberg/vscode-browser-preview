@@ -1,5 +1,6 @@
 {
   "name": "vscode-browserview",
+  "displayName": "BrowserView",
   "description": "A real browser view inside VS Code",
   "publisher": "auchenberg",
   "engines": {
