@@ -12,12 +12,6 @@
     "onView:nodeDependencies",
     "onCommand:browserview.showInstance"
   ],
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
   "configuration": {
     "properties": {
       "browserView.startUrl": {
@@ -87,7 +81,6 @@
     "eject": "react-scripts-ts eject",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "start": "react-scripts-ts start",
-    "test": "react-scripts-ts test --env=jsdom",
     "vscode:prepublish": "react-scripts-ts build && tsc -p tsconfig.extension.json"
   }
 }
