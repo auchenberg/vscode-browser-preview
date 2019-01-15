@@ -1,5 +1,5 @@
 {
-  "name": "vscode-browserpreview",
+  "name": "vscode-browser-preview",
   "displayName": "Browser Preview",
   "categories": [
     "Other"
@@ -20,24 +20,24 @@
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
-    "onCommand:browserpreview.showInstance"
+    "onCommand:browser-preview.showInstance"
   ],
   "configuration": {
     "properties": {
-      "browserPreview.startUrl": {
+      "browserpreview.startUrl": {
         "default": "https://code.visualstudio.com",
         "description": "The default start url for new Browser Preview instances",
         "type": "string"
       }
     },
-    "title": "BrowserPreview",
+    "title": "Browser Preview",
     "type": "object"
   },
   "contributes": {
     "commands": [
       {
         "category": "Browser",
-        "command": "browserpreview.showInstance",
+        "command": "browser-preview.showInstance",
         "title": "Show Browser Preview"
       }
     ],

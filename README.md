@@ -28,5 +28,5 @@ Make sure you have Google Chrome installed on your computer.
 Browser Preview has the following settings:
 
 ```json
-"browserPreview.startUrl": // The default start url for new Browser Preview instances
+"browserpreview.startUrl": // The default start url for new Browser Preview instances
 ```
