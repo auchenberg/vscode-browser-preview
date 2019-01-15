@@ -241,9 +241,8 @@ class Screencast extends React.Component<any, any> {
     };
 
     if (type === 'mouseWheel') {
-      //TODO: Check for reverse scroll direction on Windows/macbooks. Inversed for now.
-      params.deltaX = -event.wheelDeltaX;
-      params.deltaY = -event.wheelDeltaY;
+      params.deltaX = event.deltaX;
+      params.deltaY = event.deltaY;
     } 
 
     this.props.onInteraction('Input.dispatchMouseEvent', params)
