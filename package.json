@@ -16,7 +16,7 @@
     "vscode": "^1.30.0"
   },
   "license": "MIT",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
