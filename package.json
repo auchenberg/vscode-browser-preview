@@ -37,9 +37,9 @@
     },    
     "commands": [
       {
-        "category": "Browser",
-        "command": "browser-preview.showInstance",
-        "title": "Show Browser Preview"
+        "category": "Browser Preview",
+        "command": "browser-preview.openPreview",
+        "title": "Open Preview"
       }
     ],
     "debuggers": [
