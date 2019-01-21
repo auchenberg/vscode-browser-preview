@@ -17,11 +17,19 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.debug.registerDebugConfigurationProvider('browser-preview', {
         provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration[]> {
-            return Promise.resolve([{
-                type: 'browser-preview',
-                name: 'Browser Preview: Attach',
-                request: 'attach'
-            }]);
+            return Promise.resolve([
+				{
+					type: 'browser-preview',
+					name: 'Browser Preview: Attach',
+					request: 'attach'
+				},
+				{
+					type: `browser-preview`,
+					request: `launch`,
+					name: `Browser Preview: Launch`,
+					url: `http://localhost:3000`
+				}				
+			]);
 		},
 		
         resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
