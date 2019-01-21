@@ -151,11 +151,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 			vscode.window.showErrorMessage(err.message)
 		}		
 
-		let column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : null;
-
-		if(!column) {
-			column = vscode.ViewColumn.Two;
-		}
+		let column = vscode.ViewColumn.Two;
 
 		this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, "Browser Preview", column, {
 			enableScripts: true,
