@@ -11,8 +11,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const windowManager = new BrowserViewWindowManager();
 	vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());
 
-	context.subscriptions.push(vscode.commands.registerCommand('browser-preview.showInstance', () => {
-		windowManager.create(context.extensionPath);
+	context.subscriptions.push(vscode.commands.registerCommand('browser-preview.openPreview', (url?) => {
+		windowManager.create(context.extensionPath, url);
 	}));
 }
 
