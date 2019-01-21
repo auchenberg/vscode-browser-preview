@@ -25,14 +25,14 @@ class BrowserViewWindowManager {
 		this.openWindows = new Set();
 	}
 	
-	public create(extensionPath: string) {
+	public create(extensionPath: string, startUrl?: string) {
 
 		if(!this.browser) {
 			this.browser = new Browser();
 		}
 
 		let window = new BrowserViewWindow(extensionPath, this.browser);
-		window.initialize();
+		window.launch(startUrl);
 		window.once('disposed', () => {
 			this.openWindows.delete(window);
 
@@ -66,7 +66,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 		this.browser = browser;
 	}
 
-	public async initialize() {
+	public async launch(startUrl?: string) {
 
 		try {
 			this.browserPage = await this.browser.newPage();
@@ -120,7 +120,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 		// App Settings
 		let extensionSettings = vscode.workspace.getConfiguration('browserpreview');
 		let appSettings = {
-			startUrl: extensionSettings.get('startUrl') || 'http://code.visualstudio.com'
+			startUrl: startUrl ? startUrl : extensionSettings.get('startUrl')
 		};
 
 		if(!appSettings.startUrl) { // Fallback url
