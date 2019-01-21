@@ -30,7 +30,30 @@ Make sure you have Google Chrome installed on your computer.
 - Attach Chrome DevTools via `chrome://inspect`
 - Option to set the default startUrl via `browserpreview.startUrl`
 
-## Configuration.
+## Debugging
+
+You can configure VS Code's debugger to either attach or launch to the browser previews by using the following configuration:
+
+```json
+{
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "type": "browser-preview",
+            "request": "launch",
+            "name": "Launch Browser Preview",
+            "url": "http://code.visualstudio.com"
+        },
+        {
+            "type": "browser-preview",
+            "request": "attach",
+            "name": "Attach Browser Preview"
+        }
+    ]
+}
+```
+
+## Additional configuration.
 
 Browser Preview has the following settings:
 
