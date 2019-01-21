@@ -28,7 +28,7 @@ Make sure you have Google Chrome installed on your computer.
 - Ability to have multiple previews open at the same time.
 - Debuggable. Attach [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome) to the browser view instance, and debug within VS Code.
 - Attach Chrome DevTools via `chrome://inspect`
-- Option to set the default startUrl via `browserpreview.startUrl`
+- Option to set the default startUrl via `browser-preview.startUrl`
 
 ## Debugging
 
@@ -58,5 +58,5 @@ You can configure VS Code's debugger to either attach or launch to the browser p
 Browser Preview has the following settings:
 
 ```json
-"browserpreview.startUrl": // The default start url for new Browser Preview instances
+"browser-preview.startUrl": // The default start url for new Browser Preview instances
 ```
