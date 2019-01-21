@@ -14,6 +14,61 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('browser-preview.openPreview', (url?) => {
 		windowManager.create(context.extensionPath, url);
 	}));
+
+    vscode.debug.registerDebugConfigurationProvider('browser-preview', {
+        provideDebugConfigurations(folder: vscode.WorkspaceFolder | undefined, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration[]> {
+            return Promise.resolve([{
+                type: 'browser-preview',
+                name: 'Launch Browser Preview',
+                request: 'launch',
+                url: 'http://localhost:3000',
+            }]);
+		},
+		
+        resolveDebugConfiguration(folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+			let debugConfig = {
+				name: `Browser Preview`,
+				type: `chrome`,
+				request: 'attach',
+				port: 9222,
+				webRoot: config.webRoot,
+				pathMapping: config.pathMapping,
+				trace: config.trace,
+				sourceMapPathOverrides: config.sourceMapPathOverrides,
+				urlFilter: '',
+				url: '',
+			};
+
+			if (config && config.type === 'browser-preview') {
+                if (config.request && config.request.localeCompare('attach', 'en', { sensitivity: 'base' }) === 0) {
+					debugConfig.name = `Browser Preview: Attach`;
+					vscode.debug.startDebugging(folder, debugConfig)
+				} else if (config.request && config.request.localeCompare('launch', 'en', { sensitivity: 'base' }) === 0) {
+					debugConfig.name = `Browser Preview: Launch`;
+					debugConfig.urlFilter = config.url;
+					
+					// Launch new preview tab, set url filter, then attach
+					var launch = vscode.commands.executeCommand(`browser-preview.openPreview`, config.url)
+					launch.then(() => {
+						vscode.debug.startDebugging(folder, debugConfig)
+					});
+				}
+				
+            } else {
+                vscode.window.showErrorMessage('No supported launch config was found.');
+            }
+            return;
+        }
+	});
+
+
+	vscode.debug.onDidTerminateDebugSession((e: vscode.DebugSession) => {
+		if(e.name === `Browser Preview: Launch` && e.configuration.urlFilter) {
+			// TODO: Improve this with some unique ID per browser window instead of url, to avoid closing multiple instances
+			windowManager.disposeByUrl(e.configuration.urlFilter)
+		}
+	});
+		
 }
 
 class BrowserViewWindowManager {
@@ -42,6 +97,14 @@ class BrowserViewWindowManager {
 			}
 		});
 		this.openWindows.add(window);
+	}
+
+	public disposeByUrl(url: string) {
+		this.openWindows.forEach((b: BrowserViewWindow) => {
+			if(b.config.settings.startUrl == url) {
+				b.dispose();
+			}
+		})
 	}
 
 }

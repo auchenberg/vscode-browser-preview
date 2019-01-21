@@ -20,7 +20,8 @@
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
-    "onCommand:browser-preview.openPreview"
+    "onCommand:browser-preview.openPreview",
+    "onDebug"
   ],
   "contributes": {
     "configuration": {
@@ -41,6 +42,102 @@
         "title": "Show Browser Preview"
       }
     ],
+    "debuggers": [
+      {
+        "type": "browser-preview",
+        "label": "Browser Preview",
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "%chrome.url.description%",
+                "default": "http://localhost:3000"
+              },
+              "webRoot": {
+                "type": "string",
+                "description": "%chrome.webRoot.description%",
+                "default": "${workspaceFolder}"
+              },
+              "pathMapping": {
+                "type": "object",
+                "description": "%chrome.pathMapping.description%",
+                "default": {
+                  "/": "${workspaceFolder}"
+                }
+              },
+              "trace": {
+                "type": [
+                  "boolean",
+                  "string"
+                ],
+                "enum": [
+                  "verbose",
+                  true
+                ],
+                "default": true,
+                "description": "%chrome.trace.description%"
+              },
+              "sourceMapPathOverrides": {
+                "type": "object",
+                "description": "%chrome.sourceMapPathOverrides.description%",
+                "default": {
+                  "webpack:///./*": "${webRoot}/*",
+                  "webpack:///src/*": "${webRoot}/*",
+                  "webpack:///*": "*",
+                  "webpack:///./~/*": "${webRoot}/node_modules/*",
+                  "meteor://💻app/*": "${webRoot}/*"
+                }
+              }                                                    
+            }
+          },
+          "attach": {
+            "properties": {
+              "urlFilter": {
+                "type": "string",
+                "description": "%chrome.urlFilter.description%",
+                "default": ""
+              },
+              "webRoot": {
+                "type": "string",
+                "description": "%chrome.webRoot.description%",
+                "default": "${workspaceFolder}"
+              },
+              "pathMapping": {
+                "type": "object",
+                "description": "%chrome.pathMapping.description%",
+                "default": {
+                  "/": "${workspaceFolder}"
+                }
+              },
+              "trace": {
+                "type": [
+                  "boolean",
+                  "string"
+                ],
+                "enum": [
+                  "verbose",
+                  true
+                ],
+                "default": true,
+                "description": "%chrome.trace.description%"
+              },
+              "sourceMapPathOverrides": {
+                "type": "object",
+                "description": "%chrome.sourceMapPathOverrides.description%",
+                "default": {
+                  "webpack:///./*": "${webRoot}/*",
+                  "webpack:///src/*": "${webRoot}/*",
+                  "webpack:///*": "*",
+                  "webpack:///./~/*": "${webRoot}/node_modules/*",
+                  "meteor://💻app/*": "${webRoot}/*"
+                }
+              }                  
+            }
+          }
+        }
+      }
+    ],    
     "views": {
       "browser-preview": [
         {
