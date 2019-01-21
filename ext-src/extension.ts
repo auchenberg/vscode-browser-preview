@@ -20,8 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
             return Promise.resolve([{
                 type: 'browser-preview',
                 name: 'Browser Preview: Attach',
-                request: 'launch',
-                url: 'http://localhost:3000',
+                request: 'attach'
             }]);
 		},
 		

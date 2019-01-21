@@ -21,6 +21,7 @@
   "activationEvents": [
     "onView:targetTree",
     "onCommand:browser-preview.openPreview",
+    "onDebugInitialConfigurations",
     "onDebug"
   ],
   "contributes": {
