@@ -46,7 +46,7 @@ You can also configure VS Code's debugger to either attach or launch to the brow
             "type": "browser-preview",
             "request": "launch",
             "name": "Browser Preview: Launch",
-            "url": "http://code.visualstudio.com"
+            "url": "http://localhost:3000"
         }
     ]
 }

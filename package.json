@@ -46,6 +46,28 @@
       {
         "type": "browser-preview",
         "label": "Browser Preview",
+        "configurationSnippets": [
+          {
+            "label": "Browser Preview: Launch",
+            "description": "Launch Browser Preview to localhost",
+            "body": {
+                "type": "browser-preview",
+                "request": "launch",
+                "name": "Browser Preview: Launch",
+                "url": "http://localhost:3000"
+            }
+          },
+          {
+            "label": "Browser Preview: Attach",
+            "description": "Attach to open Browser Preview instances",
+            "body": {
+              "type": "browser-preview",
+              "request": "attach",
+              "name": "Browser Preview: Attach"
+            }
+          }
+        ],
+
         "configurationAttributes": {
           "launch": {
             "properties": {
