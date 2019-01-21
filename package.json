@@ -22,18 +22,18 @@
     "onView:targetTree",
     "onCommand:browser-preview.showInstance"
   ],
-  "configuration": {
-    "properties": {
-      "browserpreview.startUrl": {
-        "default": "https://code.visualstudio.com",
-        "description": "The default start url for new Browser Preview instances",
-        "type": "string"
-      }
-    },
-    "title": "Browser Preview",
-    "type": "object"
-  },
   "contributes": {
+    "configuration": {
+      "title": "Browser Preview",
+      "type": "object",    
+      "properties": {
+        "browser-preview.startUrl": {
+          "default": "https://code.visualstudio.com",
+          "description": "The default start url for new Browser Preview instances",
+          "type": "string"
+        }
+      }
+    },    
     "commands": [
       {
         "category": "Browser",
