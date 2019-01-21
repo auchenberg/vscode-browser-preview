@@ -56,6 +56,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 	
 	private browserPage: BrowserPage | null;
 	private browser: Browser;
+	public config: any;
 	
 	constructor(extensionPath: string, browser: Browser) {
 		super();
@@ -122,11 +123,17 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 			startUrl: extensionSettings.get('startUrl') || 'http://code.visualstudio.com'
 		};
 
+		if(!appSettings.startUrl) { // Fallback url
+			appSettings.startUrl = 'http://code.visualstudio.com';
+		}
+
+		this.config = {
+			settings: appSettings
+		}
+
 		this._panel.webview.postMessage({
 			method: 'extension.appConfiguration',
-			result: {
-				settings: appSettings
-			}
+			result: this.config
 		}) 	
 	}
 
