@@ -53,6 +53,12 @@ You can enable in-editor debugging of Browser Preview by installing [Debugger fo
 
 The debug configuration also supports these additional properties: `webRoot`, `pathMapping`, `trace`, `sourceMapPathOverrides` and `urlFilter`. See <https://github.com/Microsoft/vscode-chrome-debug#other-optional-launch-config-fields> for details on how to use.
 
+### Watch It
+
+Watch an animated gif showing how to open the preview and debug a browser app.
+
+[Watch it here](docs/DEBUGGING.md)
+
 ## Additional configuration
 
 Browser Preview has the following settings:
