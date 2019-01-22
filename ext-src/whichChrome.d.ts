@@ -1,6 +1,7 @@
 declare module 'which-chrome' {
   let chromepaths: {
     Chrome: string;
+    Chromium: string;
   };
   export default chromepaths;
 
@@ -9,4 +10,5 @@ declare module 'which-chrome' {
    */
 
   export var Chrome: string;
+  export var Chromium: string;
 }
