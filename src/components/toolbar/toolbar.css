@@ -1,47 +1,45 @@
-
 .toolbar {
-    background: #f0f0f0;
-    padding: 4px 4px;
-    border-bottom: 1px solid #d1d1d1;
-    box-shadow: -1px 1px 2px rgba(0,0,0,.1);
-  }
+  background: #f0f0f0;
+  padding: 4px 4px;
+  border-bottom: 1px solid #d1d1d1;
+  box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
+}
 
-  .inner {
-    display: flex;
-  }
-  
-  
-  button {
-    cursor: default!important;
-    background: transparent;
-    transition: all .2s ease-in-out;
-    padding: 0 5px;
-    color: #626262;
-    font-size: 21px;
-    border-radius: 2px;
-    border: 2px solid transparent;    
-    background-repeat: no-repeat;
-    background-size: 70%;
-    background-position: 50% 50%;
-    text-indent: -9000px;
-    
-    cursor: pointer;
+.inner {
+  display: flex;
+}
 
-    height: 29px;
-    width: 29px;
+button {
+  cursor: default !important;
+  background: transparent;
+  transition: all 0.2s ease-in-out;
+  padding: 0 5px;
+  color: #626262;
+  font-size: 21px;
+  border-radius: 2px;
+  border: 2px solid transparent;
+  background-repeat: no-repeat;
+  background-size: 70%;
+  background-position: 50% 50%;
+  text-indent: -9000px;
 
-    outline: 0;
-  }
+  cursor: pointer;
 
-  button:not([disabled]):active:hover {
-    background-color:#d3d3d3;
-  }
-  
-  button:not([disabled]):hover,
-  button:not([disabled]):active {
-    background-color: #ddd;
-  }
+  height: 29px;
+  width: 29px;
 
-  button:disabled {
-    opacity: 0.1;
-  }
+  outline: 0;
+}
+
+button:not([disabled]):active:hover {
+  background-color: #d3d3d3;
+}
+
+button:not([disabled]):hover,
+button:not([disabled]):active {
+  background-color: #ddd;
+}
+
+button:disabled {
+  opacity: 0.1;
+}

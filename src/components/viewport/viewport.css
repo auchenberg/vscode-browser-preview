@@ -1,7 +1,6 @@
 .viewport {
-    background: #fff;
-    flex: 1;
-    position: relative;
-    overflow: hidden;
+  background: #fff;
+  flex: 1;
+  position: relative;
+  overflow: hidden;
 }
-  

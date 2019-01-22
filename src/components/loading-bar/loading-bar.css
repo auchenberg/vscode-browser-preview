@@ -2,8 +2,8 @@
   pointer-events: none;
   transition: 400ms linear all;
   position: absolute;
-  top: 0;  
-  left:0;
+  top: 0;
+  left: 0;
   right: 0;
 }
 
@@ -27,7 +27,7 @@
   width: 70px;
   height: 2px;
   border-radius: 50%;
-  opacity: .45;
+  opacity: 0.45;
   box-shadow: #29d 1px 0 6px 1px;
 }
 

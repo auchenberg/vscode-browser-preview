@@ -1,9 +1,12 @@
-html, body {
+html,
+body {
   height: 100%;
 
-  font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Droid Sans,Helvetica Neue,Arial,Helvetica,sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+    Oxygen, Ubuntu, Cantarell, Droid Sans, Helvetica Neue, Arial, Helvetica,
+    sans-serif;
   font-size: 14px;
-  font-weight: 400;  
+  font-weight: 400;
 
   overflow: hidden;
 }
