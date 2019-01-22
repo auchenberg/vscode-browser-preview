@@ -14,7 +14,7 @@ export default class Browser extends EventEmitter {
   }
 
   private async launchBrowser() {
-    let chromePath = whichChrome.Chrome;
+    let chromePath = whichChrome.Chrome || whichChrome.Chromium;
 
     if (!chromePath) {
       throw new Error(`No Chrome installation found - used path ${chromePath}`);
