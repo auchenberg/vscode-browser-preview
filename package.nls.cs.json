@@ -1,8 +1,8 @@
 {
-	"chrome.url.description": "Absolute url to launch",
-	"chrome.webRoot.description": "This specifies the workspace absolute path to the webserver root. Used to resolve paths like `/app.js` to files on disk. Shorthand for a pathMapping for \"/\"",
-	"chrome.pathMapping.description": "A mapping of URLs/paths to local folders, to resolve scripts in Chrome to scripts on disk",
-	"chrome.trace.description": "When 'true', the debugger will log tracing info to a file. When 'verbose', it will also show logs in the console.",
-	"chrome.sourceMapPathOverrides.description": "A set of mappings for rewriting the locations of source files from what the sourcemap says, to their locations on disk. See README for details.",
-	"chrome.urlFilter.description": "Will search for a page with this url and attach to it, if found. Can have * wildcards."
+  "chrome.url.description": "Absolute url to launch",
+  "chrome.webRoot.description": "This specifies the workspace absolute path to the webserver root. Used to resolve paths like `/app.js` to files on disk. Shorthand for a pathMapping for \"/\"",
+  "chrome.pathMapping.description": "A mapping of URLs/paths to local folders, to resolve scripts in Chrome to scripts on disk",
+  "chrome.trace.description": "When 'true', the debugger will log tracing info to a file. When 'verbose', it will also show logs in the console.",
+  "chrome.sourceMapPathOverrides.description": "A set of mappings for rewriting the locations of source files from what the sourcemap says, to their locations on disk. See README for details.",
+  "chrome.urlFilter.description": "Will search for a page with this url and attach to it, if found. Can have * wildcards."
 }

@@ -21,6 +21,7 @@ Browser Preview for VS Code enables you to open a real browser preview inside yo
 Make sure you have Google Chrome installed on your computer.
 
 ## Features
+
 - Browser preview inside VS Code (Powered by Chrome Headless).
 - Ability to have multiple previews open at the same time.
 - Debuggable. Launch urls and attach [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome) to the browser view instance, and debug within VS Code.
@@ -33,20 +34,20 @@ You can enable in-editor debugging of Browser Previews by installing [Debugger f
 
 ```json
 {
-    "version": "0.1.0",
-    "configurations": [
-        {
-            "type": "browser-preview",
-            "request": "attach",
-            "name": "Browser Preview: Attach"
-        },    
-        {
-            "type": "browser-preview",
-            "request": "launch",
-            "name": "Browser Preview: Launch",
-            "url": "http://localhost:3000"
-        }
-    ]
+  "version": "0.1.0",
+  "configurations": [
+    {
+      "type": "browser-preview",
+      "request": "attach",
+      "name": "Browser Preview: Attach"
+    },
+    {
+      "type": "browser-preview",
+      "request": "launch",
+      "name": "Browser Preview: Launch",
+      "url": "http://localhost:3000"
+    }
+  ]
 }
 ```
 
