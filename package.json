@@ -10,7 +10,7 @@
     "email": "kenneth@auchenberg.dk",
     "name": "Kenneth Auchenberg"
   },
-  "description": "A real browser preview inside VS Code",
+  "description": "A real browser preview inside your editor that you can debug.",
   "publisher": "auchenberg",
   "engines": {
     "vscode": "^1.30.0"
