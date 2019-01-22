@@ -21,6 +21,7 @@ Browser Preview for VS Code enables you to open a real browser preview inside yo
 Make sure you have Google Chrome installed on your computer.
 
 ## Features
+
 - Browser preview inside VS Code (Powered by Chrome Headless).
 - Ability to have multiple previews open at the same time.
 - Debuggable. Launch urls and attach [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome) to the browser view instance, and debug within VS Code.
@@ -29,7 +30,7 @@ Make sure you have Google Chrome installed on your computer.
 
 ## Launch and Debugging
 
-You can enable in-editor debugging of Browser Previews by installing [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome), and configure VS Code's debugger to either attach or launch to the browser previews by using the following configuration:
+You can enable in-editor debugging of Browser Preview by installing [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome), and configure VS Code's debugger to either attach or launch to the browser previews by using the following configuration:
 
 ```json
 {
@@ -39,7 +40,7 @@ You can enable in-editor debugging of Browser Previews by installing [Debugger f
             "type": "browser-preview",
             "request": "attach",
             "name": "Browser Preview: Attach"
-        },    
+        },
         {
             "type": "browser-preview",
             "request": "launch",
@@ -50,9 +51,9 @@ You can enable in-editor debugging of Browser Previews by installing [Debugger f
 }
 ```
 
-The debug configuration also supports these addotional properties: `webRoot`, `pathMapping`, `trace`, `sourceMapPathOverrides` and `urlFilter`. See https://github.com/Microsoft/vscode-chrome-debug#other-optional-launch-config-fields for details on how to use.
+The debug configuration also supports these additional properties: `webRoot`, `pathMapping`, `trace`, `sourceMapPathOverrides` and `urlFilter`. See <https://github.com/Microsoft/vscode-chrome-debug#other-optional-launch-config-fields> for details on how to use.
 
-## Additional configuration.
+## Additional configuration
 
 Browser Preview has the following settings:
 
