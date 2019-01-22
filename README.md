@@ -29,7 +29,7 @@ Make sure you have Google Chrome installed on your computer.
 
 ## Launch and Debugging
 
-You can also configure VS Code's debugger to either attach or launch to the browser previews by using the following configuration:
+You can enable in-editor debugging of Browser Previews by installing [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome), and configure VS Code's debugger to either attach or launch to the browser previews by using the following configuration:
 
 ```json
 {
