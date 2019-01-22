@@ -184,7 +184,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 		}, null, this._disposables);	
 		
 		// App Settings
-		let extensionSettings = vscode.workspace.getConfiguration('browserpreview');
+		let extensionSettings = vscode.workspace.getConfiguration('browser-preview');
 		let appSettings = {
 			startUrl: startUrl ? startUrl : extensionSettings.get('startUrl')
 		};
