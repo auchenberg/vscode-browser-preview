@@ -202,6 +202,9 @@
     "typescript": "3.2.2",
     "vscode": "^1.1.17"
   },
+  "resolutions": {
+    "@types/react": "16.7.18"
+  },
   "eslintConfig": {
     "extends": "react-app"
   },
