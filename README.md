@@ -7,11 +7,9 @@
   <br>
 </h1>
 
-<h4 align="center">Open a real browser preview inside VS Code (Powered by Chrome Headless)</h4>
+<h4 align="center">A real browser preview inside your editor that you can debug.</h4>
 
-Browser Preview for VS Code enables you to open a real browser preview inside VS Code. The browser preview is powered by Chrome Headless, where VS Code controls the headless browser instance and streams the rendered content back to VS Code. 
-
-This enables a secure way to render web content inside VS Code, and opens the door for many interesting such as attaching VS Code's debugger to allow in-editor debugging, as the browser preview is a real browser, and not just a WebView or iFrame.
+Browser Preview for VS Code enables you to open a real browser preview inside your editor that you can debug. Browser Preview is powered by Chrome Headless, and works by starting a headless Chrome instance in a new process. This enables a secure way to render web content inside VS Code, and enables interesting features such as as in-editor debugging and more!
 
 ![](resources/demo.gif)
 
