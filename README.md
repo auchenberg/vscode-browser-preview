@@ -54,9 +54,7 @@ The debug configuration also supports these additional properties: `webRoot`, `p
 
 ### Watch It
 
-Watch an animated gif showing how to open the preview and debug a browser app.
-
-[Watch it here](docs/DEBUGGING.md)
+[Watch an animated gif](docs/DEBUGGING.md) showing how to open the preview and debug a browser app.
 
 ## Additional configuration
 
