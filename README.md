@@ -9,7 +9,7 @@
 
 <h4 align="center">A real browser preview inside your editor that you can debug.</h4>
 
-Browser Preview for VS Code enables you to open a real browser preview inside your editor that you can debug. Browser Preview is powered by Chrome Headless, and works by starting a headless Chrome instance in a new process. This enables a secure way to render web content inside VS Code, and enables interesting features such as as in-editor debugging and more!
+Browser Preview for VS Code enables you to open a real browser preview inside your editor that you can debug. Browser Preview is powered by [Chrome Headless](https://developers.google.com/web/updates/2017/04/headless-chrome), and works by starting a headless Chrome instance in a new process. This enables a secure way to render web content inside VS Code, and enables interesting features such as in-editor debugging and more!
 
 ![](resources/demo.gif)
 
@@ -22,7 +22,7 @@ Make sure you have Google Chrome installed on your computer.
 
 ## Features
 
-- Browser preview inside VS Code (Powered by Chrome Headless).
+- Browser preview inside VS Code (Powered by [Chrome Headless](https://developers.google.com/web/updates/2017/04/headless-chrome)).
 - Ability to have multiple previews open at the same time.
 - Debuggable. Launch urls and attach [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome) to the browser view instance, and debug within VS Code.
 - Attach Chrome DevTools via `chrome://inspect`
@@ -49,7 +49,6 @@ You can enable in-editor debugging of Browser Preview by installing [Debugger fo
         }
     ]
 }
-```
 
 The debug configuration also supports these additional properties: `webRoot`, `pathMapping`, `trace`, `sourceMapPathOverrides` and `urlFilter`. See <https://github.com/Microsoft/vscode-chrome-debug#other-optional-launch-config-fields> for details on how to use.
 
@@ -58,7 +57,6 @@ The debug configuration also supports these additional properties: `webRoot`, `p
 Watch an animated gif showing how to open the preview and debug a browser app.
 
 [Watch it here](docs/DEBUGGING.md)
-
 ## Additional configuration
 
 Browser Preview has the following settings:

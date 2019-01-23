@@ -27,7 +27,7 @@
   "contributes": {
     "configuration": {
       "title": "Browser Preview",
-      "type": "object",    
+      "type": "object",
       "properties": {
         "browser-preview.startUrl": {
           "default": "https://code.visualstudio.com",
@@ -35,7 +35,7 @@
           "type": "string"
         }
       }
-    },    
+    },
     "commands": [
       {
         "category": "Browser Preview",
@@ -52,10 +52,10 @@
             "label": "Browser Preview: Launch",
             "description": "Launch Browser Preview to localhost",
             "body": {
-                "type": "browser-preview",
-                "request": "launch",
-                "name": "Browser Preview: Launch",
-                "url": "http://localhost:3000"
+              "type": "browser-preview",
+              "request": "launch",
+              "name": "Browser Preview: Launch",
+              "url": "http://localhost:3000"
             }
           },
           {
@@ -68,7 +68,6 @@
             }
           }
         ],
-
         "configurationAttributes": {
           "launch": {
             "properties": {
@@ -111,7 +110,7 @@
                   "webpack:///./~/*": "${webRoot}/node_modules/*",
                   "meteor://💻app/*": "${webRoot}/*"
                 }
-              }                                                    
+              }
             }
           },
           "attach": {
@@ -155,12 +154,12 @@
                   "webpack:///./~/*": "${webRoot}/node_modules/*",
                   "meteor://💻app/*": "${webRoot}/*"
                 }
-              }                  
+              }
             }
           }
         }
       }
-    ],    
+    ],
     "views": {
       "browser-preview": [
         {
@@ -195,10 +194,16 @@
     "@types/lodash": "^4.14.119",
     "@types/node": "10.12.18",
     "@types/react": "16.7.18",
-    "@types/react-dom": "16.0.11",    
+    "@types/react-dom": "16.0.11",
+    "husky": "^1.3.1",
+    "prettier": "^1.16.1",
+    "pretty-quick": "^1.10.0",
+    "react-scripts": "2.1.3",
     "typescript": "3.2.2",
-    "vscode": "^1.1.17",
-    "react-scripts": "2.1.3"
+    "vscode": "^1.1.17"
+  },
+  "resolutions": {
+    "@types/react": "16.7.18"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -219,5 +224,10 @@
     "postinstall": "node ./node_modules/vscode/bin/install",
     "start": "react-scripts start",
     "vscode:prepublish": "react-scripts build && tsc -p tsconfig.extension.json"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }
