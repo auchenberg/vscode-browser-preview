@@ -22,7 +22,7 @@ export default class Browser extends EventEmitter {
 
     this.browser = await puppeteer.launch({
       executablePath: chromePath,
-      args: ['--remote-debugging-port=9222']
+      args: ['--remote-debugging-port=9222', '--ignore-certificate-errors']
     });
   }
 
