@@ -22,3 +22,49 @@
   box-shadow: inset 0 0 0 0.3px #419bf9;
   border-color: #419bf9;
 }
+
+.contextMenu {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  color: #484848;
+  padding: 0;
+  margin: 0;
+  z-index: 1100;
+  width: 150px;
+  list-style-type: none;
+}
+
+.contextMenuItem {
+  border: 0;
+  outline: 0;
+  padding: 5px 10px 5px 10px;
+  text-align: left;
+  vertical-align: middle;
+  cursor: default;
+}
+
+.contextMenuItem:hover {
+  background-color: #ebebeb;
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.hidden {
+  display: none;
+}
+
+.separator {
+  background-color: #ccc;
+  height: 1px;
+  padding: 0;
+  margin: 3px 0 3px 0;
+}
