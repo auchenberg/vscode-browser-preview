@@ -8,6 +8,7 @@ import Connection from './connection';
 interface IState {
   frame: object | null;
   url: string;
+  verbose: boolean;
   viewportMetadata: {
     height: number;
     width: number;
@@ -20,14 +21,28 @@ interface IState {
   };
 }
 
+type IStateDefaults = Pick<IState, 'url' | 'verbose'>
+
+interface ExtensionAppConfigurationPayload {
+  settings?: Partial<{
+    startUrl?: string;
+    verbose?: boolean;
+  }>
+}
+
 class App extends React.Component<any, IState> {
   private connection: Connection;
+  private static defaultSettings: IStateDefaults = {
+    url: 'about:blank',
+    verbose: false
+  }
 
   constructor(props: any) {
     super(props);
     this.state = {
       frame: null,
-      url: 'about:blank',
+      url: App.defaultSettings.url,
+      verbose: App.defaultSettings.verbose,
       history: {
         canGoBack: false,
         canGoForward: false
@@ -43,6 +58,8 @@ class App extends React.Component<any, IState> {
     this.connection = new Connection();
     this.onToolbarActionInvoked = this.onToolbarActionInvoked.bind(this);
     this.onViewportChanged = this.onViewportChanged.bind(this);
+
+    this.connection.setLoggingMode(this.state.verbose);
 
     this.connection.on('Page.frameNavigated', (result: any) => {
       const { frame } = result;
@@ -100,16 +117,22 @@ class App extends React.Component<any, IState> {
       });
     });
 
-    this.connection.on('extension.appConfiguration', (result: any) => {
+    this.connection.on('extension.appConfiguration', (result: ExtensionAppConfigurationPayload) => {
       const { settings } = result;
+      const { defaultSettings } = App;
 
-      if (settings && settings.startUrl) {
-        this.setState({
-          url: settings.startUrl
-        });
+      if (!settings) {
+        return;
+      }
 
+      this.setState({
+        url: settings.startUrl || defaultSettings.url,
+        verbose: settings.verbose || defaultSettings.verbose
+      });
+
+      if (settings.startUrl) {
         this.connection.send('Page.navigate', {
-          url: this.state.url
+          url: settings.startUrl
         });
       }
     });
@@ -118,6 +141,12 @@ class App extends React.Component<any, IState> {
     this.connection.send('Page.enable');
 
     this.requestNavigationHistory();
+  }
+
+  public componentDidUpdate() {
+    const { verbose } = this.state;
+
+    this.connection.setLoggingMode(verbose);
   }
 
   public render() {

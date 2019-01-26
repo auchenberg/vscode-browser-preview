@@ -59,4 +59,5 @@ Browser Preview has the following settings:
 
 ```json
 "browser-preview.startUrl": // The default start url for new Browser Preview instances
+"browser-preview.verbose": false // Enable verbose logging of messages sent between VS Code and Chrome instance
 ```
