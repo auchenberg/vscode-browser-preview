@@ -58,20 +58,10 @@ export function activate(context: vscode.ExtensionContext) {
       };
 
       if (config && config.type === 'browser-preview') {
-        if (
-          config.request &&
-          config.request.localeCompare('attach', 'en', {
-            sensitivity: 'base'
-          }) === 0
-        ) {
+        if (config.request && config.request === `attach`) {
           debugConfig.name = `Browser Preview: Attach`;
           vscode.debug.startDebugging(folder, debugConfig);
-        } else if (
-          config.request &&
-          config.request.localeCompare('launch', 'en', {
-            sensitivity: 'base'
-          }) === 0
-        ) {
+        } else if (config.request && config.request === `launch`) {
           debugConfig.name = `Browser Preview: Launch`;
           debugConfig.urlFilter = config.url;
 
