@@ -94,6 +94,12 @@ class App extends React.Component<any, IState> {
       });
     });
 
+    this.connection.on('Page.windowOpen', (result: any) => {
+      this.connection.send('extension.windowOpenRequested', {
+        url: result.url
+      });
+    });
+
     this.connection.on('extension.appConfiguration', (result: any) => {
       const { settings } = result;
 
