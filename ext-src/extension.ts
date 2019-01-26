@@ -48,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
         name: `Browser Preview`,
         type: `chrome`,
         request: 'attach',
-        port: 9222,
+        port: windowManager.getDebugPort(),
         webRoot: config.webRoot,
         pathMapping: config.pathMapping,
         trace: config.trace,
@@ -123,6 +123,10 @@ class BrowserViewWindowManager {
       }
     });
     this.openWindows.add(window);
+  }
+
+  public getDebugPort() {
+    return this.browser.remoteDebugPort;
   }
 
   public disposeByUrl(url: string) {

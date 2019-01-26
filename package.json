@@ -179,14 +179,15 @@
     }
   },
   "dependencies": {
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",
+    "get-port": "^4.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "lodash": "^4.17.11",
     "puppeteer-core": "^1.11.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
     "which-chrome": "^0.1.1"
   },
   "devDependencies": {
