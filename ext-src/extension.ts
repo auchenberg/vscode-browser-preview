@@ -7,7 +7,12 @@ import TargetTreeProvider from './targetTreeProvider';
 import * as EventEmitter from 'eventemitter2';
 
 export function activate(context: vscode.ExtensionContext) {
-  const windowManager = new BrowserViewWindowManager();
+  const windowManager = new BrowserViewWindowManager(context.extensionPath);
+
+  windowManager.on('windowOpenRequested', (params) => {
+    windowManager.create(params.url);
+  });
+
   vscode.window.registerTreeDataProvider(
     'targetTree',
     new TargetTreeProvider()
@@ -15,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('browser-preview.openPreview', (url?) => {
-      windowManager.create(context.extensionPath, url);
+      windowManager.create(url);
     })
   );
 
@@ -48,7 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
         name: `Browser Preview`,
         type: `chrome`,
         request: 'attach',
-        port: 9222,
+        port: windowManager.getDebugPort(),
         webRoot: config.webRoot,
         pathMapping: config.pathMapping,
         trace: config.trace,
@@ -58,20 +63,10 @@ export function activate(context: vscode.ExtensionContext) {
       };
 
       if (config && config.type === 'browser-preview') {
-        if (
-          config.request &&
-          config.request.localeCompare('attach', 'en', {
-            sensitivity: 'base'
-          }) === 0
-        ) {
+        if (config.request && config.request === `attach`) {
           debugConfig.name = `Browser Preview: Attach`;
           vscode.debug.startDebugging(folder, debugConfig);
-        } else if (
-          config.request &&
-          config.request.localeCompare('launch', 'en', {
-            sensitivity: 'base'
-          }) === 0
-        ) {
+        } else if (config.request && config.request === `launch`) {
           debugConfig.name = `Browser Preview: Launch`;
           debugConfig.urlFilter = config.url;
 
@@ -99,30 +94,41 @@ export function activate(context: vscode.ExtensionContext) {
   });
 }
 
-class BrowserViewWindowManager {
+class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   private openWindows: Set<BrowserViewWindow>;
   private browser: any;
+  private extensionPath: string;
 
-  constructor() {
+  constructor(extensionPath: string) {
+    super();
     this.openWindows = new Set();
+    this.extensionPath = extensionPath;
   }
 
-  public create(extensionPath: string, startUrl?: string) {
+  public create(startUrl?: string) {
     if (!this.browser) {
       this.browser = new Browser();
     }
 
-    let window = new BrowserViewWindow(extensionPath, this.browser);
+    let window = new BrowserViewWindow(this.extensionPath, this.browser);
     window.launch(startUrl);
     window.once('disposed', () => {
       this.openWindows.delete(window);
-
       if (this.openWindows.size === 0) {
         this.browser.dispose();
         this.browser = null;
       }
     });
+
+    window.on('windowOpenRequested', (params) => {
+      this.emit('windowOpenRequested', params);
+    });
+
     this.openWindows.add(window);
+  }
+
+  public getDebugPort() {
+    return this.browser.remoteDebugPort;
   }
 
   public disposeByUrl(url: string) {
@@ -193,6 +199,11 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
             return;
           }
         }
+        if (message.type === 'extension.windowOpenRequested') {
+          this.emit('windowOpenRequested', {
+            url: message.params.url
+          });
+        }
 
         if (this.browserPage) {
           try {
@@ -242,6 +253,8 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       this.browserPage.dispose();
       this.browserPage = null;
     }
+
+    this.removeAllListeners();
 
     while (this._disposables.length) {
       const x = this._disposables.pop();

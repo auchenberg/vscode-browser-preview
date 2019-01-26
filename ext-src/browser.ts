@@ -5,9 +5,11 @@ import BrowserPage from './browserPage';
 import * as whichChrome from 'which-chrome';
 
 const puppeteer = require('puppeteer-core');
+const getPort = require('get-port');
 
 export default class Browser extends EventEmitter {
   private browser: any;
+  public remoteDebugPort: number = 0;
 
   constructor() {
     super();
@@ -15,6 +17,7 @@ export default class Browser extends EventEmitter {
 
   private async launchBrowser() {
     let chromePath = whichChrome.Chrome || whichChrome.Chromium;
+    this.remoteDebugPort = await getPort({ port: 9222 });
 
     if (!chromePath) {
       throw new Error(`No Chrome installation found - used path ${chromePath}`);
@@ -22,7 +25,7 @@ export default class Browser extends EventEmitter {
 
     this.browser = await puppeteer.launch({
       executablePath: chromePath,
-      args: ['--remote-debugging-port=9222']
+      args: [`--remote-debugging-port=${this.remoteDebugPort}`]
     });
   }
 

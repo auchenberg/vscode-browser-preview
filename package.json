@@ -73,17 +73,17 @@
             "properties": {
               "url": {
                 "type": "string",
-                "description": "%chrome.url.description%",
+                "description": "Absolute url to launch",
                 "default": "http://localhost:3000"
               },
               "webRoot": {
                 "type": "string",
-                "description": "%chrome.webRoot.description%",
+                "description": "This specifies the workspace absolute path to the webserver root. Used to resolve paths like `/app.js` to files on disk. Shorthand for a pathMapping for \"/\"",
                 "default": "${workspaceFolder}"
               },
               "pathMapping": {
                 "type": "object",
-                "description": "%chrome.pathMapping.description%",
+                "description": "A mapping of URLs/paths to local folders, to resolve scripts in Chrome to scripts on disk",
                 "default": {
                   "/": "${workspaceFolder}"
                 }
@@ -98,11 +98,11 @@
                   true
                 ],
                 "default": true,
-                "description": "%chrome.trace.description%"
+                "description": "When 'true', the debugger will log tracing info to a file. When 'verbose', it will also show logs in the console."
               },
               "sourceMapPathOverrides": {
                 "type": "object",
-                "description": "%chrome.sourceMapPathOverrides.description%",
+                "description": "A set of mappings for rewriting the locations of source files from what the sourcemap says, to their locations on disk. See README for details.",
                 "default": {
                   "webpack:///./*": "${webRoot}/*",
                   "webpack:///src/*": "${webRoot}/*",
@@ -117,17 +117,17 @@
             "properties": {
               "urlFilter": {
                 "type": "string",
-                "description": "%chrome.urlFilter.description%",
+                "description": "Will search for a page with this url and attach to it, if found. Can have * wildcards.",
                 "default": ""
               },
               "webRoot": {
                 "type": "string",
-                "description": "%chrome.webRoot.description%",
+                "description": "This specifies the workspace absolute path to the webserver root. Used to resolve paths like `/app.js` to files on disk. Shorthand for a pathMapping for \"/\"",
                 "default": "${workspaceFolder}"
               },
               "pathMapping": {
                 "type": "object",
-                "description": "%chrome.pathMapping.description%",
+                "description": "A mapping of URLs/paths to local folders, to resolve scripts in Chrome to scripts on disk",
                 "default": {
                   "/": "${workspaceFolder}"
                 }
@@ -142,11 +142,11 @@
                   true
                 ],
                 "default": true,
-                "description": "%chrome.trace.description%"
+                "description": "When 'true', the debugger will log tracing info to a file. When 'verbose', it will also show logs in the console."
               },
               "sourceMapPathOverrides": {
                 "type": "object",
-                "description": "%chrome.sourceMapPathOverrides.description%",
+                "description": "A set of mappings for rewriting the locations of source files from what the sourcemap says, to their locations on disk. See README for details.",
                 "default": {
                   "webpack:///./*": "${webRoot}/*",
                   "webpack:///src/*": "${webRoot}/*",
@@ -179,14 +179,15 @@
     }
   },
   "dependencies": {
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",
+    "get-port": "^4.1.0",
     "karma-chrome-launcher": "^2.2.0",
     "lodash": "^4.17.11",
     "puppeteer-core": "^1.11.0",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
     "which-chrome": "^0.1.1"
   },
   "devDependencies": {
