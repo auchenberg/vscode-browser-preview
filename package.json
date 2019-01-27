@@ -33,6 +33,11 @@
           "default": "https://code.visualstudio.com",
           "description": "The default start url for new Browser Preview instances",
           "type": "string"
+        },
+        "browser-preview.chromeExecutable": {
+          "default": "",
+          "description": "The full path to the executable, including the complete filename of the exectuable",
+          "type": "string"
         }
       }
     },
