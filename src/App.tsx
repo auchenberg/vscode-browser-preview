@@ -8,7 +8,7 @@ import Connection from './connection';
 interface IState {
   frame: object | null;
   url: string;
-  verbose: boolean;
+  isVerboseMode: boolean;
   viewportMetadata: {
     height: number;
     width: number;
@@ -21,28 +21,22 @@ interface IState {
   };
 }
 
-type IStateDefaults = Pick<IState, 'url' | 'verbose'>
-
-interface ExtensionAppConfigurationPayload {
-  settings?: Partial<{
-    startUrl?: string;
-    verbose?: boolean;
-  }>
+interface ExtensionConfigurationPayload {
+  startUrl?: string;
+  isVerboseMode?: boolean;
+  chromeExecutable?: string;
+  extensionPath?: string;
 }
 
 class App extends React.Component<any, IState> {
   private connection: Connection;
-  private static defaultSettings: IStateDefaults = {
-    url: 'about:blank',
-    verbose: false
-  }
 
   constructor(props: any) {
     super(props);
     this.state = {
       frame: null,
-      url: App.defaultSettings.url,
-      verbose: App.defaultSettings.verbose,
+      url: 'about:blank',
+      isVerboseMode: false,
       history: {
         canGoBack: false,
         canGoForward: false
@@ -59,7 +53,7 @@ class App extends React.Component<any, IState> {
     this.onToolbarActionInvoked = this.onToolbarActionInvoked.bind(this);
     this.onViewportChanged = this.onViewportChanged.bind(this);
 
-    this.connection.setLoggingMode(this.state.verbose);
+    this.connection.enableVerboseLogging(this.state.isVerboseMode);
 
     this.connection.on('Page.frameNavigated', (result: any) => {
       const { frame } = result;
@@ -117,25 +111,25 @@ class App extends React.Component<any, IState> {
       });
     });
 
-    this.connection.on('extension.appConfiguration', (result: ExtensionAppConfigurationPayload) => {
-      const { settings } = result;
-      const { defaultSettings } = App;
+    this.connection.on(
+      'extension.appConfiguration',
+      (payload: ExtensionConfigurationPayload) => {
+        if (!payload) {
+          return;
+        }
 
-      if (!settings) {
-        return;
-      }
-
-      this.setState({
-        url: settings.startUrl || defaultSettings.url,
-        verbose: settings.verbose || defaultSettings.verbose
-      });
-
-      if (settings.startUrl) {
-        this.connection.send('Page.navigate', {
-          url: settings.startUrl
+        this.setState({
+          isVerboseMode: payload.isVerboseMode ? payload.isVerboseMode : false,
+          url: payload.startUrl ? payload.startUrl : 'about:blank'
         });
+
+        if (payload.startUrl) {
+          this.connection.send('Page.navigate', {
+            url: payload.startUrl
+          });
+        }
       }
-    });
+    );
 
     // Initialize
     this.connection.send('Page.enable');
@@ -144,9 +138,9 @@ class App extends React.Component<any, IState> {
   }
 
   public componentDidUpdate() {
-    const { verbose } = this.state;
+    const { isVerboseMode } = this.state;
 
-    this.connection.setLoggingMode(verbose);
+    this.connection.enableVerboseLogging(isVerboseMode);
   }
 
   public render() {

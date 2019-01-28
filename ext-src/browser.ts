@@ -11,24 +11,21 @@ const getPort = require('get-port');
 export default class Browser extends EventEmitter {
   private browser: any;
   public remoteDebugPort: number = 0;
+  private config: any;
 
-  constructor() {
+  constructor(config: object) {
     super();
+    this.config = config || {};
   }
 
   private async launchBrowser() {
     let chromePath = whichChrome.Chrome || whichChrome.Chromium;
-    this.remoteDebugPort = await getPort({ port: 9222 });
 
-    let extensionSettings = vscode.workspace.getConfiguration(
-      'browser-preview'
-    );
-    if (extensionSettings) {
-      let chromeExecutable = extensionSettings.get('chromeExecutable');
-      if (chromeExecutable && chromeExecutable.toString().length > 0) {
-        chromePath = chromeExecutable.toString();
-      }
+    if (this.config.chromeExecutable) {
+      chromePath = this.config.chromeExecutable;
     }
+
+    this.remoteDebugPort = await getPort({ port: 9222 });
 
     if (!chromePath) {
       throw new Error(

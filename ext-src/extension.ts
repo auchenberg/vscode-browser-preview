@@ -97,20 +97,51 @@ export function activate(context: vscode.ExtensionContext) {
 class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   private openWindows: Set<BrowserViewWindow>;
   private browser: any;
-  private extensionPath: string;
+  private config: any;
 
   constructor(extensionPath: string) {
     super();
     this.openWindows = new Set();
-    this.extensionPath = extensionPath;
+    this.config = {
+      extensionPath: extensionPath,
+      chromeExecutable: null,
+      startUrl: 'http://code.visualstudio.com',
+      isVerboseMode: false
+    };
+    this.refreshSettings();
+  }
+
+  private refreshSettings() {
+    let extensionSettings = vscode.workspace.getConfiguration(
+      'browser-preview'
+    );
+
+    if (extensionSettings) {
+      let chromeExecutable = extensionSettings.get('chromeExecutable');
+      if (chromeExecutable !== undefined) {
+        this.config.chromeExecutable = chromeExecutable;
+      }
+
+      let startUrl = extensionSettings.get('startUrl');
+      if (startUrl !== undefined) {
+        this.config.startUrl = startUrl;
+      }
+
+      let isVerboseMode = extensionSettings.get('verbose');
+      if (isVerboseMode !== undefined) {
+        this.config.isVerboseMode = isVerboseMode;
+      }
+    }
   }
 
   public create(startUrl?: string) {
+    this.refreshSettings();
+
     if (!this.browser) {
-      this.browser = new Browser();
+      this.browser = new Browser(this.config);
     }
 
-    let window = new BrowserViewWindow(this.extensionPath, this.browser);
+    let window = new BrowserViewWindow(this.config, this.browser);
     window.launch(startUrl);
     window.once('disposed', () => {
       this.openWindows.delete(window);
@@ -144,16 +175,15 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   private static readonly viewType = 'browser-preview';
 
   private _panel: vscode.WebviewPanel | null;
-  private _extensionPath: string;
   private _disposables: vscode.Disposable[] = [];
 
   private browserPage: BrowserPage | null;
   private browser: Browser;
   public config: any;
 
-  constructor(extensionPath: string, browser: Browser) {
+  constructor(config: any, browser: Browser) {
     super();
-    this._extensionPath = extensionPath;
+    this.config = config;
     this._panel = null;
     this.browserPage = null;
     this.browser = browser;
@@ -183,7 +213,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
         enableScripts: true,
         retainContextWhenHidden: true,
         localResourceRoots: [
-          vscode.Uri.file(path.join(this._extensionPath, 'build'))
+          vscode.Uri.file(path.join(this.config.extensionPath, 'build'))
         ]
       }
     );
@@ -221,23 +251,6 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       this._disposables
     );
 
-    // App Settings
-    let extensionSettings = vscode.workspace.getConfiguration(
-      'browser-preview'
-    );
-    let appSettings = {
-      startUrl: startUrl ? startUrl : extensionSettings.get('startUrl')
-    };
-
-    if (!appSettings.startUrl) {
-      // Fallback url
-      appSettings.startUrl = 'http://code.visualstudio.com';
-    }
-
-    this.config = {
-      settings: appSettings
-    };
-
     this._panel.webview.postMessage({
       method: 'extension.appConfiguration',
       result: this.config
@@ -254,8 +267,6 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       this.browserPage = null;
     }
 
-    this.removeAllListeners();
-
     while (this._disposables.length) {
       const x = this._disposables.pop();
       if (x) {
@@ -264,11 +275,12 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     }
 
     this.emit('disposed');
+    this.removeAllListeners();
   }
 
   private _getHtmlForWebview() {
     const manifest = require(path.join(
-      this._extensionPath,
+      this.config.extensionPath,
       'build',
       'asset-manifest.json'
     ));
@@ -278,26 +290,26 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     const chunkScript = manifest['static/js/1.0e8ab1f0.chunk.js'];
 
     const runtimescriptPathOnDisk = vscode.Uri.file(
-      path.join(this._extensionPath, 'build', runtimeScript)
+      path.join(this.config.extensionPath, 'build', runtimeScript)
     );
     const runtimescriptUri = runtimescriptPathOnDisk.with({
       scheme: 'vscode-resource'
     });
     const chunkScriptPathOnDisk = vscode.Uri.file(
-      path.join(this._extensionPath, 'build', chunkScript)
+      path.join(this.config.extensionPath, 'build', chunkScript)
     );
     const chunkScriptUri = chunkScriptPathOnDisk.with({
       scheme: 'vscode-resource'
     });
     const mainScriptPathOnDisk = vscode.Uri.file(
-      path.join(this._extensionPath, 'build', mainScript)
+      path.join(this.config.extensionPath, 'build', mainScript)
     );
     const mainScriptUri = mainScriptPathOnDisk.with({
       scheme: 'vscode-resource'
     });
 
     const stylePathOnDisk = vscode.Uri.file(
-      path.join(this._extensionPath, 'build', mainStyle)
+      path.join(this.config.extensionPath, 'build', mainStyle)
     );
     const styleUri = stylePathOnDisk.with({ scheme: 'vscode-resource' });
 
@@ -306,7 +318,9 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 			<head>
 				<meta charset="utf-8">
 				<link rel="stylesheet" type="text/css" href="${styleUri}">
-				<base href="${vscode.Uri.file(path.join(this._extensionPath, 'build')).with({
+				<base href="${vscode.Uri.file(
+          path.join(this.config.extensionPath, 'build')
+        ).with({
           scheme: 'vscode-resource'
         })}/">
 			</head>

@@ -69,7 +69,7 @@ export default class Connection extends EventEmitter2 {
     }
   }
 
-  setLoggingMode(verbose: boolean) {
+  enableVerboseLogging(verbose: boolean) {
     if (verbose) {
       this.logger.enable();
     } else {
