@@ -38,6 +38,11 @@
           "default": "",
           "description": "The full path to the executable, including the complete filename of the exectuable",
           "type": "string"
+        },
+        "browser-preview.verbose": {
+          "default": "",
+          "description": "Toggles verbose logging",
+          "type": "boolean"
         }
       }
     },
