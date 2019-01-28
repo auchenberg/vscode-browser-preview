@@ -27,6 +27,7 @@ Make sure you have Google Chrome installed on your computer.
 - Debuggable. Launch urls and attach [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome) to the browser view instance, and debug within VS Code.
 - Attach Chrome DevTools via `chrome://inspect`
 - Option to set the default startUrl via `browser-preview.startUrl`
+- Option to set the path to the chrome exectuable via `browser-preview.chromeExecutable`
 
 ## Launch and Debugging
 
@@ -60,4 +61,5 @@ Browser Preview has the following settings:
 ```json
 "browser-preview.startUrl": // The default start url for new Browser Preview instances
 "browser-preview.verbose": false // Enable verbose logging of messages sent between VS Code and Chrome instance
+"browser-preview.chromeExecutable": // The full path to the executable, including the complete filename of the exectuable
 ```

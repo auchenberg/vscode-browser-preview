@@ -3,6 +3,7 @@
 import { EventEmitter } from 'events';
 import BrowserPage from './browserPage';
 import * as whichChrome from 'which-chrome';
+import * as vscode from 'vscode';
 
 const puppeteer = require('puppeteer-core');
 const getPort = require('get-port');
@@ -19,8 +20,20 @@ export default class Browser extends EventEmitter {
     let chromePath = whichChrome.Chrome || whichChrome.Chromium;
     this.remoteDebugPort = await getPort({ port: 9222 });
 
+    let extensionSettings = vscode.workspace.getConfiguration(
+      'browser-preview'
+    );
+    if (extensionSettings) {
+      let chromeExecutable = extensionSettings.get('chromeExecutable');
+      if (chromeExecutable && chromeExecutable.toString().length > 0) {
+        chromePath = chromeExecutable.toString();
+      }
+    }
+
     if (!chromePath) {
-      throw new Error(`No Chrome installation found - used path ${chromePath}`);
+      throw new Error(
+        `No Chrome installation found, or no Chrome executable set in the settings - used path ${chromePath}`
+      );
     }
 
     this.browser = await puppeteer.launch({
