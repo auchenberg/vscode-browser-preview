@@ -31,7 +31,7 @@ Make sure you have Google Chrome installed on your computer.
 
 ## Launch and Debugging
 
-You can enable in-editor debugging of Browser Previews by installing [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome), and configure VS Code's debugger to either attach or launch to the browser previews by using the following configuration:
+You can enable in-editor debugging of Browser Preview by installing [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome), and configure VS Code's debugger to either attach or launch to the browser previews by using the following configuration:
 
 ```json
 {
@@ -52,7 +52,7 @@ You can enable in-editor debugging of Browser Previews by installing [Debugger f
 }
 ```
 
-The debug configuration also supports these additional properties: `webRoot`, `pathMapping`, `trace`, `sourceMapPathOverrides` and `urlFilter`. See https://github.com/Microsoft/vscode-chrome-debug#other-optional-launch-config-fields for details on how to use.
+The debug configuration also supports these additional properties: `webRoot`, `pathMapping`, `trace`, `sourceMapPathOverrides` and `urlFilter`. See <https://github.com/Microsoft/vscode-chrome-debug#other-optional-launch-config-fields> for details on how to use.
 
 ## Additional configuration.
 
