@@ -53,18 +53,20 @@ export function activate(context: vscode.ExtensionContext) {
         name: `Browser Preview`,
         type: `chrome`,
         request: 'attach',
-        port: windowManager.getDebugPort(),
         webRoot: config.webRoot,
         pathMapping: config.pathMapping,
         trace: config.trace,
         sourceMapPathOverrides: config.sourceMapPathOverrides,
         urlFilter: '',
-        url: ''
+        url: '',
+        port: 9222
       };
 
       if (config && config.type === 'browser-preview') {
         if (config.request && config.request === `attach`) {
           debugConfig.name = `Browser Preview: Attach`;
+          debugConfig.port = windowManager.getDebugPort();
+
           vscode.debug.startDebugging(folder, debugConfig);
         } else if (config.request && config.request === `launch`) {
           debugConfig.name = `Browser Preview: Launch`;
@@ -75,8 +77,12 @@ export function activate(context: vscode.ExtensionContext) {
             `browser-preview.openPreview`,
             config.url
           );
+
           launch.then(() => {
-            vscode.debug.startDebugging(folder, debugConfig);
+            setTimeout(() => {
+              debugConfig.port = windowManager.getDebugPort();
+              vscode.debug.startDebugging(folder, debugConfig);
+            }, 1000);
           });
         }
       } else {
@@ -159,7 +165,7 @@ class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   }
 
   public getDebugPort() {
-    return this.browser.remoteDebugPort;
+    return this.browser ? this.browser.remoteDebugPort : null;
   }
 
   public disposeByUrl(url: string) {
