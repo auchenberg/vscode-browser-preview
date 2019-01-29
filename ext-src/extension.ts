@@ -298,18 +298,26 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     const mainScript = manifest['main.js'];
     const mainStyle = manifest['main.css'];
     const runtimeScript = manifest['runtime~main.js'];
-    const chunkScript = manifest['static/js/1.0e8ab1f0.chunk.js'];
+
+    // finding potential list of js chunk files
+    const chunkScriptsUri = [];
+    for (let key in manifest) {
+      if (key.endsWith('.chunk.js') && manifest.hasOwnProperty(key)) {
+        // finding their paths on the disk
+        let chunkScriptUri = vscode.Uri.file(
+          path.join(this.config.extensionPath, 'build', manifest[key])
+        ).with({
+          scheme: 'vscode-resource'
+        });
+        // push the chunk Uri to the list of chunks
+        chunkScriptsUri.push(chunkScriptUri);
+      }
+    }
 
     const runtimescriptPathOnDisk = vscode.Uri.file(
       path.join(this.config.extensionPath, 'build', runtimeScript)
     );
     const runtimescriptUri = runtimescriptPathOnDisk.with({
-      scheme: 'vscode-resource'
-    });
-    const chunkScriptPathOnDisk = vscode.Uri.file(
-      path.join(this.config.extensionPath, 'build', chunkScript)
-    );
-    const chunkScriptUri = chunkScriptPathOnDisk.with({
       scheme: 'vscode-resource'
     });
     const mainScriptPathOnDisk = vscode.Uri.file(
@@ -339,7 +347,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 			<body>
 				<div id="root"></div>
 				<script src="${runtimescriptUri}"></script>
-				<script src="${chunkScriptUri}"></script>
+				${chunkScriptsUri.map((item) => `<script src="${item}"></script>`)}
 				<script src="${mainScriptUri}"></script>
 			</body>
 			</html>`;
