@@ -251,6 +251,11 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       this._disposables
     );
 
+    // Update starturl if requested to launch specifi page.
+    if (startUrl) {
+      this.config.startUrl = startUrl;
+    }
+
     this._panel.webview.postMessage({
       method: 'extension.appConfiguration',
       result: this.config
