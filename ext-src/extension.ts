@@ -170,7 +170,7 @@ class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
 
   public disposeByUrl(url: string) {
     this.openWindows.forEach((b: BrowserViewWindow) => {
-      if (b.config.settings.startUrl == url) {
+      if (b.config.startUrl == url) {
         b.dispose();
       }
     });
