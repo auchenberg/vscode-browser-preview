@@ -4,8 +4,10 @@ import './App.css';
 import Toolbar from './components/toolbar/toolbar';
 import Viewport from './components/viewport/viewport';
 import Connection from './connection';
+import { ExtensionConfiguration } from '../ext-src/extensionConfiguration';
 
 interface IState {
+  format: 'jpeg' | 'png';
   frame: object | null;
   url: string;
   isVerboseMode: boolean;
@@ -21,13 +23,6 @@ interface IState {
   };
 }
 
-interface ExtensionConfigurationPayload {
-  startUrl?: string;
-  isVerboseMode?: boolean;
-  chromeExecutable?: string;
-  extensionPath?: string;
-}
-
 class App extends React.Component<any, IState> {
   private connection: Connection;
 
@@ -35,6 +30,7 @@ class App extends React.Component<any, IState> {
     super(props);
     this.state = {
       frame: null,
+      format: 'jpeg',
       url: 'about:blank',
       isVerboseMode: false,
       history: {
@@ -113,14 +109,15 @@ class App extends React.Component<any, IState> {
 
     this.connection.on(
       'extension.appConfiguration',
-      (payload: ExtensionConfigurationPayload) => {
+      (payload: ExtensionConfiguration) => {
         if (!payload) {
           return;
         }
 
         this.setState({
           isVerboseMode: payload.isVerboseMode ? payload.isVerboseMode : false,
-          url: payload.startUrl ? payload.startUrl : 'about:blank'
+          url: payload.startUrl ? payload.startUrl : 'about:blank',
+          format: payload.format ? payload.format : 'jpeg'
         });
 
         if (payload.startUrl) {
@@ -170,7 +167,7 @@ class App extends React.Component<any, IState> {
 
   public startCasting() {
     this.connection.send('Page.startScreencast', {
-      format: 'jpeg',
+      format: this.state.format,
       maxWidth: Math.floor(
         this.state.viewportMetadata.width * window.devicePixelRatio
       ),

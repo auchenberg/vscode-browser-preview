@@ -5,6 +5,7 @@ import Browser from './browser';
 import BrowserPage from './browserPage';
 import TargetTreeProvider from './targetTreeProvider';
 import * as EventEmitter from 'eventemitter2';
+import { ExtensionConfiguration } from './extensionConfiguration';
 
 export function activate(context: vscode.ExtensionContext) {
   const windowManager = new BrowserViewWindowManager(context.extensionPath);
@@ -103,16 +104,15 @@ export function activate(context: vscode.ExtensionContext) {
 class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   private openWindows: Set<BrowserViewWindow>;
   private browser: any;
-  private config: any;
+  private config: ExtensionConfiguration;
 
   constructor(extensionPath: string) {
     super();
     this.openWindows = new Set();
     this.config = {
       extensionPath: extensionPath,
-      chromeExecutable: null,
       startUrl: 'http://code.visualstudio.com',
-      isVerboseMode: false
+      format: 'jpeg'
     };
     this.refreshSettings();
   }
@@ -123,19 +123,24 @@ class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     );
 
     if (extensionSettings) {
-      let chromeExecutable = extensionSettings.get('chromeExecutable');
+      let chromeExecutable = extensionSettings.get<string>('chromeExecutable');
       if (chromeExecutable !== undefined) {
         this.config.chromeExecutable = chromeExecutable;
       }
 
-      let startUrl = extensionSettings.get('startUrl');
+      let startUrl = extensionSettings.get<string>('startUrl');
       if (startUrl !== undefined) {
         this.config.startUrl = startUrl;
       }
 
-      let isVerboseMode = extensionSettings.get('verbose');
+      let isVerboseMode = extensionSettings.get<boolean>('verbose');
       if (isVerboseMode !== undefined) {
         this.config.isVerboseMode = isVerboseMode;
+      }
+
+      let format = extensionSettings.get<string>('format');
+      if (format !== undefined) {
+        this.config.format = format.includes('png') ? 'png' : 'jpeg';
       }
     }
   }
@@ -185,9 +190,9 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
   private browserPage: BrowserPage | null;
   private browser: Browser;
-  public config: any;
+  public config: ExtensionConfiguration;
 
-  constructor(config: any, browser: Browser) {
+  constructor(config: ExtensionConfiguration, browser: Browser) {
     super();
     this.config = config;
     this._panel = null;

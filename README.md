@@ -28,6 +28,7 @@ Make sure you have Google Chrome installed on your computer.
 - Attach Chrome DevTools via `chrome://inspect`
 - Option to set the default startUrl via `browser-preview.startUrl`
 - Option to set the path to the chrome exectuable via `browser-preview.chromeExecutable`
+- Option to set the type of rendering via `browser-preview.format` with the support for `jpeg` (default one) and `png` formats
 
 ## Launch and Debugging
 
