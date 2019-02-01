@@ -43,6 +43,11 @@
           "default": "",
           "description": "Toggles verbose logging",
           "type": "boolean"
+        },
+        "browser-preview.format": {
+          "default": "jpeg",
+          "description": "The type of image used in rendering preview. Supported values are: `jpeg` (default) and `png`",
+          "type": "string"
         }
       }
     },

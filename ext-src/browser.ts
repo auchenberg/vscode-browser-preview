@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 import BrowserPage from './browserPage';
 import * as whichChrome from 'which-chrome';
 import * as vscode from 'vscode';
+import { ExtensionConfiguration } from './extensionConfiguration';
 
 const puppeteer = require('puppeteer-core');
 const getPort = require('get-port');
@@ -11,11 +12,9 @@ const getPort = require('get-port');
 export default class Browser extends EventEmitter {
   private browser: any;
   public remoteDebugPort: number = 0;
-  private config: any;
 
-  constructor(config: object) {
+  constructor(private config: ExtensionConfiguration) {
     super();
-    this.config = config || {};
   }
 
   private async launchBrowser() {
