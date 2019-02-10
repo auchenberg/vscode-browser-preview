@@ -63,4 +63,5 @@ Browser Preview has the following settings:
 "browser-preview.startUrl": // The default start url for new Browser Preview instances
 "browser-preview.verbose": false // Enable verbose logging of messages sent between VS Code and Chrome instance
 "browser-preview.chromeExecutable": // The full path to the executable, including the complete filename of the exectuable
+"browser-preview.format": // Option to set the type of rendering with the support for `jpeg` (default one) and `png` formats
 ```
