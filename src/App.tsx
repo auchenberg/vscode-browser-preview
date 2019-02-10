@@ -107,6 +107,16 @@ class App extends React.Component<any, IState> {
       });
     });
 
+    this.connection.on('Page.javascriptDialogOpening', (result: any) => {
+      const { url, message, type } = result;
+
+      this.connection.send('extension.windowDialogRequested', {
+        url: url,
+        message: message,
+        type: type
+      });
+    });
+
     this.connection.on('Page.frameResized', (result: any) => {
       this.stopCasting();
       this.startCasting();
@@ -167,6 +177,7 @@ class App extends React.Component<any, IState> {
   }
 
   public stopCasting() {
+    window.alert('hallo');
     this.connection.send('Page.stopScreencast');
   }
 

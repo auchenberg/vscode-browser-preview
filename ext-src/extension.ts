@@ -233,26 +233,53 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
     this._panel.webview.onDidReceiveMessage(
-      (message) => {
-        if (message.type === 'extension.updateTitle') {
+      (msg) => {
+        if (msg.type === 'extension.updateTitle') {
           if (this._panel) {
-            this._panel.title = message.params.title;
+            this._panel.title = msg.params.title;
             return;
           }
         }
-        if (message.type === 'extension.windowOpenRequested') {
+        if (msg.type === 'extension.windowOpenRequested') {
           this.emit('windowOpenRequested', {
-            url: message.params.url
+            url: msg.params.url
           });
+        }
+
+        if (msg.type === 'extension.windowDialogRequested') {
+          const { message, type } = msg.params;
+          if (type == 'alert') {
+            vscode.window.showInformationMessage(message);
+            if (this.browserPage) {
+              this.browserPage.send('Page.handleJavaScriptDialog', {
+                accept: true
+              });
+            }
+          } else if (type === 'prompt') {
+            vscode.window
+              .showInputBox({ placeHolder: message })
+              .then((result) => {
+                if (this.browserPage) {
+                  this.browserPage.send('Page.handleJavaScriptDialog', {
+                    accept: true,
+                    promptText: result
+                  });
+                }
+              });
+          } else if (type === 'confirm') {
+            vscode.window.showQuickPick(['Ok', 'Cancel']).then((result) => {
+              if (this.browserPage) {
+                this.browserPage.send('Page.handleJavaScriptDialog', {
+                  accept: result === 'Ok'
+                });
+              }
+            });
+          }
         }
 
         if (this.browserPage) {
           try {
-            this.browserPage.send(
-              message.type,
-              message.params,
-              message.callbackId
-            );
+            this.browserPage.send(msg.type, msg.params, msg.callbackId);
           } catch (err) {
             vscode.window.showErrorMessage(err);
           }
