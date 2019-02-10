@@ -175,13 +175,27 @@ class Screencast extends React.Component<any, any> {
   }
 
   private handleMouseEvent(event: any) {
-    this.dispatchMouseEvent(event.nativeEvent);
+    if (this.props.isInspectEnabled) {
+      const position = this.convertIntoScreenSpace(event, this.state);
+      this.props.onInspectElement({
+        position: position
+      });
+    } else {
+      this.dispatchMouseEvent(event.nativeEvent);
+    }
 
     if (event.type === 'mousedown') {
       if (this.canvasRef.current) {
         this.canvasRef.current.focus();
       }
     }
+  }
+
+  private convertIntoScreenSpace(event: any, state: any) {
+    return {
+      x: Math.round(event.clientX / state.screenZoom),
+      y: Math.round(event.clientY / state.screenZoom - state.screenOffsetTop)
+    };
   }
 
   private handleKeyEvent(event: any) {

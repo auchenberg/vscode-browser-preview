@@ -18,6 +18,7 @@ class Viewport extends React.Component<any, any> {
     this.handleScreencastInteraction = this.handleScreencastInteraction.bind(
       this
     );
+    this.handleInspectElement = this.handleInspectElement.bind(this);
   }
 
   public componentDidMount() {
@@ -38,6 +39,8 @@ class Viewport extends React.Component<any, any> {
           height={this.props.height}
           width={this.props.width}
           frame={this.props.frame}
+          isInspectEnabled={this.props.isInspectEnabled}
+          onInspectElement={this.handleInspectElement}
           onInteraction={this.handleScreencastInteraction}
         />
       </div>
@@ -46,6 +49,12 @@ class Viewport extends React.Component<any, any> {
 
   private handleResize(e: any) {
     this.updateDimensions();
+  }
+
+  private handleInspectElement(params: object) {
+    this.props.onViewportChanged('inspectElement', {
+      params: params
+    });
   }
 
   private handleScreencastInteraction(action: string, params: object) {

@@ -11,6 +11,7 @@ interface IState {
   frame: object | null;
   url: string;
   isVerboseMode: boolean;
+  isInspectEnabled: boolean;
   viewportMetadata: {
     height: number;
     width: number;
@@ -33,6 +34,7 @@ class App extends React.Component<any, IState> {
       format: 'jpeg',
       url: 'about:blank',
       isVerboseMode: false,
+      isInspectEnabled: false,
       history: {
         canGoBack: false,
         canGoForward: false
@@ -168,6 +170,7 @@ class App extends React.Component<any, IState> {
           showLoading={this.state.viewportMetadata.isLoading}
           width={this.state.viewportMetadata.width}
           height={this.state.viewportMetadata.height}
+          isInspectEnabled={this.state.isInspectEnabled}
           loadingPercent={this.state.viewportMetadata.loadingPercent}
           frame={this.state.frame}
           onViewportChanged={this.onViewportChanged}
@@ -230,8 +233,31 @@ class App extends React.Component<any, IState> {
     });
   }
 
-  private onViewportChanged(action: string, data: any) {
+  private async onViewportChanged(action: string, data: any) {
     switch (action) {
+      case 'inspectElement':
+        const node: any = await this.connection.send('DOM.getNodeForLocation', {
+          x: data.params.position.x,
+          y: data.params.position.y
+        });
+
+        console.log('node', node);
+
+        // const node = await this._domModel.nodeForLocation({
+        // x: Math.floor(position.x / this._pageScaleFactor + this._scrollOffsetX),
+        //y: Math.floor(position.y / this._pageScaleFactor + this._scrollOffsetY)
+        // includeUserAgentShadowDOM: false
+        //}
+
+        // if (!node)
+        //   return;
+        // if (event.type === 'mousemove') {
+        //   this.highlightInOverlay({node}, this._inspectModeConfig);
+        //   this._domModel.overlayModel().nodeHighlightRequested(node.id);
+        // } else if (event.type === 'click') {
+        //   this._domModel.overlayModel().inspectNodeRequested(node.backendNodeId());
+        // }
+        break;
       case 'interaction':
         this.connection.send(data.action, data.params);
         break;
@@ -269,6 +295,11 @@ class App extends React.Component<any, IState> {
         break;
       case 'refresh':
         this.connection.send('Page.reload');
+        break;
+      case 'inspect':
+        this.setState({
+          isInspectEnabled: !this.state.isInspectEnabled
+        });
         break;
       case 'urlChange':
         this.connection.send('Page.navigate', {
