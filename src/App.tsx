@@ -107,6 +107,11 @@ class App extends React.Component<any, IState> {
       });
     });
 
+    this.connection.on('Page.frameResized', (result: any) => {
+      this.stopCasting();
+      this.startCasting();
+    });
+
     this.connection.on(
       'extension.appConfiguration',
       (payload: ExtensionConfiguration) => {
@@ -220,27 +225,23 @@ class App extends React.Component<any, IState> {
         break;
 
       case 'size':
-        this.stopCasting();
+        let req = this.connection.send('Page.setDeviceMetricsOverride', {
+          deviceScaleFactor: 2,
+          height: Math.floor(data.height),
+          mobile: false,
+          width: Math.floor(data.width)
+        });
 
-        this.connection
-          .send('Page.setDeviceMetricsOverride', {
-            deviceScaleFactor: 2,
-            height: Math.floor(data.height),
-            mobile: false,
-            width: Math.floor(data.width)
-          })
-          .then(() => {
-            this.setState({
-              ...this.state,
-              viewportMetadata: {
-                ...this.state.viewportMetadata,
-                height: data.height as number,
-                width: data.width as number
-              }
-            });
-
-            this.startCasting();
+        req.then(() => {
+          this.setState({
+            ...this.state,
+            viewportMetadata: {
+              ...this.state.viewportMetadata,
+              height: data.height as number,
+              width: data.width as number
+            }
           });
+        });
 
         break;
     }
