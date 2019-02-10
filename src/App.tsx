@@ -172,6 +172,7 @@ class App extends React.Component<any, IState> {
 
   public startCasting() {
     this.connection.send('Page.startScreencast', {
+      quality: 80,
       format: this.state.format,
       maxWidth: Math.floor(
         this.state.viewportMetadata.width * window.devicePixelRatio
