@@ -75,7 +75,7 @@ class UrlInput extends React.Component<any, IUrlInputState> {
       // Enter
 
       let url = this.state.url;
-      let schemeRegex = /^(https?|about|chrome):/;
+      let schemeRegex = /^(https?|about|chrome|file):/;
 
       if (!url.match(schemeRegex)) {
         url = 'http://' + this.state.url;
