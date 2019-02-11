@@ -246,6 +246,30 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
           });
         }
 
+        if (msg.type === 'extension.openFile') {
+          let uri = vscode.Uri.file(msg.params.uri);
+
+          // Open document
+          vscode.workspace.openTextDocument(uri).then(
+            (document: vscode.TextDocument) => {
+              // Show the document
+              vscode.window
+                .showTextDocument(document, vscode.ViewColumn.One)
+                .then(
+                  (document) => {},
+                  (reason) => {
+                    vscode.window.showErrorMessage(
+                      `Failed to show file. ${reason}`
+                    );
+                  }
+                );
+            },
+            (err) => {
+              vscode.window.showErrorMessage(`Failed to open file. ${err}`);
+            }
+          );
+        }
+
         if (msg.type === 'extension.windowDialogRequested') {
           const { message, type } = msg.params;
           if (type == 'alert') {
