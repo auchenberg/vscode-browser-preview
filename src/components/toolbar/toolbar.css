@@ -10,7 +10,7 @@
 }
 
 button {
-  cursor: default !important;
+  cursor: pointer !important;
   background: transparent;
   transition: all 0.2s ease-in-out;
   padding: 0 5px;
@@ -42,4 +42,8 @@ button:not([disabled]):active {
 
 button:disabled {
   opacity: 0.1;
+}
+
+button.active {
+  background-color: #d5d5d5;
 }

@@ -23,6 +23,7 @@ const iconInspectStyle = {
 interface IToolbarProps {
   canGoBack: boolean;
   canGoForward: boolean;
+  isInspectEnabled: boolean;
   url: string;
   onActionInvoked: (action: string, data: object) => void;
 }
@@ -43,7 +44,9 @@ class Toolbar extends React.Component<IToolbarProps> {
       <div className="toolbar">
         <div className="inner">
           <button
-            className="inspect"
+            className={
+              `inspect ` + (this.props.isInspectEnabled ? `active` : ``)
+            }
             style={iconInspectStyle}
             onClick={this.handleInspect}
           >

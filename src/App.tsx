@@ -165,6 +165,7 @@ class App extends React.Component<any, IState> {
           onActionInvoked={this.onToolbarActionInvoked}
           canGoBack={this.state.history.canGoBack}
           canGoForward={this.state.history.canGoForward}
+          isInspectEnabled={this.state.isInspectEnabled}
         />
         <Viewport
           showLoading={this.state.viewportMetadata.isLoading}
