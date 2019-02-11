@@ -175,7 +175,7 @@ class Screencast extends React.Component<any, any> {
   }
 
   private handleMouseEvent(event: any) {
-    if (this.props.isInspectEnabled) {
+    if (this.props.isInspectEnabled && event.type === 'click') {
       const position = this.convertIntoScreenSpace(event, this.state);
       this.props.onInspectElement({
         position: position
