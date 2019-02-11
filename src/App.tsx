@@ -236,12 +236,92 @@ class App extends React.Component<any, IState> {
   private async onViewportChanged(action: string, data: any) {
     switch (action) {
       case 'inspectElement':
-        const node: any = await this.connection.send('DOM.getNodeForLocation', {
-          x: data.params.position.x,
-          y: data.params.position.y
+        const nodeInfo: any = await this.connection.send(
+          'DOM.getNodeForLocation',
+          {
+            x: data.params.position.x,
+            y: data.params.position.y
+          }
+        );
+
+        const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
+          nodeId: nodeInfo.nodeId,
+          backendNodeId: nodeInfo.backendNodeId
         });
 
-        console.log('node', node);
+        if (nodeDetails.object) {
+          let objectId = nodeDetails.object.objectId;
+          const nodeProperties: any = await this.connection.send(
+            'Runtime.getProperties',
+            {
+              objectId: objectId,
+              generatePreview: true
+            }
+          );
+
+          var props = nodeProperties.result as Array<object>;
+          var reactInternalRef: any = props.find((i: any) =>
+            i.name.startsWith('__reactInternalInstance')
+          );
+
+          if (reactInternalRef) {
+            let reactInternalObjectId = reactInternalRef.value.objectId;
+            const reactInternalObject: any = await this.connection.send(
+              'Runtime.getProperties',
+              {
+                objectId: reactInternalObjectId,
+                generatePreview: true
+              }
+            );
+
+            if (reactInternalObject) {
+              var reactObjectValues = reactInternalObject.result as Array<
+                object
+              >;
+              var reactDebugSourceRef: any = reactObjectValues.find(
+                (i: any) => i.name == '_debugSource'
+              );
+              let reactDebugSourceObjectId = reactDebugSourceRef.value.objectId;
+
+              if (reactDebugSourceObjectId) {
+                const reactDebugSourceRef: any = await this.connection.send(
+                  'Runtime.getProperties',
+                  {
+                    objectId: reactDebugSourceObjectId,
+                    generatePreview: true
+                  }
+                );
+
+                if (reactDebugSourceRef) {
+                  var reactDebugSourceProps = reactDebugSourceRef.result as Array<
+                    object
+                  >;
+
+                  var fileNameRef: any = reactDebugSourceProps.find(
+                    (i: any) => i.name == 'fileName'
+                  );
+                  var lineNumberRef: any = reactDebugSourceProps.find(
+                    (i: any) => i.name == 'lineNumber'
+                  );
+                  var fileNameValue = fileNameRef.value.value;
+                  var lineNumberValue = lineNumberRef.value.value;
+
+                  console.log('fileName', fileNameValue);
+                  console.log('lineNumber', lineNumberValue);
+
+                  let uri = `${fileNameValue}`;
+                  // if(lineNumberValue) {
+                  //   uri = uri + `:${lineNumberValue}`
+                  // }
+
+                  this.connection.send('extension.openFile', {
+                    uri: uri
+                  });
+                }
+              }
+            }
+          }
+        }
 
         // const node = await this._domModel.nodeForLocation({
         // x: Math.floor(position.x / this._pageScaleFactor + this._scrollOffsetX),
