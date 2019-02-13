@@ -18,8 +18,9 @@ class Screencast extends React.Component<any, any> {
     this.handleKeyEvent = this.handleKeyEvent.bind(this);
 
     this.state = {
-      screenOffsetTop: 0,
       imageZoom: 1,
+      highlightInfo: null,
+      screenOffsetTop: 0,
       screenZoom: 1
     };
   }
@@ -94,6 +95,51 @@ class Screencast extends React.Component<any, any> {
       );
       this.canvasContext.restore();
 
+      // Render highlight
+      let config = {
+        contentColor: 'rgba(111, 168, 220, .66)',
+        paddingColor: 'rgba(147, 196, 125, .55)',
+        borderColor: 'rgba(255, 229, 153, .66)',
+        marginColor: 'rgba(246, 178, 107, .66)'
+      };
+
+      if (this.state.highlightInfo) {
+        let model = this.state.highlightInfo;
+        this.canvasContext.save();
+        const transparentColor = 'rgba(0, 0, 0, 0)';
+        const quads = [];
+
+        if (model.content && config.contentColor !== transparentColor)
+          quads.push({ quad: model.content, color: config.contentColor });
+        if (model.padding && config.paddingColor !== transparentColor)
+          quads.push({ quad: model.padding, color: config.paddingColor });
+        if (model.border && config.borderColor !== transparentColor)
+          quads.push({ quad: model.border, color: config.borderColor });
+        if (model.margin && config.marginColor !== transparentColor)
+          quads.push({ quad: model.margin, color: config.marginColor });
+
+        for (let i = quads.length - 1; i > 0; --i) {
+          this.drawOutlinedQuadWithClip(
+            this.canvasContext,
+            quads[i].quad,
+            quads[i - 1].quad,
+            quads[i].color
+          );
+        }
+
+        if (quads.length > 0) {
+          this.drawOutlinedQuad(
+            this.canvasContext,
+            quads[0].quad,
+            quads[0].color
+          );
+        }
+
+        this.canvasContext.restore();
+        this.canvasContext.globalCompositeOperation = 'destination-over';
+      }
+
+      // Render frame
       let dy = this.state.screenOffsetTop * this.state.screenZoom;
       let dw = imageElement.naturalWidth * this.state.imageZoom;
       let dh = imageElement.naturalHeight * this.state.imageZoom;
@@ -111,8 +157,8 @@ class Screencast extends React.Component<any, any> {
     if (imageElement && screencastFrame) {
       const canvasWidth = this.props.width;
       const canvasHeight = this.props.height;
-      const metadata = screencastFrame.metadata;
 
+      const metadata = screencastFrame.metadata;
       const deviceSizeRatio = metadata.deviceHeight / metadata.deviceWidth;
 
       let imageZoom = Math.min(
@@ -127,8 +173,13 @@ class Screencast extends React.Component<any, any> {
       let screenZoom =
         (imageElement.naturalWidth * imageZoom) / metadata.deviceWidth;
 
+      const highlightInfo = this.props.highlightInfo
+        ? this.scaleBoxModelToViewport(this.props.highlightInfo)
+        : null;
+
       this.setState({
         imageZoom: imageZoom,
+        highlightInfo: highlightInfo,
         screenOffsetTop: metadata.offsetTop,
         screenZoom: screenZoom
       });
@@ -180,6 +231,11 @@ class Screencast extends React.Component<any, any> {
       this.props.onInspectElement({
         position: position
       });
+    } else if (this.props.isInspectEnabled && event.type === 'mousemove') {
+      const position = this.convertIntoScreenSpace(event, this.state);
+      this.props.onInspectHighlightRequested({
+        position: position
+      });
     } else {
       this.dispatchMouseEvent(event.nativeEvent);
     }
@@ -192,10 +248,69 @@ class Screencast extends React.Component<any, any> {
   }
 
   private convertIntoScreenSpace(event: any, state: any) {
+    let screenOffsetTop = 0;
+    if (this.canvasRef && this.canvasRef.current) {
+      screenOffsetTop = this.canvasRef.current.getBoundingClientRect().top;
+    }
+
     return {
       x: Math.round(event.clientX / state.screenZoom),
-      y: Math.round(event.clientY / state.screenZoom - state.screenOffsetTop)
+      y: Math.round(event.clientY / state.screenZoom - screenOffsetTop)
     };
+  }
+
+  private quadToPath(context: any, quad: any) {
+    context.beginPath();
+    context.moveTo(quad[0], quad[1]);
+    context.lineTo(quad[2], quad[3]);
+    context.lineTo(quad[4], quad[5]);
+    context.lineTo(quad[6], quad[7]);
+    context.closePath();
+    return context;
+  }
+
+  private drawOutlinedQuad(context: any, quad: any, fillColor: any) {
+    context.save();
+    context.lineWidth = 2;
+    this.quadToPath(context, quad).clip();
+    context.fillStyle = fillColor;
+    context.fill();
+    context.restore();
+  }
+
+  private drawOutlinedQuadWithClip(
+    context: any,
+    quad: any,
+    clipQuad: any,
+    fillColor: any
+  ) {
+    context.fillStyle = fillColor;
+    context.save();
+    context.lineWidth = 0;
+    this.quadToPath(context, quad).fill();
+    context.globalCompositeOperation = 'destination-out';
+    context.fillStyle = 'red';
+    this.quadToPath(context, clipQuad).fill();
+    context.restore();
+  }
+
+  private scaleBoxModelToViewport(model: any) {
+    let zoomFactor = this.state.screenZoom;
+    let offsetTop = this.state.screenOffsetTop;
+
+    function scaleQuad(quad: any) {
+      for (let i = 0; i < quad.length; i += 2) {
+        quad[i] = quad[i] * zoomFactor;
+        quad[i + 1] = (quad[i + 1] + offsetTop) * zoomFactor;
+      }
+    }
+
+    scaleQuad.call(this, model.content);
+    scaleQuad.call(this, model.padding);
+    scaleQuad.call(this, model.border);
+    scaleQuad.call(this, model.margin);
+
+    return model;
   }
 
   private handleKeyEvent(event: any) {

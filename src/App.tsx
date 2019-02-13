@@ -17,6 +17,7 @@ interface IState {
     width: number;
     isLoading: boolean;
     loadingPercent: number;
+    highlightInfo: object | null;
   };
   history: {
     canGoBack: boolean;
@@ -41,6 +42,7 @@ class App extends React.Component<any, IState> {
       },
       viewportMetadata: {
         height: 0,
+        highlightInfo: null,
         isLoading: false,
         loadingPercent: 0.0,
         width: 0
@@ -173,6 +175,7 @@ class App extends React.Component<any, IState> {
           height={this.state.viewportMetadata.height}
           isInspectEnabled={this.state.isInspectEnabled}
           loadingPercent={this.state.viewportMetadata.loadingPercent}
+          highlightInfo={this.state.viewportMetadata.highlightInfo}
           frame={this.state.frame}
           onViewportChanged={this.onViewportChanged}
         />
@@ -236,6 +239,34 @@ class App extends React.Component<any, IState> {
 
   private async onViewportChanged(action: string, data: any) {
     switch (action) {
+      case 'inspectHighlightRequested':
+        let highlightNodeInfo: any = await this.connection.send(
+          'DOM.getNodeForLocation',
+          {
+            x: data.params.position.x,
+            y: data.params.position.y
+          }
+        );
+
+        if (highlightNodeInfo) {
+          let highlightBoxModel: any = await this.connection.send(
+            'DOM.getBoxModel',
+            {
+              backendNodeId: highlightNodeInfo.backendNodeId
+            }
+          );
+
+          if (highlightBoxModel && highlightBoxModel.model) {
+            this.setState({
+              ...this.state,
+              viewportMetadata: {
+                ...this.state.viewportMetadata,
+                highlightInfo: highlightBoxModel.model
+              }
+            });
+          }
+        }
+        break;
       case 'inspectElement':
         const nodeInfo: any = await this.connection.send(
           'DOM.getNodeForLocation',
@@ -247,6 +278,12 @@ class App extends React.Component<any, IState> {
 
         const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
           nodeId: nodeInfo.nodeId,
+          backendNodeId: nodeInfo.backendNodeId
+        });
+
+        // Trigger CDP request to enable DOM explorer
+        // TODO: No sure this works.
+        this.connection.send('Overlay.inspectNodeRequested', {
           backendNodeId: nodeInfo.backendNodeId
         });
 
@@ -323,21 +360,6 @@ class App extends React.Component<any, IState> {
             }
           }
         }
-
-        // const node = await this._domModel.nodeForLocation({
-        // x: Math.floor(position.x / this._pageScaleFactor + this._scrollOffsetX),
-        //y: Math.floor(position.y / this._pageScaleFactor + this._scrollOffsetY)
-        // includeUserAgentShadowDOM: false
-        //}
-
-        // if (!node)
-        //   return;
-        // if (event.type === 'mousemove') {
-        //   this.highlightInOverlay({node}, this._inspectModeConfig);
-        //   this._domModel.overlayModel().nodeHighlightRequested(node.id);
-        // } else if (event.type === 'click') {
-        //   this._domModel.overlayModel().inspectNodeRequested(node.backendNodeId());
-        // }
         break;
       case 'interaction':
         this.connection.send(data.action, data.params);
@@ -378,9 +400,19 @@ class App extends React.Component<any, IState> {
         this.connection.send('Page.reload');
         break;
       case 'inspect':
-        this.setState({
-          isInspectEnabled: !this.state.isInspectEnabled
-        });
+        if (this.state.isInspectEnabled) {
+          this.setState({
+            isInspectEnabled: false,
+            viewportMetadata: {
+              ...this.state.viewportMetadata,
+              highlightInfo: null
+            }
+          });
+        } else {
+          this.setState({
+            isInspectEnabled: true
+          });
+        }
         break;
       case 'urlChange':
         this.connection.send('Page.navigate', {
