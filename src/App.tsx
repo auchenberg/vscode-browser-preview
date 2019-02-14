@@ -259,7 +259,7 @@ class App extends React.Component<any, IState> {
     }
   }
 
-  private onToolbarActionInvoked(action: string, data: any) {
+  private onToolbarActionInvoked(action: string, data: any): Promise<any> {
     switch (action) {
       case 'forward':
         this.connection.send('Page.goForward');
@@ -279,7 +279,16 @@ class App extends React.Component<any, IState> {
           url: data.url
         });
         break;
+      case 'readClipboard':
+        return this.connection.send('Clipboard.readText');
+      case 'writeClipboard':
+        // overwrite the clipboard only if there is a valid value
+        if (data && (data as any).value)
+          return this.connection.send('Clipboard.writeText', data);
+        break;
     }
+    // return an empty promise
+    return Promise.resolve();
   }
 }
 
