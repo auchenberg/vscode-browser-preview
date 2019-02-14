@@ -149,8 +149,6 @@ class App extends React.Component<any, IState> {
         <Toolbar
           url={this.state.url}
           onActionInvoked={this.onToolbarActionInvoked}
-          onClipboardRead={this.onClipboardRead.bind(this)}
-          onClipboardWrite={this.onClipboardWrite.bind(this)}
           canGoBack={this.state.history.canGoBack}
           canGoForward={this.state.history.canGoForward}
         />
@@ -251,7 +249,7 @@ class App extends React.Component<any, IState> {
     }
   }
 
-  private onToolbarActionInvoked(action: string, data: any) {
+  private onToolbarActionInvoked(action: string, data: any): Promise<any> {
     switch (action) {
       case 'forward':
         this.connection.send('Page.goForward');
@@ -271,17 +269,14 @@ class App extends React.Component<any, IState> {
           url: data.url
         });
         break;
+      case 'readClipboard':
+        return this.connection.send('Clipboard.readText');
+      case 'writeClipboard':
+        // overwrite the clipboard only if there is a valid value
+        if (data && (data as any).value)
+          return this.connection.send('Clipboard.writeText', data);
+        break;
     }
-  }
-
-  private onClipboardRead(): Promise<string> {
-    return this.connection.send('Clipboard.readText');
-  }
-
-  private onClipboardWrite(value: string): Promise<void> {
-    // overwrite the clipboard only if there is a valid value
-    if (value) return this.connection.send('Clipboard.writeText', value);
-
     // return an empty promise
     return Promise.resolve();
   }

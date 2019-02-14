@@ -30,8 +30,7 @@ class UrlInput extends React.Component<any, IUrlInputState> {
         setUrl: this.setUrl.bind(this),
         enterUrl: this.enterUrl.bind(this),
         selectUrl: this.selectUrl.bind(this),
-        onClipboardRead: this.props.onClipboardRead,
-        onClipboardWrite: this.props.onClipboardWrite,
+        onActionInvoked: this.props.onActionInvoked,
         selectedUrlInput: ''
       }
     };

@@ -19,9 +19,7 @@ interface IToolbarProps {
   canGoBack: boolean;
   canGoForward: boolean;
   url: string;
-  onActionInvoked: (action: string, data: object) => void;
-  onClipboardRead: () => Promise<string>;
-  onClipboardWrite: (value: string) => Promise<void>;
+  onActionInvoked: (action: string, data?: object) => Promise<any>;
 }
 
 class Toolbar extends React.Component<IToolbarProps> {
@@ -64,8 +62,7 @@ class Toolbar extends React.Component<IToolbarProps> {
           <UrlInput
             url={this.props.url}
             onUrlChanged={this.handleUrlChange}
-            onClipboardRead={this.props.onClipboardRead}
-            onClipboardWrite={this.props.onClipboardWrite}
+            onActionInvoked={this.props.onActionInvoked}
           />
         </div>
       </div>

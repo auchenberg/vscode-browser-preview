@@ -158,7 +158,10 @@ class ContextMenu extends React.Component<IContextMenuProps, IContextMenu> {
     let pasteGoIndex = this.state.menuItems.findIndex(
       (x) => x.itemType === ContextMenuItemsType.PasteAndGo
     );
-    if (this.props.onClipboardRead && (await this.props.onClipboardRead())) {
+    if (
+      this.props.onActionInvoked &&
+      (await this.props.onActionInvoked('readClipboard'))
+    ) {
       if (paste) {
         _menuItems[pasteIndex].isDisabled = false;
         this.setState({ menuItems: _menuItems });
@@ -210,28 +213,32 @@ class ContextMenu extends React.Component<IContextMenuProps, IContextMenu> {
   }
 
   private async CutHandler(event: React.MouseEvent<HTMLLIElement>) {
-    if (this.props.onClipboardWrite && this.props.selectedUrlInput) {
-      await this.props.onClipboardWrite(this.props.selectedUrlInput);
+    if (this.props.onActionInvoked && this.props.selectedUrlInput) {
+      await this.props.onActionInvoked('writeClipboard', {
+        value: this.props.selectedUrlInput
+      });
       this.props.setUrl('');
     }
   }
 
   private async CopyHandler(event: React.MouseEvent<HTMLLIElement>) {
-    if (this.props.onClipboardWrite && this.props.selectedUrlInput) {
-      await this.props.onClipboardWrite(this.props.selectedUrlInput);
+    if (this.props.onActionInvoked && this.props.selectedUrlInput) {
+      await this.props.onActionInvoked('writeClipboard', {
+        value: this.props.selectedUrlInput
+      });
     }
   }
 
   private async PasteHandler(event: React.MouseEvent<HTMLLIElement>) {
-    if (this.props.onClipboardRead) {
-      let value: string = await this.props.onClipboardRead();
+    if (this.props.onActionInvoked) {
+      let value: string = await this.props.onActionInvoked('readClipboard');
       if (value) this.props.setUrl(value);
     }
   }
 
   private async PasteGoHandler(event: React.MouseEvent<HTMLLIElement>) {
-    if (this.props.onClipboardRead && this.props.enterUrl) {
-      let value: string = await this.props.onClipboardRead();
+    if (this.props.onActionInvoked && this.props.enterUrl) {
+      let value: string = await this.props.onActionInvoked('readClipboard');
       if (value) {
         this.props.setUrl(value);
         this.props.enterUrl();

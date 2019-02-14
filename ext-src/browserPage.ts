@@ -51,7 +51,7 @@ export default class BrowserPage extends EnhancedEventEmitter {
         );
         break;
       case 'Clipboard.writeText':
-        this.clipboard.writeText(<string>(<unknown>data)).then(
+        this.clipboard.writeText((data as any).value).then(
           (result: any) => {
             this.emit({
               callbackId: callbackId,

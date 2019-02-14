@@ -9,8 +9,7 @@ export interface IContextMenuProps extends IContextMenu {
   setUrl: (value: string) => void;
   enterUrl: () => void;
   selectUrl: (element?: HTMLInputElement) => void;
-  onClipboardRead: () => Promise<string>;
-  onClipboardWrite: (value: string) => Promise<void>;
+  onActionInvoked: (action: string, data?: object) => Promise<any>;
   selectedUrlInput: string;
 }
 
