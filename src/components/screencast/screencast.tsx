@@ -181,6 +181,8 @@ class Screencast extends React.Component<any, any> {
         imageZoom: imageZoom,
         highlightInfo: highlightInfo,
         screenOffsetTop: metadata.offsetTop,
+        scrollOffsetX: metadata.scrollOffsetX,
+        scrollOffsetY: metadata.scrollOffsetY,
         screenZoom: screenZoom
       });
 
@@ -254,8 +256,14 @@ class Screencast extends React.Component<any, any> {
     }
 
     return {
-      x: Math.round(event.clientX / state.screenZoom),
-      y: Math.round(event.clientY / state.screenZoom - screenOffsetTop)
+      x: Math.round(
+        event.clientX / state.screenZoom + this.state.scrollOffsetX
+      ),
+      y: Math.round(
+        event.clientY / state.screenZoom -
+          screenOffsetTop +
+          this.state.scrollOffsetY
+      )
     };
   }
 
