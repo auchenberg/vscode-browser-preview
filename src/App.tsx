@@ -11,11 +11,13 @@ interface IState {
   frame: object | null;
   url: string;
   isVerboseMode: boolean;
+  isInspectEnabled: boolean;
   viewportMetadata: {
     height: number;
     width: number;
     isLoading: boolean;
     loadingPercent: number;
+    highlightInfo: object | null;
   };
   history: {
     canGoBack: boolean;
@@ -33,12 +35,14 @@ class App extends React.Component<any, IState> {
       format: 'jpeg',
       url: 'about:blank',
       isVerboseMode: false,
+      isInspectEnabled: false,
       history: {
         canGoBack: false,
         canGoForward: false
       },
       viewportMetadata: {
         height: 0,
+        highlightInfo: null,
         isLoading: false,
         loadingPercent: 0.0,
         width: 0
@@ -122,26 +126,23 @@ class App extends React.Component<any, IState> {
       this.startCasting();
     });
 
-    this.connection.on(
-      'extension.appConfiguration',
-      (payload: ExtensionConfiguration) => {
-        if (!payload) {
-          return;
-        }
-
-        this.setState({
-          isVerboseMode: payload.isVerboseMode ? payload.isVerboseMode : false,
-          url: payload.startUrl ? payload.startUrl : 'about:blank',
-          format: payload.format ? payload.format : 'jpeg'
-        });
-
-        if (payload.startUrl) {
-          this.connection.send('Page.navigate', {
-            url: payload.startUrl
-          });
-        }
+    this.connection.on('extension.appConfiguration', (payload: ExtensionConfiguration) => {
+      if (!payload) {
+        return;
       }
-    );
+
+      this.setState({
+        isVerboseMode: payload.isVerboseMode ? payload.isVerboseMode : false,
+        url: payload.startUrl ? payload.startUrl : 'about:blank',
+        format: payload.format ? payload.format : 'jpeg'
+      });
+
+      if (payload.startUrl) {
+        this.connection.send('Page.navigate', {
+          url: payload.startUrl
+        });
+      }
+    });
 
     // Initialize
     this.connection.send('Page.enable');
@@ -163,12 +164,15 @@ class App extends React.Component<any, IState> {
           onActionInvoked={this.onToolbarActionInvoked}
           canGoBack={this.state.history.canGoBack}
           canGoForward={this.state.history.canGoForward}
+          isInspectEnabled={this.state.isInspectEnabled}
         />
         <Viewport
           showLoading={this.state.viewportMetadata.isLoading}
           width={this.state.viewportMetadata.width}
           height={this.state.viewportMetadata.height}
+          isInspectEnabled={this.state.isInspectEnabled}
           loadingPercent={this.state.viewportMetadata.loadingPercent}
+          highlightInfo={this.state.viewportMetadata.highlightInfo}
           frame={this.state.frame}
           onViewportChanged={this.onViewportChanged}
         />
@@ -185,19 +189,13 @@ class App extends React.Component<any, IState> {
     this.connection.send('Page.startScreencast', {
       quality: 80,
       format: this.state.format,
-      maxWidth: Math.floor(
-        this.state.viewportMetadata.width * window.devicePixelRatio
-      ),
-      maxHeight: Math.floor(
-        this.state.viewportMetadata.height * window.devicePixelRatio
-      )
+      maxWidth: Math.floor(this.state.viewportMetadata.width * window.devicePixelRatio),
+      maxHeight: Math.floor(this.state.viewportMetadata.height * window.devicePixelRatio)
     });
   }
 
   private async requestNavigationHistory() {
-    const history: any = await this.connection.send(
-      'Page.getNavigationHistory'
-    );
+    const history: any = await this.connection.send('Page.getNavigationHistory');
 
     if (!history) {
       return;
@@ -230,8 +228,93 @@ class App extends React.Component<any, IState> {
     });
   }
 
-  private onViewportChanged(action: string, data: any) {
+  private async onViewportChanged(action: string, data: any) {
     switch (action) {
+      case 'inspectHighlightRequested':
+        let highlightNodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
+          x: data.params.position.x,
+          y: data.params.position.y
+        });
+
+        if (highlightNodeInfo) {
+          let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
+            backendNodeId: highlightNodeInfo.backendNodeId
+          });
+
+          if (highlightBoxModel && highlightBoxModel.model) {
+            this.setState({
+              ...this.state,
+              viewportMetadata: {
+                ...this.state.viewportMetadata,
+                highlightInfo: highlightBoxModel.model
+              }
+            });
+          }
+        }
+        break;
+      case 'inspectElement':
+        const nodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
+          x: data.params.position.x,
+          y: data.params.position.y
+        });
+
+        const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
+          nodeId: nodeInfo.nodeId,
+          backendNodeId: nodeInfo.backendNodeId
+        });
+
+        // Trigger CDP request to enable DOM explorer
+        // TODO: No sure this works.
+        this.connection.send('Overlay.inspectNodeRequested', {
+          backendNodeId: nodeInfo.backendNodeId
+        });
+
+        if (nodeDetails.object) {
+          let objectId = nodeDetails.object.objectId;
+          const nodeProperties: any = await this.connection.send('Runtime.getProperties', {
+            objectId: objectId,
+            generatePreview: true
+          });
+
+          var props = nodeProperties.result as Array<object>;
+          var reactInternalRef: any = props.find((i: any) => i.name.startsWith('__reactInternalInstance'));
+
+          if (reactInternalRef) {
+            let reactInternalObjectId = reactInternalRef.value.objectId;
+            const reactInternalObject: any = await this.connection.send('Runtime.getProperties', {
+              objectId: reactInternalObjectId,
+              generatePreview: true
+            });
+
+            if (reactInternalObject) {
+              var reactObjectValues = reactInternalObject.result as Array<object>;
+              var reactDebugSourceRef: any = reactObjectValues.find((i: any) => i.name == '_debugSource');
+              let reactDebugSourceObjectId = reactDebugSourceRef.value.objectId;
+
+              if (reactDebugSourceObjectId) {
+                const reactDebugSourceRef: any = await this.connection.send('Runtime.getProperties', {
+                  objectId: reactDebugSourceObjectId,
+                  generatePreview: true
+                });
+
+                if (reactDebugSourceRef) {
+                  var reactDebugSourceProps = reactDebugSourceRef.result as Array<object>;
+
+                  var fileNameRef: any = reactDebugSourceProps.find((i: any) => i.name == 'fileName');
+                  var lineNumberRef: any = reactDebugSourceProps.find((i: any) => i.name == 'lineNumber');
+                  var fileNameValue = fileNameRef.value.value;
+                  var lineNumberValue = lineNumberRef.value.value;
+
+                  this.connection.send('extension.openFile', {
+                    uri: fileNameValue,
+                    lineNumber: lineNumberValue
+                  });
+                }
+              }
+            }
+          }
+        }
+        break;
       case 'interaction':
         this.connection.send(data.action, data.params);
         break;
@@ -269,6 +352,21 @@ class App extends React.Component<any, IState> {
         break;
       case 'refresh':
         this.connection.send('Page.reload');
+        break;
+      case 'inspect':
+        if (this.state.isInspectEnabled) {
+          this.setState({
+            isInspectEnabled: false,
+            viewportMetadata: {
+              ...this.state.viewportMetadata,
+              highlightInfo: null
+            }
+          });
+        } else {
+          this.setState({
+            isInspectEnabled: true
+          });
+        }
         break;
       case 'urlChange':
         this.connection.send('Page.navigate', {

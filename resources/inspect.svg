@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="160px" height="160px" viewBox="0 0 160 160" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.2 (67145) - http://www.bohemiancoding.com/sketch -->
+    <title>inspect</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="inspect" transform="translate(-24.000000, -24.000000)">
+            <polygon id="path346" opacity="0.5" points="0 0 196 0 196 196 0 196"></polygon>
+            <path d="M73.5,171.5 L42.875,171.5 C30.625,171.5 24.5,165.375 24.5,153.125 L24.5,42.875 C24.5,30.625 30.625,24.5 42.875,24.5 L153.125,24.5 C171.5,24.5 171.5,42.48055 171.5,42.875 L171.5,73.5 L159.25,73.5 L159.25,36.75 L36.75,36.75 L36.75,159.25 L73.5,159.25 L73.5,171.5 Z M183.75,110.25 L147,134.75 L183.75,171.5 L171.5,183.75 L134.75,147 L110.25,183.75 L85.75,85.75 L183.75,110.25 Z" id="path348" fill="#000000" fill-rule="nonzero"></path>
+        </g>
+    </g>
+</svg>

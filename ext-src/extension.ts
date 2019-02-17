@@ -14,10 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
     windowManager.create(params.url);
   });
 
-  vscode.window.registerTreeDataProvider(
-    'targetTree',
-    new TargetTreeProvider()
-  );
+  vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());
 
   context.subscriptions.push(
     vscode.commands.registerCommand('browser-preview.openPreview', (url?) => {
@@ -74,10 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
           debugConfig.urlFilter = config.url;
 
           // Launch new preview tab, set url filter, then attach
-          var launch = vscode.commands.executeCommand(
-            `browser-preview.openPreview`,
-            config.url
-          );
+          var launch = vscode.commands.executeCommand(`browser-preview.openPreview`, config.url);
 
           launch.then(() => {
             setTimeout(() => {
@@ -118,9 +112,7 @@ class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   }
 
   private refreshSettings() {
-    let extensionSettings = vscode.workspace.getConfiguration(
-      'browser-preview'
-    );
+    let extensionSettings = vscode.workspace.getConfiguration('browser-preview');
 
     if (extensionSettings) {
       let chromeExecutable = extensionSettings.get<string>('chromeExecutable');
@@ -216,18 +208,11 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
     let column = vscode.ViewColumn.Two;
 
-    this._panel = vscode.window.createWebviewPanel(
-      BrowserViewWindow.viewType,
-      'Browser Preview',
-      column,
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-        localResourceRoots: [
-          vscode.Uri.file(path.join(this.config.extensionPath, 'build'))
-        ]
-      }
-    );
+    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, 'Browser Preview', column, {
+      enableScripts: true,
+      retainContextWhenHidden: true,
+      localResourceRoots: [vscode.Uri.file(path.join(this.config.extensionPath, 'build'))]
+    });
 
     this._panel.webview.html = this._getHtmlForWebview();
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
@@ -246,6 +231,34 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
           });
         }
 
+        if (msg.type === 'extension.openFile') {
+          let uri = vscode.Uri.file(msg.params.uri);
+          let lineNumber = msg.params.lineNumber;
+
+          // Open document
+          vscode.workspace.openTextDocument(uri).then(
+            (document: vscode.TextDocument) => {
+              // Show the document
+              vscode.window.showTextDocument(document, vscode.ViewColumn.One).then(
+                (document) => {
+                  if (lineNumber) {
+                    document.revealRange(
+                      new vscode.Range(lineNumber, 0, lineNumber, 0),
+                      vscode.TextEditorRevealType.InCenter
+                    );
+                  }
+                },
+                (reason) => {
+                  vscode.window.showErrorMessage(`Failed to show file. ${reason}`);
+                }
+              );
+            },
+            (err) => {
+              vscode.window.showErrorMessage(`Failed to open file. ${err}`);
+            }
+          );
+        }
+
         if (msg.type === 'extension.windowDialogRequested') {
           const { message, type } = msg.params;
           if (type == 'alert') {
@@ -256,16 +269,14 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
               });
             }
           } else if (type === 'prompt') {
-            vscode.window
-              .showInputBox({ placeHolder: message })
-              .then((result) => {
-                if (this.browserPage) {
-                  this.browserPage.send('Page.handleJavaScriptDialog', {
-                    accept: true,
-                    promptText: result
-                  });
-                }
-              });
+            vscode.window.showInputBox({ placeHolder: message }).then((result) => {
+              if (this.browserPage) {
+                this.browserPage.send('Page.handleJavaScriptDialog', {
+                  accept: true,
+                  promptText: result
+                });
+              }
+            });
           } else if (type === 'confirm') {
             vscode.window.showQuickPick(['Ok', 'Cancel']).then((result) => {
               if (this.browserPage) {
@@ -322,11 +333,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   }
 
   private _getHtmlForWebview() {
-    const manifest = require(path.join(
-      this.config.extensionPath,
-      'build',
-      'asset-manifest.json'
-    ));
+    const manifest = require(path.join(this.config.extensionPath, 'build', 'asset-manifest.json'));
     const mainScript = manifest['main.js'];
     const mainStyle = manifest['main.css'];
     const runtimeScript = manifest['runtime~main.js'];
@@ -336,9 +343,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     for (let key in manifest) {
       if (key.endsWith('.chunk.js') && manifest.hasOwnProperty(key)) {
         // finding their paths on the disk
-        let chunkScriptUri = vscode.Uri.file(
-          path.join(this.config.extensionPath, 'build', manifest[key])
-        ).with({
+        let chunkScriptUri = vscode.Uri.file(path.join(this.config.extensionPath, 'build', manifest[key])).with({
           scheme: 'vscode-resource'
         });
         // push the chunk Uri to the list of chunks
@@ -346,22 +351,16 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       }
     }
 
-    const runtimescriptPathOnDisk = vscode.Uri.file(
-      path.join(this.config.extensionPath, 'build', runtimeScript)
-    );
+    const runtimescriptPathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', runtimeScript));
     const runtimescriptUri = runtimescriptPathOnDisk.with({
       scheme: 'vscode-resource'
     });
-    const mainScriptPathOnDisk = vscode.Uri.file(
-      path.join(this.config.extensionPath, 'build', mainScript)
-    );
+    const mainScriptPathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', mainScript));
     const mainScriptUri = mainScriptPathOnDisk.with({
       scheme: 'vscode-resource'
     });
 
-    const stylePathOnDisk = vscode.Uri.file(
-      path.join(this.config.extensionPath, 'build', mainStyle)
-    );
+    const stylePathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', mainStyle));
     const styleUri = stylePathOnDisk.with({ scheme: 'vscode-resource' });
 
     return `<!DOCTYPE html>
@@ -369,9 +368,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 			<head>
 				<meta charset="utf-8">
 				<link rel="stylesheet" type="text/css" href="${styleUri}">
-				<base href="${vscode.Uri.file(
-          path.join(this.config.extensionPath, 'build')
-        ).with({
+				<base href="${vscode.Uri.file(path.join(this.config.extensionPath, 'build')).with({
           scheme: 'vscode-resource'
         })}/">
 			</head>

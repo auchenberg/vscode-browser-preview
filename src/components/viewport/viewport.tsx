@@ -15,9 +15,9 @@ class Viewport extends React.Component<any, any> {
     this.viewportRef = React.createRef();
 
     this.debouncedResizeHandler = _.debounce(this.handleResize.bind(this), 50);
-    this.handleScreencastInteraction = this.handleScreencastInteraction.bind(
-      this
-    );
+    this.handleInspectElement = this.handleInspectElement.bind(this);
+    this.handleInspectHighlightRequested = this.handleInspectHighlightRequested.bind(this);
+    this.handleScreencastInteraction = this.handleScreencastInteraction.bind(this);
   }
 
   public componentDidMount() {
@@ -38,6 +38,10 @@ class Viewport extends React.Component<any, any> {
           height={this.props.height}
           width={this.props.width}
           frame={this.props.frame}
+          highlightInfo={this.props.highlightInfo}
+          isInspectEnabled={this.props.isInspectEnabled}
+          onInspectElement={this.handleInspectElement}
+          onInspectHighlightRequested={this.handleInspectHighlightRequested}
           onInteraction={this.handleScreencastInteraction}
         />
       </div>
@@ -46,6 +50,18 @@ class Viewport extends React.Component<any, any> {
 
   private handleResize(e: any) {
     this.updateDimensions();
+  }
+
+  private handleInspectElement(params: object) {
+    this.props.onViewportChanged('inspectElement', {
+      params: params
+    });
+  }
+
+  private handleInspectHighlightRequested(params: object) {
+    this.props.onViewportChanged('inspectHighlightRequested', {
+      params: params
+    });
   }
 
   private handleScreencastInteraction(action: string, params: object) {

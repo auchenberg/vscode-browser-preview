@@ -1,12 +1,8 @@
 import * as vscode from 'vscode';
 
-export default class TargetTreeProvider
-  implements vscode.TreeDataProvider<object> {
-  private _onDidChangeTreeData: vscode.EventEmitter<
-    object | undefined
-  > = new vscode.EventEmitter<object | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<object | undefined> = this
-    ._onDidChangeTreeData.event;
+export default class TargetTreeProvider implements vscode.TreeDataProvider<object> {
+  private _onDidChangeTreeData: vscode.EventEmitter<object | undefined> = new vscode.EventEmitter<object | undefined>();
+  readonly onDidChangeTreeData: vscode.Event<object | undefined> = this._onDidChangeTreeData.event;
 
   constructor() {}
 
