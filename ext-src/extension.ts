@@ -248,6 +248,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
         if (msg.type === 'extension.openFile') {
           let uri = vscode.Uri.file(msg.params.uri);
+          let lineNumber = msg.params.lineNumber;
 
           // Open document
           vscode.workspace.openTextDocument(uri).then(
@@ -256,7 +257,14 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
               vscode.window
                 .showTextDocument(document, vscode.ViewColumn.One)
                 .then(
-                  (document) => {},
+                  (document) => {
+                    if (lineNumber) {
+                      document.revealRange(
+                        new vscode.Range(lineNumber, 0, lineNumber, 0),
+                        vscode.TextEditorRevealType.InCenter
+                      );
+                    }
+                  },
                   (reason) => {
                     vscode.window.showErrorMessage(
                       `Failed to show file. ${reason}`

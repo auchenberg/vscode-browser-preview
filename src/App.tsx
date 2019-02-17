@@ -344,16 +344,9 @@ class App extends React.Component<any, IState> {
                   var fileNameValue = fileNameRef.value.value;
                   var lineNumberValue = lineNumberRef.value.value;
 
-                  console.log('fileName', fileNameValue);
-                  console.log('lineNumber', lineNumberValue);
-
-                  let uri = `${fileNameValue}`;
-                  // if(lineNumberValue) {
-                  //   uri = uri + `:${lineNumberValue}`
-                  // }
-
                   this.connection.send('extension.openFile', {
-                    uri: uri
+                    uri: fileNameValue,
+                    lineNumber: lineNumberValue
                   });
                 }
               }
