@@ -36,26 +36,30 @@ You can enable in-editor debugging of Browser Preview by installing [Debugger fo
 
 ```json
 {
-  "version": "0.1.0",
-  "configurations": [
-    {
-      "type": "browser-preview",
-      "request": "attach",
-      "name": "Browser Preview: Attach"
-    },
-    {
-      "type": "browser-preview",
-      "request": "launch",
-      "name": "Browser Preview: Launch",
-      "url": "http://localhost:3000"
-    }
-  ]
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "type": "browser-preview",
+            "request": "attach",
+            "name": "Browser Preview: Attach"
+        },
+        {
+            "type": "browser-preview",
+            "request": "launch",
+            "name": "Browser Preview: Launch",
+            "url": "http://localhost:3000"
+        }
+    ]
 }
 ```
 
 The debug configuration also supports these additional properties: `webRoot`, `pathMapping`, `trace`, `sourceMapPathOverrides` and `urlFilter`. See <https://github.com/Microsoft/vscode-chrome-debug#other-optional-launch-config-fields> for details on how to use.
 
-## Additional configuration.
+### Watch It
+
+[Watch an animated gif](docs/DEBUGGING.md) showing how to open the preview and debug a browser app.
+
+## Additional configuration
 
 Browser Preview has the following settings:
 
