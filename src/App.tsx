@@ -126,26 +126,23 @@ class App extends React.Component<any, IState> {
       this.startCasting();
     });
 
-    this.connection.on(
-      'extension.appConfiguration',
-      (payload: ExtensionConfiguration) => {
-        if (!payload) {
-          return;
-        }
-
-        this.setState({
-          isVerboseMode: payload.isVerboseMode ? payload.isVerboseMode : false,
-          url: payload.startUrl ? payload.startUrl : 'about:blank',
-          format: payload.format ? payload.format : 'jpeg'
-        });
-
-        if (payload.startUrl) {
-          this.connection.send('Page.navigate', {
-            url: payload.startUrl
-          });
-        }
+    this.connection.on('extension.appConfiguration', (payload: ExtensionConfiguration) => {
+      if (!payload) {
+        return;
       }
-    );
+
+      this.setState({
+        isVerboseMode: payload.isVerboseMode ? payload.isVerboseMode : false,
+        url: payload.startUrl ? payload.startUrl : 'about:blank',
+        format: payload.format ? payload.format : 'jpeg'
+      });
+
+      if (payload.startUrl) {
+        this.connection.send('Page.navigate', {
+          url: payload.startUrl
+        });
+      }
+    });
 
     // Initialize
     this.connection.send('Page.enable');
@@ -192,19 +189,13 @@ class App extends React.Component<any, IState> {
     this.connection.send('Page.startScreencast', {
       quality: 80,
       format: this.state.format,
-      maxWidth: Math.floor(
-        this.state.viewportMetadata.width * window.devicePixelRatio
-      ),
-      maxHeight: Math.floor(
-        this.state.viewportMetadata.height * window.devicePixelRatio
-      )
+      maxWidth: Math.floor(this.state.viewportMetadata.width * window.devicePixelRatio),
+      maxHeight: Math.floor(this.state.viewportMetadata.height * window.devicePixelRatio)
     });
   }
 
   private async requestNavigationHistory() {
-    const history: any = await this.connection.send(
-      'Page.getNavigationHistory'
-    );
+    const history: any = await this.connection.send('Page.getNavigationHistory');
 
     if (!history) {
       return;
@@ -240,21 +231,15 @@ class App extends React.Component<any, IState> {
   private async onViewportChanged(action: string, data: any) {
     switch (action) {
       case 'inspectHighlightRequested':
-        let highlightNodeInfo: any = await this.connection.send(
-          'DOM.getNodeForLocation',
-          {
-            x: data.params.position.x,
-            y: data.params.position.y
-          }
-        );
+        let highlightNodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
+          x: data.params.position.x,
+          y: data.params.position.y
+        });
 
         if (highlightNodeInfo) {
-          let highlightBoxModel: any = await this.connection.send(
-            'DOM.getBoxModel',
-            {
-              backendNodeId: highlightNodeInfo.backendNodeId
-            }
-          );
+          let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
+            backendNodeId: highlightNodeInfo.backendNodeId
+          });
 
           if (highlightBoxModel && highlightBoxModel.model) {
             this.setState({
@@ -268,13 +253,10 @@ class App extends React.Component<any, IState> {
         }
         break;
       case 'inspectElement':
-        const nodeInfo: any = await this.connection.send(
-          'DOM.getNodeForLocation',
-          {
-            x: data.params.position.x,
-            y: data.params.position.y
-          }
-        );
+        const nodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
+          x: data.params.position.x,
+          y: data.params.position.y
+        });
 
         const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
           nodeId: nodeInfo.nodeId,
@@ -289,58 +271,37 @@ class App extends React.Component<any, IState> {
 
         if (nodeDetails.object) {
           let objectId = nodeDetails.object.objectId;
-          const nodeProperties: any = await this.connection.send(
-            'Runtime.getProperties',
-            {
-              objectId: objectId,
-              generatePreview: true
-            }
-          );
+          const nodeProperties: any = await this.connection.send('Runtime.getProperties', {
+            objectId: objectId,
+            generatePreview: true
+          });
 
           var props = nodeProperties.result as Array<object>;
-          var reactInternalRef: any = props.find((i: any) =>
-            i.name.startsWith('__reactInternalInstance')
-          );
+          var reactInternalRef: any = props.find((i: any) => i.name.startsWith('__reactInternalInstance'));
 
           if (reactInternalRef) {
             let reactInternalObjectId = reactInternalRef.value.objectId;
-            const reactInternalObject: any = await this.connection.send(
-              'Runtime.getProperties',
-              {
-                objectId: reactInternalObjectId,
-                generatePreview: true
-              }
-            );
+            const reactInternalObject: any = await this.connection.send('Runtime.getProperties', {
+              objectId: reactInternalObjectId,
+              generatePreview: true
+            });
 
             if (reactInternalObject) {
-              var reactObjectValues = reactInternalObject.result as Array<
-                object
-              >;
-              var reactDebugSourceRef: any = reactObjectValues.find(
-                (i: any) => i.name == '_debugSource'
-              );
+              var reactObjectValues = reactInternalObject.result as Array<object>;
+              var reactDebugSourceRef: any = reactObjectValues.find((i: any) => i.name == '_debugSource');
               let reactDebugSourceObjectId = reactDebugSourceRef.value.objectId;
 
               if (reactDebugSourceObjectId) {
-                const reactDebugSourceRef: any = await this.connection.send(
-                  'Runtime.getProperties',
-                  {
-                    objectId: reactDebugSourceObjectId,
-                    generatePreview: true
-                  }
-                );
+                const reactDebugSourceRef: any = await this.connection.send('Runtime.getProperties', {
+                  objectId: reactDebugSourceObjectId,
+                  generatePreview: true
+                });
 
                 if (reactDebugSourceRef) {
-                  var reactDebugSourceProps = reactDebugSourceRef.result as Array<
-                    object
-                  >;
+                  var reactDebugSourceProps = reactDebugSourceRef.result as Array<object>;
 
-                  var fileNameRef: any = reactDebugSourceProps.find(
-                    (i: any) => i.name == 'fileName'
-                  );
-                  var lineNumberRef: any = reactDebugSourceProps.find(
-                    (i: any) => i.name == 'lineNumber'
-                  );
+                  var fileNameRef: any = reactDebugSourceProps.find((i: any) => i.name == 'fileName');
+                  var lineNumberRef: any = reactDebugSourceProps.find((i: any) => i.name == 'lineNumber');
                   var fileNameValue = fileNameRef.value.value;
                   var lineNumberValue = lineNumberRef.value.value;
 

@@ -14,10 +14,7 @@ class ViewportInfo extends React.Component<any, any> {
   }
 
   public componentWillReceiveProps(nextProps: any) {
-    if (
-      nextProps.height !== this.props.height ||
-      nextProps.width !== this.props.width
-    ) {
+    if (nextProps.height !== this.props.height || nextProps.width !== this.props.width) {
       this.setState({ isHidden: false });
       window.clearTimeout(this.timer);
     }

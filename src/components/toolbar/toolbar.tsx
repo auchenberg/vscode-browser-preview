@@ -44,9 +44,7 @@ class Toolbar extends React.Component<IToolbarProps> {
       <div className="toolbar">
         <div className="inner">
           <button
-            className={
-              `inspect ` + (this.props.isInspectEnabled ? `active` : ``)
-            }
+            className={`inspect ` + (this.props.isInspectEnabled ? `active` : ``)}
             style={iconInspectStyle}
             onClick={this.handleInspect}
           >
@@ -68,11 +66,7 @@ class Toolbar extends React.Component<IToolbarProps> {
           >
             Forward
           </button>
-          <button
-            className="refresh"
-            style={iconRefreshStyle}
-            onClick={this.handleRefresh}
-          >
+          <button className="refresh" style={iconRefreshStyle} onClick={this.handleRefresh}>
             Refresh
           </button>
           <UrlInput url={this.props.url} onUrlChanged={this.handleUrlChange} />
