@@ -25,7 +25,7 @@ interface IToolbarProps {
   canGoForward: boolean;
   isInspectEnabled: boolean;
   url: string;
-  onActionInvoked: (action: string, data: object) => void;
+  onActionInvoked: (action: string, data?: object) => Promise<any>;
 }
 
 class Toolbar extends React.Component<IToolbarProps> {
@@ -69,7 +69,11 @@ class Toolbar extends React.Component<IToolbarProps> {
           <button className="refresh" style={iconRefreshStyle} onClick={this.handleRefresh}>
             Refresh
           </button>
-          <UrlInput url={this.props.url} onUrlChanged={this.handleUrlChange} />
+          <UrlInput
+            url={this.props.url}
+            onUrlChanged={this.handleUrlChange}
+            onActionInvoked={this.props.onActionInvoked}
+          />
         </div>
       </div>
     );

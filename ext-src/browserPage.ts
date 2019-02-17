@@ -1,17 +1,20 @@
 'use strict';
 
 import { EventEmitter } from 'events';
+import Clipboard from './clipboard';
 var EventEmitterEnhancer = require('event-emitter-enhancer');
 var EnhancedEventEmitter = EventEmitterEnhancer.extend(EventEmitter);
 
 export default class BrowserPage extends EnhancedEventEmitter {
   private client: any;
   private browser: any;
+  private clipboard: Clipboard;
   public page: any;
 
   constructor(browser: any) {
     super();
     this.browser = browser;
+    this.clipboard = new Clipboard();
   }
 
   public dispose() {
@@ -30,6 +33,38 @@ export default class BrowserPage extends EnhancedEventEmitter {
         break;
       case 'Page.goBackward':
         await this.page.goBack();
+        break;
+      case 'Clipboard.readText':
+        this.clipboard.readText().then(
+          (result: any) => {
+            this.emit({
+              callbackId: callbackId,
+              result: result
+            });
+          },
+          (err: any) => {
+            this.emit({
+              callbackId: callbackId,
+              error: err.message
+            });
+          }
+        );
+        break;
+      case 'Clipboard.writeText':
+        this.clipboard.writeText((data as any).value).then(
+          (result: any) => {
+            this.emit({
+              callbackId: callbackId,
+              result: result
+            });
+          },
+          (err: any) => {
+            this.emit({
+              callbackId: callbackId,
+              error: err.message
+            });
+          }
+        );
         break;
       default:
         this.client

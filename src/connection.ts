@@ -19,7 +19,7 @@ export default class Connection extends EventEmitter2 {
     });
   }
 
-  send(method: string, params = {}): Promise<object> {
+  send<T>(method: string, params = {}): Promise<T> {
     const id = ++this.lastId;
 
     this.logger.log('SEND ► ', method, params);
