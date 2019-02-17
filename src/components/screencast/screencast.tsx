@@ -315,6 +315,11 @@ class Screencast extends React.Component<any, any> {
 
   private handleKeyEvent(event: any) {
     this.emitKeyEvent(event.nativeEvent);
+
+    if (event.key === 'Tab') {
+      event.preventDefault();
+    }
+
     if (this.canvasRef.current) {
       this.canvasRef.current.focus();
     }
