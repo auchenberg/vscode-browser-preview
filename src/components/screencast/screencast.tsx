@@ -7,15 +7,20 @@ class Screencast extends React.Component<any, any> {
   private canvasRef: React.RefObject<HTMLCanvasElement>;
   private imageRef: React.RefObject<HTMLImageElement>;
   private canvasContext: CanvasRenderingContext2D | null;
+  private frameId: number | null;
+  private frame: string | null;
 
   constructor(props: any) {
     super(props);
     this.canvasRef = React.createRef();
     this.imageRef = React.createRef();
     this.canvasContext = null;
+    this.frameId = null;
+    this.frame = props.frame;
 
     this.handleMouseEvent = this.handleMouseEvent.bind(this);
     this.handleKeyEvent = this.handleKeyEvent.bind(this);
+    this.renderLoop = this.renderLoop.bind(this);
 
     this.state = {
       imageZoom: 1,
@@ -25,10 +30,43 @@ class Screencast extends React.Component<any, any> {
     };
   }
 
-  public componentDidMount() {
-    if (this.canvasRef.current) {
-      this.canvasContext = this.canvasRef.current.getContext('2d');
+  static getDerivedStateFromProps(nextProps: any, prevState: any) {
+    if (nextProps.frame !== prevState.frame) {
+      return {
+        frame: nextProps.frame
+      };
+    } else return null;
+  }
+
+  public componentDidUpdate(prevProps: any, prevState: any) {
+    if (prevState.frame !== this.state.frame) {
+      this.renderScreencastFrame();
     }
+  }
+
+  public componentDidMount() {
+    this.startLoop();
+  }
+
+  public componentWillUnmount() {
+    this.stopLoop();
+  }
+
+  public startLoop() {
+    if (!this.frameId) {
+      this.frameId = window.requestAnimationFrame(this.renderLoop);
+    }
+  }
+
+  public stopLoop() {
+    if (this.frameId) {
+      window.cancelAnimationFrame(this.frameId);
+    }
+  }
+
+  public renderLoop() {
+    this.renderFrame();
+    this.frameId = window.requestAnimationFrame(this.renderLoop); // Set up next iteration of the loop
   }
 
   public render() {
@@ -52,101 +90,96 @@ class Screencast extends React.Component<any, any> {
     );
   }
 
-  public componentWillReceiveProps() {
-    this.renderScreencastFrame();
-  }
+  private renderFrame() {
+    if (!this.canvasRef.current || !this.imageRef.current) {
+      return;
+    }
 
-  private paint() {
+    this.canvasContext = this.canvasRef.current.getContext('2d');
     const canvasElement = this.canvasRef.current;
     const imageElement = this.imageRef.current;
 
-    if (imageElement && canvasElement && this.canvasContext) {
-      const checkerboardPattern = this.getCheckerboardPattern(
-        canvasElement,
-        this.canvasContext
-      );
-      const canvasWidth = this.props.width;
-      const canvasHeight = this.props.height;
-
-      canvasElement.width = window.devicePixelRatio * canvasWidth;
-      canvasElement.height = window.devicePixelRatio * canvasHeight;
-
-      this.canvasContext.save();
-      this.canvasContext.scale(
-        window.devicePixelRatio,
-        window.devicePixelRatio
-      );
-
-      this.canvasContext.save();
-      this.canvasContext.fillStyle = checkerboardPattern;
-
-      this.canvasContext.fillRect(
-        0,
-        0,
-        canvasWidth,
-        this.state.screenOffsetTop * this.state.screenZoom
-      );
-      this.canvasContext.fillRect(
-        0,
-        this.state.screenOffsetTop * this.state.screenZoom +
-          imageElement.naturalHeight * this.state.imageZoom,
-        canvasWidth,
-        canvasHeight
-      );
-      this.canvasContext.restore();
-
-      // Render highlight
-      let config = {
-        contentColor: 'rgba(111, 168, 220, .66)',
-        paddingColor: 'rgba(147, 196, 125, .55)',
-        borderColor: 'rgba(255, 229, 153, .66)',
-        marginColor: 'rgba(246, 178, 107, .66)'
-      };
-
-      if (this.state.highlightInfo) {
-        let model = this.state.highlightInfo;
-        this.canvasContext.save();
-        const transparentColor = 'rgba(0, 0, 0, 0)';
-        const quads = [];
-
-        if (model.content && config.contentColor !== transparentColor)
-          quads.push({ quad: model.content, color: config.contentColor });
-        if (model.padding && config.paddingColor !== transparentColor)
-          quads.push({ quad: model.padding, color: config.paddingColor });
-        if (model.border && config.borderColor !== transparentColor)
-          quads.push({ quad: model.border, color: config.borderColor });
-        if (model.margin && config.marginColor !== transparentColor)
-          quads.push({ quad: model.margin, color: config.marginColor });
-
-        for (let i = quads.length - 1; i > 0; --i) {
-          this.drawOutlinedQuadWithClip(
-            this.canvasContext,
-            quads[i].quad,
-            quads[i - 1].quad,
-            quads[i].color
-          );
-        }
-
-        if (quads.length > 0) {
-          this.drawOutlinedQuad(
-            this.canvasContext,
-            quads[0].quad,
-            quads[0].color
-          );
-        }
-
-        this.canvasContext.restore();
-        this.canvasContext.globalCompositeOperation = 'destination-over';
-      }
-
-      // Render frame
-      let dy = this.state.screenOffsetTop * this.state.screenZoom;
-      let dw = imageElement.naturalWidth * this.state.imageZoom;
-      let dh = imageElement.naturalHeight * this.state.imageZoom;
-
-      this.canvasContext.drawImage(imageElement, 0, dy, dw, dh);
-      this.canvasContext.restore();
+    if (!this.canvasContext) {
+      return;
     }
+
+    const canvasWidth = this.props.width;
+    const canvasHeight = this.props.height;
+    const checkerboardPattern = this.getCheckerboardPattern(
+      canvasElement,
+      this.canvasContext
+    );
+
+    canvasElement.width = window.devicePixelRatio * canvasWidth;
+    canvasElement.height = window.devicePixelRatio * canvasHeight;
+
+    this.canvasContext.save();
+    this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+    this.canvasContext.save();
+    this.canvasContext.fillStyle = checkerboardPattern;
+    this.canvasContext.fillRect(
+      0,
+      0,
+      canvasWidth,
+      this.state.screenOffsetTop * this.state.screenZoom
+    );
+    this.canvasContext.fillRect(
+      0,
+      this.state.screenOffsetTop * this.state.screenZoom +
+        imageElement.naturalHeight * this.state.imageZoom,
+      canvasWidth,
+      canvasHeight
+    );
+    this.canvasContext.restore();
+
+    // Render highlight
+    let config = {
+      contentColor: 'rgba(111, 168, 220, .66)',
+      paddingColor: 'rgba(147, 196, 125, .55)',
+      borderColor: 'rgba(255, 229, 153, .66)',
+      marginColor: 'rgba(246, 178, 107, .66)'
+    };
+
+    if (this.state.highlightInfo) {
+      let model = this.state.highlightInfo;
+      this.canvasContext.save();
+      const transparentColor = 'rgba(0, 0, 0, 0)';
+      const quads = [];
+      if (model.content && config.contentColor !== transparentColor)
+        quads.push({ quad: model.content, color: config.contentColor });
+      if (model.padding && config.paddingColor !== transparentColor)
+        quads.push({ quad: model.padding, color: config.paddingColor });
+      if (model.border && config.borderColor !== transparentColor)
+        quads.push({ quad: model.border, color: config.borderColor });
+      if (model.margin && config.marginColor !== transparentColor)
+        quads.push({ quad: model.margin, color: config.marginColor });
+      for (let i = quads.length - 1; i > 0; --i) {
+        this.drawOutlinedQuadWithClip(
+          this.canvasContext,
+          quads[i].quad,
+          quads[i - 1].quad,
+          quads[i].color
+        );
+      }
+      if (quads.length > 0) {
+        this.drawOutlinedQuad(
+          this.canvasContext,
+          quads[0].quad,
+          quads[0].color
+        );
+      }
+      this.canvasContext.restore();
+      this.canvasContext.globalCompositeOperation = 'destination-over';
+    }
+
+    // Render viewport frame
+    let dy = this.state.screenOffsetTop * this.state.screenZoom;
+    let dw = imageElement.naturalWidth * this.state.imageZoom;
+    let dh = imageElement.naturalHeight * this.state.imageZoom;
+
+    this.canvasContext.drawImage(imageElement, 0, dy, dw, dh);
+    this.canvasContext.restore();
   }
 
   public renderScreencastFrame() {
@@ -186,13 +219,7 @@ class Screencast extends React.Component<any, any> {
         screenZoom: screenZoom
       });
 
-      if (imageElement) {
-        imageElement.onload = () => {
-          this.paint();
-        };
-        imageElement.src =
-          'data:image/jpg;base64,' + screencastFrame.base64Data;
-      }
+      imageElement.src = 'data:image/jpg;base64,' + screencastFrame.base64Data;
     }
   }
 
