@@ -6,6 +6,7 @@ import BrowserPage from './browserPage';
 import TargetTreeProvider from './targetTreeProvider';
 import * as EventEmitter from 'eventemitter2';
 import { ExtensionConfiguration } from './extensionConfiguration';
+import { setupLiveShare} from './liveShare';
 
 export function activate(context: vscode.ExtensionContext) {
   const windowManager = new BrowserViewWindowManager(context.extensionPath);
@@ -93,10 +94,12 @@ export function activate(context: vscode.ExtensionContext) {
       windowManager.disposeByUrl(e.configuration.urlFilter);
     }
   });
+
+  setupLiveShare(windowManager);
 }
 
-class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
-  private openWindows: Set<BrowserViewWindow>;
+export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
+  public openWindows: Set<BrowserViewWindow>;
   private browser: any;
   private config: ExtensionConfiguration;
 
@@ -174,13 +177,13 @@ class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   }
 }
 
-class BrowserViewWindow extends EventEmitter.EventEmitter2 {
+export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   private static readonly viewType = 'browser-preview';
 
   private _panel: vscode.WebviewPanel | null;
   private _disposables: vscode.Disposable[] = [];
 
-  private browserPage: BrowserPage | null;
+  public browserPage: BrowserPage | null;
   private browser: Browser;
   public config: ExtensionConfiguration;
 
@@ -201,6 +204,8 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
             this._panel.webview.postMessage(data);
           }
         });
+
+        this.emit("windowCreated", this.browserPage);
       }
     } catch (err) {
       vscode.window.showErrorMessage(err.message);

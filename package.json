@@ -22,7 +22,8 @@
     "onView:targetTree",
     "onCommand:browser-preview.openPreview",
     "onDebugInitialConfigurations",
-    "onDebug"
+    "onDebug",
+    "onFileSystem:vsls"
   ],
   "contributes": {
     "configuration": {
@@ -203,6 +204,7 @@
     "puppeteer-core": "^1.11.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
+    "vsls": "^0.3.967",
     "which-chrome": "^0.1.1"
   },
   "devDependencies": {
