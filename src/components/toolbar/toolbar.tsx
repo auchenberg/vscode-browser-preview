@@ -43,13 +43,13 @@ class Toolbar extends React.Component<IToolbarProps> {
     return (
       <div className="toolbar">
         <div className="inner">
-          <button
+          {/* <button
             className={`inspect ` + (this.props.isInspectEnabled ? `active` : ``)}
             style={iconInspectStyle}
             onClick={this.handleInspect}
           >
             Inspect
-          </button>
+          </button> */}
           <button
             className="backward"
             style={iconBackwardStyle}
