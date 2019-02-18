@@ -6,7 +6,7 @@ const REQUEST_GET_WINDOWS = 'getWindows';
 const NOTIFICATION_WINDOW_CREATED = 'windowCreated';
 const NOTIFICATION_WINDOW_INTERACTION = 'windowInteraction';
 
-const DISPATCHED_EVENTS = ['Input.dispatchMouseEvent', 'Input.dispatchKeyboardEvent'];
+const DISPATCHED_EVENTS = ['Input.dispatchMouseEvent', 'Input.dispatchKeyEvent'];
 const SHARED_PANEL_TITLE = `${PANEL_TITLE} (Shared)`;
 
 export async function setupLiveShare(windowManager: BrowserViewWindowManager) {
