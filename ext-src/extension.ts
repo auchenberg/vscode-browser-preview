@@ -6,7 +6,7 @@ import BrowserPage from './browserPage';
 import TargetTreeProvider from './targetTreeProvider';
 import * as EventEmitter from 'eventemitter2';
 import { ExtensionConfiguration } from './extensionConfiguration';
-import { setupLiveShare} from './liveShare';
+import { setupLiveShare } from './liveShare';
 
 export function activate(context: vscode.ExtensionContext) {
   const windowManager = new BrowserViewWindowManager(context.extensionPath);
@@ -140,7 +140,7 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     }
   }
 
-  public create(startUrl?: string) {
+  public create(startUrl?: string, title?: string) {
     this.refreshSettings();
 
     if (!this.browser) {
@@ -148,7 +148,7 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     }
 
     let window = new BrowserViewWindow(this.config, this.browser);
-    window.launch(startUrl);
+    window.launch(startUrl, title);
     window.once('disposed', () => {
       this.openWindows.delete(window);
       if (this.openWindows.size === 0) {
@@ -177,6 +177,8 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   }
 }
 
+export const PANEL_TITLE = 'Browser Preview';
+
 export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   private static readonly viewType = 'browser-preview';
 
@@ -195,7 +197,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     this.browser = browser;
   }
 
-  public async launch(startUrl?: string) {
+  public async launch(startUrl?: string, title: string = PANEL_TITLE) {
     try {
       this.browserPage = await this.browser.newPage();
       if (this.browserPage) {
@@ -205,7 +207,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
           }
         });
 
-        this.emit("windowCreated", this.browserPage);
+        this.emit('windowCreated', this.browserPage);
       }
     } catch (err) {
       vscode.window.showErrorMessage(err.message);
@@ -213,7 +215,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
     let column = vscode.ViewColumn.Two;
 
-    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, 'Browser Preview', column, {
+    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, title, column, {
       enableScripts: true,
       retainContextWhenHidden: true,
       localResourceRoots: [vscode.Uri.file(path.join(this.config.extensionPath, 'build'))]

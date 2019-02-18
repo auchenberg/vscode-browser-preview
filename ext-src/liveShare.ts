@@ -1,5 +1,5 @@
 import * as vsls from 'vsls/vscode';
-import { BrowserViewWindowManager, BrowserViewWindow } from './extension';
+import { BrowserViewWindowManager, BrowserViewWindow, PANEL_TITLE } from './extension';
 
 const SERVICE_NAME = 'browser-preview';
 const REQUEST_GET_WINDOWS = 'getWindows';
@@ -7,17 +7,18 @@ const NOTIFICATION_WINDOW_CREATED = 'windowCreated';
 const NOTIFICATION_WINDOW_INTERACTION = 'windowInteraction';
 
 const DISPATCHED_EVENTS = ['Input.dispatchMouseEvent', 'Input.dispatchKeyboardEvent'];
+const SHARED_PANEL_TITLE = `${PANEL_TITLE} (Shared)`;
 
 export async function setupLiveShare(windowManager: BrowserViewWindowManager) {
   const liveShare = await vsls.getApi();
   if (!liveShare) {
-	// The user doesn't have the Live Share
-	// extension installed, so there's nothing
-	// further to initialize.
+    // The user doesn't have the Live Share
+    // extension installed, so there's nothing
+    // further to initialize.
     return;
   }
 
-  await onSessionStarted(liveShare);
+  await sessionStarted(liveShare);
   setupServices(liveShare, windowManager);
 }
 
@@ -49,12 +50,12 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
     const windows = await service.request(REQUEST_GET_WINDOWS, []);
     if (windows && windows.length > 0) {
       windows.forEach(({ startUrl, viewport }: any) => {
-        windowManager.create(startUrl);
+        windowManager.create(startUrl, SHARED_PANEL_TITLE);
       });
     }
 
     service.onNotify(NOTIFICATION_WINDOW_CREATED, async (args: any) => {
-      await windowManager.create(args.startUrl);
+      await windowManager.create(args.startUrl, SHARED_PANEL_TITLE);
     });
   }
 
@@ -62,7 +63,7 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
   handleLocalWindowCreation(service, liveShare, windowManager);
 }
 
-function onSessionStarted(liveShare: vsls.LiveShare) {
+function sessionStarted(liveShare: vsls.LiveShare) {
   return new Promise((resolve) => {
     if (liveShare.session.id) {
       resolve();
