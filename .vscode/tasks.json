@@ -4,9 +4,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "yarn: build",
+      "label": "npm: build",
       "type": "shell",
-      "command": "yarn build"
+      "command": "npm run build"
     }
   ]
 }
