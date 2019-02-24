@@ -12,12 +12,14 @@ interface IState {
   url: string;
   isVerboseMode: boolean;
   isInspectEnabled: boolean;
+  isDeviceEmulationEnabled: boolean;
   viewportMetadata: {
     height: number;
     width: number;
     isLoading: boolean;
     loadingPercent: number;
     highlightInfo: object | null;
+    padding: number;
   };
   history: {
     canGoBack: boolean;
@@ -27,6 +29,7 @@ interface IState {
 
 class App extends React.Component<any, IState> {
   private connection: Connection;
+  private viewport: any;
 
   constructor(props: any) {
     super(props);
@@ -36,16 +39,18 @@ class App extends React.Component<any, IState> {
       url: 'about:blank',
       isVerboseMode: false,
       isInspectEnabled: false,
+      isDeviceEmulationEnabled: false,
       history: {
         canGoBack: false,
         canGoForward: false
       },
       viewportMetadata: {
-        height: 0,
+        height: 500,
+        width: 500,
+        padding: 0,
         highlightInfo: null,
         isLoading: false,
-        loadingPercent: 0.0,
-        width: 0
+        loadingPercent: 0.0
       }
     };
 
@@ -169,23 +174,28 @@ class App extends React.Component<any, IState> {
           canGoBack={this.state.history.canGoBack}
           canGoForward={this.state.history.canGoForward}
           isInspectEnabled={this.state.isInspectEnabled}
+          isDeviceEmulationEnabled={this.state.isDeviceEmulationEnabled}
         />
         <Viewport
           showLoading={this.state.viewportMetadata.isLoading}
           width={this.state.viewportMetadata.width}
           height={this.state.viewportMetadata.height}
           isInspectEnabled={this.state.isInspectEnabled}
+          isDeviceEmulationEnabled={this.state.isDeviceEmulationEnabled}
           loadingPercent={this.state.viewportMetadata.loadingPercent}
           highlightInfo={this.state.viewportMetadata.highlightInfo}
+          padding={this.state.viewportMetadata.padding}
           frame={this.state.frame}
           onViewportChanged={this.onViewportChanged}
+          ref={(c) => {
+            this.viewport = c;
+          }}
         />
       </div>
     );
   }
 
   public stopCasting() {
-    window.alert('hallo');
     this.connection.send('Page.stopScreencast');
   }
 
@@ -324,22 +334,30 @@ class App extends React.Component<any, IState> {
         break;
 
       case 'size':
-        let req = this.connection.send('Page.setDeviceMetricsOverride', {
+        let height = Math.floor(data.height);
+        let width = Math.floor(data.width);
+
+        // TODO: This means the viewport sent to the browser will be different than local state
+        // We should introduce notion of "deviceViewport" and "renderedViewport" or something.
+        if (this.state.isDeviceEmulationEnabled) {
+          height = height - this.state.viewportMetadata.padding;
+          width = width - this.state.viewportMetadata.padding;
+        }
+
+        this.connection.send('Page.setDeviceMetricsOverride', {
           deviceScaleFactor: 2,
-          height: Math.floor(data.height),
           mobile: false,
-          width: Math.floor(data.width)
+          height: height,
+          width: width
         });
 
-        req.then(() => {
-          this.setState({
-            ...this.state,
-            viewportMetadata: {
-              ...this.state.viewportMetadata,
-              height: data.height as number,
-              width: data.width as number
-            }
-          });
+        this.setState({
+          ...this.state,
+          viewportMetadata: {
+            ...this.state.viewportMetadata,
+            height: data.height as number,
+            width: data.width as number
+          }
         });
 
         break;
@@ -372,6 +390,26 @@ class App extends React.Component<any, IState> {
           });
         }
         break;
+      case 'emulateDevice':
+        if (this.state.isDeviceEmulationEnabled) {
+          this.viewport.resetViewportSize();
+          this.setState({
+            isDeviceEmulationEnabled: false,
+            viewportMetadata: {
+              ...this.state.viewportMetadata,
+              padding: 0
+            }
+          });
+        } else {
+          this.setState({
+            isDeviceEmulationEnabled: true,
+            viewportMetadata: {
+              ...this.state.viewportMetadata,
+              padding: 40
+            }
+          });
+        }
+        break;
       case 'urlChange':
         this.connection.send('Page.navigate', {
           url: data.url
@@ -385,7 +423,9 @@ class App extends React.Component<any, IState> {
         return this.connection.send('Clipboard.readText');
       case 'writeClipboard':
         // overwrite the clipboard only if there is a valid value
-        if (data && (data as any).value) return this.connection.send('Clipboard.writeText', data);
+        if (data && (data as any).value) {
+          return this.connection.send('Clipboard.writeText', data);
+        }
         break;
     }
     // return an empty promise

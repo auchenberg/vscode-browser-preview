@@ -20,10 +20,16 @@ const iconInspectStyle = {
   backgroundSize: `12px 12px`
 };
 
+const iconDeviceStyle = {
+  backgroundImage: `url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMTVweCIgaGVpZ2h0PSIxNnB4IiB2aWV3Qm94PSIwIDAgMTUgMTYiIHZlcnNpb249IjEuMSI+CiAgICA8IS0tIEdlbmVyYXRvcjogU2tldGNoIDUyLjIgKDY3MTQ1KSAtIGh0dHA6Ly93d3cuYm9oZW1pYW5jb2RpbmcuY29tL3NrZXRjaCAtLT4KICAgIDx0aXRsZT5waG9uZTwvdGl0bGU+CiAgICA8ZGVzYz5DcmVhdGVkIHdpdGggU2tldGNoLjwvZGVzYz4KICAgIDxnIGlkPSJQYWdlLTEiIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPgogICAgICAgIDxnIGlkPSJwaG9uZSIgZmlsbD0iIzAwMDAwMCIgZmlsbC1ydWxlPSJub256ZXJvIj4KICAgICAgICAgICAgPHBhdGggZD0iTTMsMSBMMyw1LjAwMDEgTDMsNi4wMDAyIEw2LjM0MzQsNi41MzEzNSBMNi4zMjc4LDE0LjU3ODE1IEw1LDE0Ljk5OTk4IEM1LjAwNiwxNS41OTI3NiA1LjQzOTMxLDE2LjAxMTM4IDYsMTUuOTk5OTggTDE0LDE1Ljk5OTk4IEMxNC41Nzg5NiwxNi4wMDE5OCAxNC45ODE3NywxNS41NzI5IDE1LDE0Ljk5OTk4IEwxNSwwLjk5OTk4IEMxNC45ODk4LDAuNDY1MjEgMTQuNTE4MjMsMC4wMDI1OSAxNCwtMmUtMDUgTDQsLTJlLTA1IEMzLjQ2NzAzLDAuMDA3OTggMy4wMDI4NCwwLjQ1Njc1IDMsMC45OTk5OCBMMywxIFogTTMuOTk5OTUsMSBMMTQsMSBMMTQsMTUgTDYsMTUgTDYuNzE4NDUsMTQuNTc4MjEgTDYuODEyMTUsNi4xNTY0MSBMMy45OTk5NSw2LjAwMDMxIEwzLjk5OTk1LDUuMDAwMzggTDMuOTk5OTUsMSBaIiBpZD0icGF0aDM4MiIvPgogICAgICAgICAgICA8cGF0aCBkPSJNMCw2IEwwLDE1IEMwLjAwNiwxNS41OTI3OCAwLjQzOTMxLDE2LjAxMTQgMSwxNiBMNiwxNiBDNi41Nzg5NiwxNi4wMDIgNi45ODE3NywxNS41NzI5MiA3LDE1IEw3LDYgQzYuOTg5OCw1LjQ2NTIzIDYuNTE4MjMsNS4wMDI2MSA2LDUgTDEsNSBDMC40NjcwMyw1LjAwOCAwLjAwMjg0LDUuNDU2NzcgMCw2IFogTTEsNy4wMDAyIEw2LDcuMDAwMiBMNiwxNC4wMDAyIEwxLDE0LjAwMDIgTDEsNy4wMDAyIFoiIGlkPSJwYXRoMzg0Ii8+CiAgICAgICAgPC9nPgogICAgPC9nPgo8L3N2Zz4=)`,
+  backgroundSize: `14px 14px`
+};
+
 interface IToolbarProps {
   canGoBack: boolean;
   canGoForward: boolean;
   isInspectEnabled: boolean;
+  isDeviceEmulationEnabled: boolean;
   url: string;
   onActionInvoked: (action: string, data?: object) => Promise<any>;
 }
@@ -37,6 +43,7 @@ class Toolbar extends React.Component<IToolbarProps> {
     this.handleRefresh = this.handleRefresh.bind(this);
     this.handleUrlChange = this.handleUrlChange.bind(this);
     this.handleInspect = this.handleInspect.bind(this);
+    this.handleEmulateDevice = this.handleEmulateDevice.bind(this);
   }
 
   public render() {
@@ -50,6 +57,13 @@ class Toolbar extends React.Component<IToolbarProps> {
           >
             Inspect
           </button> */}
+          <button
+            className={`device ` + (this.props.isDeviceEmulationEnabled ? `active` : ``)}
+            style={iconDeviceStyle}
+            onClick={this.handleEmulateDevice}
+          >
+            Device toolbar
+          </button>
           <button
             className="backward"
             style={iconBackwardStyle}
@@ -97,6 +111,10 @@ class Toolbar extends React.Component<IToolbarProps> {
 
   private handleInspect() {
     this.props.onActionInvoked('inspect', {});
+  }
+
+  private handleEmulateDevice() {
+    this.props.onActionInvoked('emulateDevice', {});
   }
 }
 
