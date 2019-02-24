@@ -55,6 +55,10 @@ class App extends React.Component<any, IState> {
 
     this.connection.enableVerboseLogging(this.state.isVerboseMode);
 
+    this.connection.on('Page.navigatedWithinDocument', (result: any) => {
+      this.requestNavigationHistory();
+    });
+
     this.connection.on('Page.frameNavigated', (result: any) => {
       const { frame } = result;
       var isMainFrame = !frame.parentId;
@@ -381,8 +385,7 @@ class App extends React.Component<any, IState> {
         return this.connection.send('Clipboard.readText');
       case 'writeClipboard':
         // overwrite the clipboard only if there is a valid value
-        if (data && (data as any).value)
-          return this.connection.send('Clipboard.writeText', data);
+        if (data && (data as any).value) return this.connection.send('Clipboard.writeText', data);
         break;
     }
     // return an empty promise
