@@ -29,6 +29,7 @@ interface IState {
 
 class App extends React.Component<any, IState> {
   private connection: Connection;
+  private viewport: any;
 
   constructor(props: any) {
     super(props);
@@ -186,6 +187,9 @@ class App extends React.Component<any, IState> {
           padding={this.state.viewportMetadata.padding}
           frame={this.state.frame}
           onViewportChanged={this.onViewportChanged}
+          ref={(c) => {
+            this.viewport = c;
+          }}
         />
       </div>
     );
@@ -379,6 +383,7 @@ class App extends React.Component<any, IState> {
         break;
       case 'emulateDevice':
         if (this.state.isDeviceEmulationEnabled) {
+          this.viewport.resetViewportSize();
           this.setState({
             isDeviceEmulationEnabled: false,
             viewportMetadata: {

@@ -115,6 +115,10 @@ class Viewport extends React.Component<any, any> {
     );
   }
 
+  public resetViewportSize() {
+    this.calculateViewportSize();
+  }
+
   private calculateViewportSize() {
     if (this.viewportRef.current) {
       const dim = this.viewportRef.current.getBoundingClientRect();
