@@ -115,20 +115,38 @@ class Viewport extends React.Component<any, any> {
   }
 
   public resetViewportSize() {
-    this.calculateViewportSize();
+    this.setState(
+      {
+        isFixedSize: false
+      },
+      () => {
+        this.calculateViewportSize();
+      }
+    );
   }
 
   private calculateViewportSize() {
     if (this.viewportRef.current) {
       const dim = this.viewportRef.current.getBoundingClientRect();
-      let width = dim.width;
-      let height = dim.height;
+
+      let currentWidth = this.state.width;
+      let currentHeight = this.state.height;
+
+      let viewportWidth = dim.width;
+      let viewportHeight = dim.height;
+
+      let newViewportWidth = viewportWidth;
+      let newViewportHeight = viewportHeight;
+
+      if (this.state.isFixedSize) {
+        newViewportHeight = currentHeight > viewportHeight ? viewportHeight : currentHeight;
+        newViewportWidth = currentWidth > viewportWidth ? viewportWidth : currentWidth;
+      }
 
       this.setState(
         {
-          isFixedSize: false,
-          width: width,
-          height: height
+          width: newViewportWidth,
+          height: newViewportHeight
         },
         () => {
           this.emitViewportChanges();
