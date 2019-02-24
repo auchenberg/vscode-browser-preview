@@ -59,6 +59,10 @@ class App extends React.Component<any, IState> {
 
     this.connection.enableVerboseLogging(this.state.isVerboseMode);
 
+    this.connection.on('Page.navigatedWithinDocument', (result: any) => {
+      this.requestNavigationHistory();
+    });
+
     this.connection.on('Page.frameNavigated', (result: any) => {
       const { frame } = result;
       var isMainFrame = !frame.parentId;
