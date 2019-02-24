@@ -391,7 +391,7 @@ class App extends React.Component<any, IState> {
             isDeviceEmulationEnabled: true,
             viewportMetadata: {
               ...this.state.viewportMetadata,
-              padding: 20
+              padding: 40
             }
           });
         }
