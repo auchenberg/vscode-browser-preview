@@ -334,11 +334,21 @@ class App extends React.Component<any, IState> {
         break;
 
       case 'size':
+        let height = Math.floor(data.height);
+        let width = Math.floor(data.width);
+
+        // TODO: This means the viewport sent to the browser will be different than local state
+        // We should introduce notion of "deviceViewport" and "renderedViewport" or something.
+        if (this.state.isDeviceEmulationEnabled) {
+          height = height - this.state.viewportMetadata.padding;
+          width = width - this.state.viewportMetadata.padding;
+        }
+
         this.connection.send('Page.setDeviceMetricsOverride', {
           deviceScaleFactor: 2,
-          height: Math.floor(data.height),
           mobile: false,
-          width: Math.floor(data.width)
+          height: height,
+          width: width
         });
 
         this.setState({
