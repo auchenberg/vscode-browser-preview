@@ -201,6 +201,7 @@
     "karma-chrome-launcher": "^2.2.0",
     "lodash": "^4.17.11",
     "puppeteer-core": "^1.11.0",
+    "re-resizable": "^4.11.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "which-chrome": "^0.1.1"
