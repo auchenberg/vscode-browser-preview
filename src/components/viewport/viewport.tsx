@@ -34,8 +34,6 @@ class Viewport extends React.Component<any, any> {
   static getDerivedStateFromProps(nextProps: any, prevState: any) {
     return {
       isResizable: nextProps.isDeviceEmulationEnabled,
-      // height: nextProps.height,
-      // width: nextProps.width,
       padding: nextProps.padding
     };
   }
@@ -66,6 +64,7 @@ class Viewport extends React.Component<any, any> {
     if (this.state.isResizable) {
       width = width - this.state.padding;
       height = height - this.state.padding;
+
       resizableEnableOptions = {
         top: true,
         topRight: true,
