@@ -46,11 +46,11 @@ class App extends React.Component<any, IState> {
       },
       viewportMetadata: {
         height: 500,
+        width: 500,
+        padding: 0,
         highlightInfo: null,
         isLoading: false,
-        loadingPercent: 0.0,
-        width: 500,
-        padding: 0
+        loadingPercent: 0.0
       }
     };
 
@@ -196,7 +196,6 @@ class App extends React.Component<any, IState> {
   }
 
   public stopCasting() {
-    window.alert('hallo');
     this.connection.send('Page.stopScreencast');
   }
 
