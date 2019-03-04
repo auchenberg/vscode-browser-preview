@@ -28,7 +28,7 @@ export default class Browser extends EventEmitter {
     }
 
     // Detect remote debugging port
-    this.remoteDebugPort = await getPort({ port: 9222 });
+    this.remoteDebugPort = await getPort({ port: 9222, host: '127.0.0.1' });
     chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
 
     if (!chromePath) {
