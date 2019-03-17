@@ -30,8 +30,10 @@ Make sure you have Google Chrome installed on your computer.
 - Option to set the path to the chrome exectuable via `browser-preview.chromeExecutable`
 - Option to set the type of rendering via `browser-preview.format` with the support for `jpeg` (default one) and `png` formats
 
-## How to change the default url / start page?
+## How to change the default start url / start page?
 Go to your settings, search for "browser preview" and set `browser-preview.startUrl` to your desired url.
+
+![](assets/settings.png)
 
 ## Launch and Debugging
 
