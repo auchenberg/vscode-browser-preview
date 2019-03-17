@@ -30,6 +30,9 @@ Make sure you have Google Chrome installed on your computer.
 - Option to set the path to the chrome exectuable via `browser-preview.chromeExecutable`
 - Option to set the type of rendering via `browser-preview.format` with the support for `jpeg` (default one) and `png` formats
 
+## How to change the default url / start page?
+Go to your settings, search for "browser preview" and set `browser-preview.startUrl` to your desired url.
+
 ## Launch and Debugging
 
 You can enable in-editor debugging of Browser Preview by installing [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome), and configure VS Code's debugger to either attach or launch to the browser previews by using the following configuration:
