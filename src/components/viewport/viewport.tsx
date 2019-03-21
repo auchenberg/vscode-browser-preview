@@ -17,8 +17,6 @@ class Viewport extends React.Component<any, any> {
     this.viewportRef = React.createRef();
 
     this.state = {
-      height: this.props.height,
-      width: this.props.width,
       padding: 0,
       isFixedSize: false,
       isResizable: false
@@ -48,8 +46,8 @@ class Viewport extends React.Component<any, any> {
   }
 
   public render() {
-    let width = this.state.width;
-    let height = this.state.height;
+    let width = this.props.width;
+    let height = this.props.height;
     let resizableEnableOptions = {
       top: false,
       right: false,
@@ -77,6 +75,19 @@ class Viewport extends React.Component<any, any> {
       };
     }
 
+    let renderer = (
+      <Screencast
+        height={height}
+        width={width}
+        frame={this.props.frame}
+        highlightInfo={this.props.highlightInfo}
+        isInspectEnabled={this.props.isInspectEnabled}
+        onInspectElement={this.handleInspectElement}
+        onInspectHighlightRequested={this.handleInspectHighlightRequested}
+        onInteraction={this.handleScreencastInteraction}
+      />
+    );
+
     return (
       <div className={`viewport ` + (this.state.isResizable ? `viewport-resizable` : ``)} ref={this.viewportRef}>
         <Loading percent={this.props.loadingPercent} />
@@ -99,16 +110,7 @@ class Viewport extends React.Component<any, any> {
             topLeft: 'viewport-resizer resizer-top-left'
           }}
         >
-          <Screencast
-            height={height}
-            width={width}
-            frame={this.props.frame}
-            highlightInfo={this.props.highlightInfo}
-            isInspectEnabled={this.props.isInspectEnabled}
-            onInspectElement={this.handleInspectElement}
-            onInspectHighlightRequested={this.handleInspectHighlightRequested}
-            onInteraction={this.handleScreencastInteraction}
-          />
+          {renderer}
         </Resizable>
       </div>
     );
@@ -129,8 +131,8 @@ class Viewport extends React.Component<any, any> {
     if (this.viewportRef.current) {
       const dim = this.viewportRef.current.getBoundingClientRect();
 
-      let currentWidth = this.state.width;
-      let currentHeight = this.state.height;
+      let currentWidth = this.props.width;
+      let currentHeight = this.props.height;
 
       let viewportWidth = dim.width;
       let viewportHeight = dim.height;
@@ -143,15 +145,13 @@ class Viewport extends React.Component<any, any> {
         newViewportWidth = currentWidth > viewportWidth ? viewportWidth : currentWidth;
       }
 
-      this.setState(
-        {
-          width: newViewportWidth,
-          height: newViewportHeight
-        },
-        () => {
-          this.emitViewportChanges();
-        }
-      );
+      console.log('newViewportWidth', newViewportWidth);
+      console.log('newViewportHeight', newViewportHeight);
+
+      this.emitViewportChanges({
+        width: newViewportWidth,
+        height: newViewportHeight
+      });
     }
   }
 
@@ -159,14 +159,17 @@ class Viewport extends React.Component<any, any> {
     this.calculateViewportSize();
   }
 
-  private handleResizeStop(e: any, direction: any, ref: any, d: any) {
+  private handleResizeStop(e: any, direction: any, ref: any, delta: any) {
+    console.log('delta', delta);
+
     this.setState({
-      isFixedSize: true,
-      width: this.props.width + d.width,
-      height: this.props.height + d.height
+      isFixedSize: true
     });
 
-    this.emitViewportChanges();
+    this.emitViewportChanges({
+      width: this.props.width + delta.width,
+      height: this.props.height + delta.height
+    });
   }
 
   private handleInspectElement(params: object) {
@@ -188,10 +191,10 @@ class Viewport extends React.Component<any, any> {
     });
   }
 
-  private emitViewportChanges() {
+  private emitViewportChanges(newViewport: any) {
     this.props.onViewportChanged('size', {
-      height: this.state.height,
-      width: this.state.width
+      height: newViewport.height,
+      width: newViewport.width
     });
   }
 }

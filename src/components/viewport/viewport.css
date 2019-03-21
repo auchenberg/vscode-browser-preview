@@ -9,7 +9,7 @@
 }
 
 .viewport-resizable {
-  padding: 10px;
+  padding: 50px 10px 10px 10px;
   justify-content: center;
   align-items: center;
 }

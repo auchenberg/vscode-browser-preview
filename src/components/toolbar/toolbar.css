@@ -12,7 +12,7 @@
 button {
   cursor: pointer !important;
   background: transparent;
-  transition: all 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out;
   padding: 0 5px;
   color: #626262;
   font-size: 21px;

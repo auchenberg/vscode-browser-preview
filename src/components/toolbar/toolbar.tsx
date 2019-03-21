@@ -2,6 +2,7 @@ import * as React from 'react';
 import './toolbar.css';
 
 import UrlInput from '../url-input/url-input';
+import DeviceSettings from '../device-settings/device-settings';
 
 const iconBackwardStyle = {
   backgroundImage: `url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNNDI3IDIzNC42MjVIMTY3LjI5NmwxMTkuNzAyLTExOS43MDJMMjU2IDg1IDg1IDI1NmwxNzEgMTcxIDI5LjkyMi0yOS45MjQtMTE4LjYyNi0xMTkuNzAxSDQyN3YtNDIuNzV6Ii8+PC9zdmc+)`
@@ -28,13 +29,20 @@ const iconDeviceStyle = {
 interface IToolbarProps {
   canGoBack: boolean;
   canGoForward: boolean;
+  height: number;
+  width: number;
   isInspectEnabled: boolean;
   isDeviceEmulationEnabled: boolean;
   url: string;
   onActionInvoked: (action: string, data?: object) => Promise<any>;
 }
 
-class Toolbar extends React.Component<IToolbarProps> {
+interface IToolbarState {
+  height: number;
+  width: number;
+}
+
+class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   constructor(props: any) {
     super(props);
 
@@ -44,6 +52,8 @@ class Toolbar extends React.Component<IToolbarProps> {
     this.handleUrlChange = this.handleUrlChange.bind(this);
     this.handleInspect = this.handleInspect.bind(this);
     this.handleEmulateDevice = this.handleEmulateDevice.bind(this);
+    this.handleDeviceChange = this.handleDeviceChange.bind(this);
+    this.handleViewportSizeChange = this.handleViewportSizeChange.bind(this);
   }
 
   public render() {
@@ -62,7 +72,7 @@ class Toolbar extends React.Component<IToolbarProps> {
             style={iconDeviceStyle}
             onClick={this.handleEmulateDevice}
           >
-            Device toolbar
+            Emulate device
           </button>
           <button
             className="backward"
@@ -89,6 +99,13 @@ class Toolbar extends React.Component<IToolbarProps> {
             onActionInvoked={this.props.onActionInvoked}
           />
         </div>
+        <DeviceSettings
+          height={this.props.height}
+          width={this.props.width}
+          isVisible={this.props.isDeviceEmulationEnabled}
+          onDeviceChange={this.handleDeviceChange}
+          onViewportSizeChange={this.handleViewportSizeChange}
+        />
       </div>
     );
   }
@@ -115,6 +132,19 @@ class Toolbar extends React.Component<IToolbarProps> {
 
   private handleEmulateDevice() {
     this.props.onActionInvoked('emulateDevice', {});
+  }
+
+  private handleViewportSizeChange(viewportSize: any) {
+    this.props.onActionInvoked('viewportSizeChange', {
+      height: viewportSize.height,
+      width: viewportSize.width
+    });
+  }
+
+  private handleDeviceChange(device: any) {
+    this.props.onActionInvoked('viewportDeviceChange', {
+      device: device
+    });
   }
 }
 

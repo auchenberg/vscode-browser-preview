@@ -175,6 +175,8 @@ class App extends React.Component<any, IState> {
           canGoForward={this.state.history.canGoForward}
           isInspectEnabled={this.state.isInspectEnabled}
           isDeviceEmulationEnabled={this.state.isDeviceEmulationEnabled}
+          width={this.state.viewportMetadata.width}
+          height={this.state.viewportMetadata.height}
         />
         <Viewport
           showLoading={this.state.viewportMetadata.isLoading}
@@ -186,6 +188,7 @@ class App extends React.Component<any, IState> {
           highlightInfo={this.state.viewportMetadata.highlightInfo}
           padding={this.state.viewportMetadata.padding}
           frame={this.state.frame}
+          url={this.state.url}
           onViewportChanged={this.onViewportChanged}
           ref={(c) => {
             this.viewport = c;
@@ -426,6 +429,22 @@ class App extends React.Component<any, IState> {
         if (data && (data as any).value) {
           return this.connection.send('Clipboard.writeText', data);
         }
+        break;
+
+      case 'viewportSizeChange':
+        this.onViewportChanged('size', {
+          width: data.width,
+          height: data.height
+        });
+        break;
+
+      case 'viewportDeviceChange':
+        let viewport = data.device.viewport;
+
+        this.onViewportChanged('size', {
+          width: viewport.width,
+          height: viewport.height
+        });
         break;
     }
     // return an empty promise

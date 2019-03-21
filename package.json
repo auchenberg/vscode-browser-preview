@@ -194,6 +194,7 @@
     }
   },
   "dependencies": {
+    "browser-viewport-device-descriptions": "^1.1.0",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",
