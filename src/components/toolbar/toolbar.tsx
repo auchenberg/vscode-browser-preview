@@ -29,20 +29,16 @@ const iconDeviceStyle = {
 interface IToolbarProps {
   canGoBack: boolean;
   canGoForward: boolean;
-  height: number;
-  width: number;
   isInspectEnabled: boolean;
   isDeviceEmulationEnabled: boolean;
   url: string;
+  viewport: any;
   onActionInvoked: (action: string, data?: object) => Promise<any>;
 }
 
-interface IToolbarState {
-  height: number;
-  width: number;
-}
+class Toolbar extends React.Component<IToolbarProps, any> {
+  private viewportMetadata: any;
 
-class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   constructor(props: any) {
     super(props);
 
@@ -57,16 +53,18 @@ class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
   }
 
   public render() {
+    this.viewportMetadata = this.props.viewport;
+
     return (
       <div className="toolbar">
         <div className="inner">
-          {/* <button
+          <button
             className={`inspect ` + (this.props.isInspectEnabled ? `active` : ``)}
             style={iconInspectStyle}
             onClick={this.handleInspect}
           >
             Inspect
-          </button> */}
+          </button>
           <button
             className={`device ` + (this.props.isDeviceEmulationEnabled ? `active` : ``)}
             style={iconDeviceStyle}
@@ -100,8 +98,7 @@ class Toolbar extends React.Component<IToolbarProps, IToolbarState> {
           />
         </div>
         <DeviceSettings
-          height={this.props.height}
-          width={this.props.width}
+          viewportMetadata={this.viewportMetadata}
           isVisible={this.props.isDeviceEmulationEnabled}
           onDeviceChange={this.handleDeviceChange}
           onViewportSizeChange={this.handleViewportSizeChange}

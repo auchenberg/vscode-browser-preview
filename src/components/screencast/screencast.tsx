@@ -242,6 +242,11 @@ class Screencast extends React.Component<any, any> {
         position: position
       });
     } else {
+      const position = this.convertIntoScreenSpace(event, this.state);
+      this.props.onInspectHighlightRequested({
+        position: position
+      });
+
       this.dispatchMouseEvent(event.nativeEvent);
     }
 

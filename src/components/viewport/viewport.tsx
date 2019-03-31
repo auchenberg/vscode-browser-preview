@@ -10,16 +10,18 @@ import * as _ from 'lodash';
 
 class Viewport extends React.Component<any, any> {
   private viewportRef: React.RefObject<HTMLDivElement>;
+  private viewportMetadata: any;
   private debouncedResizeHandler: any;
+  private viewportPadding: any;
 
   constructor(props: any) {
     super(props);
     this.viewportRef = React.createRef();
-
-    this.state = {
-      padding: 0,
-      isFixedSize: false,
-      isResizable: false
+    this.viewportPadding = {
+      top: 70,
+      left: 30,
+      right: 30,
+      bottom: 30
     };
 
     this.debouncedResizeHandler = _.debounce(this.handleViewportResize.bind(this), 50);
@@ -27,13 +29,6 @@ class Viewport extends React.Component<any, any> {
     this.handleInspectHighlightRequested = this.handleInspectHighlightRequested.bind(this);
     this.handleScreencastInteraction = this.handleScreencastInteraction.bind(this);
     this.handleResizeStop = this.handleResizeStop.bind(this);
-  }
-
-  static getDerivedStateFromProps(nextProps: any, prevState: any) {
-    return {
-      isResizable: nextProps.isDeviceEmulationEnabled,
-      padding: nextProps.padding
-    };
   }
 
   public componentDidMount() {
@@ -46,8 +41,11 @@ class Viewport extends React.Component<any, any> {
   }
 
   public render() {
-    let width = this.props.width;
-    let height = this.props.height;
+    this.viewportMetadata = this.props.viewport;
+
+    let width = this.viewportMetadata.width * this.viewportMetadata.screenZoom;
+    let height = this.viewportMetadata.height * this.viewportMetadata.screenZoom;
+
     let resizableEnableOptions = {
       top: false,
       right: false,
@@ -59,10 +57,7 @@ class Viewport extends React.Component<any, any> {
       topLeft: false
     };
 
-    if (this.state.isResizable) {
-      width = width - this.state.padding;
-      height = height - this.state.padding;
-
+    if (this.viewportMetadata.isResizable) {
       resizableEnableOptions = {
         top: true,
         topRight: true,
@@ -80,7 +75,7 @@ class Viewport extends React.Component<any, any> {
         height={height}
         width={width}
         frame={this.props.frame}
-        highlightInfo={this.props.highlightInfo}
+        highlightInfo={this.viewportMetadata.highlightInfo}
         isInspectEnabled={this.props.isInspectEnabled}
         onInspectElement={this.handleInspectElement}
         onInspectHighlightRequested={this.handleInspectHighlightRequested}
@@ -89,9 +84,12 @@ class Viewport extends React.Component<any, any> {
     );
 
     return (
-      <div className={`viewport ` + (this.state.isResizable ? `viewport-resizable` : ``)} ref={this.viewportRef}>
-        <Loading percent={this.props.loadingPercent} />
-        <ViewportInfo height={height} width={width} />
+      <div
+        className={`viewport ` + (this.props.isDeviceEmulationEnabled ? `viewport-resizable` : ``)}
+        ref={this.viewportRef}
+      >
+        <Loading percent={this.viewportMetadata.loadingPercent} />
+        <ViewportInfo height={this.viewportMetadata.height} width={this.viewportMetadata.width} />
         <Resizable
           size={{
             width: width,
@@ -116,59 +114,79 @@ class Viewport extends React.Component<any, any> {
     );
   }
 
-  public resetViewportSize() {
-    this.setState(
-      {
-        isFixedSize: false
-      },
-      () => {
-        this.calculateViewportSize();
-      }
-    );
+  public calculateViewport() {
+    console.log('viewport.calculateViewport');
+    this.calculateViewportSize();
+    this.calculateViewportZoom();
+  }
+
+  private calculateViewportZoom() {
+    let screenZoom;
+
+    if (this.viewportMetadata.isFixedZoom) {
+      return;
+    }
+
+    if (!this.viewportMetadata.isFixedSize) {
+      screenZoom = 1;
+    } else {
+      const screenViewportDimensions = {
+        height: window.innerHeight - 38, // TODO: Remove hardcoded toolbar height
+        width: window.innerWidth
+      };
+
+      screenZoom = Math.min(
+        screenViewportDimensions.width / this.viewportMetadata.width,
+        screenViewportDimensions.height / this.viewportMetadata.height
+      );
+    }
+
+    if (screenZoom === this.viewportMetadata.screenZoom) {
+      return;
+    }
+
+    this.emitViewportChanges({
+      screenZoom: screenZoom
+    });
   }
 
   private calculateViewportSize() {
+    if (this.viewportMetadata.isFixedSize) {
+      return;
+    }
+
     if (this.viewportRef.current) {
       const dim = this.viewportRef.current.getBoundingClientRect();
-
-      let currentWidth = this.props.width;
-      let currentHeight = this.props.height;
 
       let viewportWidth = dim.width;
       let viewportHeight = dim.height;
 
-      let newViewportWidth = viewportWidth;
-      let newViewportHeight = viewportHeight;
-
-      if (this.state.isFixedSize) {
-        newViewportHeight = currentHeight > viewportHeight ? viewportHeight : currentHeight;
-        newViewportWidth = currentWidth > viewportWidth ? viewportWidth : currentWidth;
+      if (this.props.isDeviceEmulationEnabled) {
+        // Add padding to enable space for resizers
+        viewportWidth = viewportWidth - this.viewportPadding.left - this.viewportPadding.right;
+        viewportHeight = viewportHeight - this.viewportPadding.bottom - this.viewportPadding.top;
       }
 
-      console.log('newViewportWidth', newViewportWidth);
-      console.log('newViewportHeight', newViewportHeight);
+      if (viewportWidth === this.viewportMetadata.width && viewportHeight === this.viewportMetadata.height) {
+        return;
+      }
 
       this.emitViewportChanges({
-        width: newViewportWidth,
-        height: newViewportHeight
+        width: viewportWidth,
+        height: viewportHeight
       });
     }
   }
 
   private handleViewportResize() {
-    this.calculateViewportSize();
+    this.calculateViewport();
   }
 
   private handleResizeStop(e: any, direction: any, ref: any, delta: any) {
-    console.log('delta', delta);
-
-    this.setState({
-      isFixedSize: true
-    });
-
     this.emitViewportChanges({
-      width: this.props.width + delta.width,
-      height: this.props.height + delta.height
+      width: this.viewportMetadata.width + delta.width,
+      height: this.viewportMetadata.height + delta.height,
+      isFixedSize: true
     });
   }
 
@@ -192,10 +210,7 @@ class Viewport extends React.Component<any, any> {
   }
 
   private emitViewportChanges(newViewport: any) {
-    this.props.onViewportChanged('size', {
-      height: newViewport.height,
-      width: newViewport.width
-    });
+    this.props.onViewportChanged('size', newViewport);
   }
 }
 

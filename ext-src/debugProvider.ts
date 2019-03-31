@@ -1,0 +1,86 @@
+import { env } from 'vscode';
+import * as path from 'path';
+import * as vscode from 'vscode';
+
+export default class ContentProvider {
+  private windowManager: any;
+
+  constructor(windowManager: any) {
+    this.windowManager = windowManager;
+
+    vscode.debug.onDidTerminateDebugSession((e: vscode.DebugSession) => {
+      if (e.name === `Browser Preview: Launch` && e.configuration.urlFilter) {
+        // TODO: Improve this with some unique ID per browser window instead of url, to avoid closing multiple instances
+        this.windowManager.disposeByUrl(e.configuration.urlFilter);
+      }
+    });
+  }
+
+  getProvider(): vscode.DebugConfigurationProvider {
+    let debugPort = this.windowManager.getDebugPort();
+
+    return {
+      provideDebugConfigurations(
+        folder: vscode.WorkspaceFolder | undefined,
+        token?: vscode.CancellationToken
+      ): vscode.ProviderResult<vscode.DebugConfiguration[]> {
+        return Promise.resolve([
+          {
+            type: 'browser-preview',
+            name: 'Browser Preview: Attach',
+            request: 'attach'
+          },
+          {
+            type: `browser-preview`,
+            request: `launch`,
+            name: `Browser Preview: Launch`,
+            url: `http://localhost:3000`
+          }
+        ]);
+      },
+      resolveDebugConfiguration(
+        folder: vscode.WorkspaceFolder | undefined,
+        config: vscode.DebugConfiguration,
+        token?: vscode.CancellationToken
+      ): vscode.ProviderResult<vscode.DebugConfiguration> {
+        let debugConfig = {
+          name: `Browser Preview`,
+          type: `chrome`,
+          request: 'attach',
+          webRoot: config.webRoot,
+          pathMapping: config.pathMapping,
+          trace: config.trace,
+          sourceMapPathOverrides: config.sourceMapPathOverrides,
+          urlFilter: '',
+          url: '',
+          port: 9222
+        };
+
+        if (config && config.type === 'browser-preview') {
+          if (config.request && config.request === `attach`) {
+            debugConfig.name = `Browser Preview: Attach`;
+            debugConfig.port = debugPort;
+
+            vscode.debug.startDebugging(folder, debugConfig);
+          } else if (config.request && config.request === `launch`) {
+            debugConfig.name = `Browser Preview: Launch`;
+            debugConfig.urlFilter = config.url;
+
+            // Launch new preview tab, set url filter, then attach
+            var launch = vscode.commands.executeCommand(`browser-preview.openPreview`, config.url);
+
+            launch.then(() => {
+              setTimeout(() => {
+                debugConfig.port = debugPort;
+                vscode.debug.startDebugging(folder, debugConfig);
+              }, 1000);
+            });
+          }
+        } else {
+          vscode.window.showErrorMessage('No supported launch config was found.');
+        }
+        return;
+      }
+    };
+  }
+}

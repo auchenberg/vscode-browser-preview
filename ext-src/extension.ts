@@ -6,93 +6,25 @@ import BrowserPage from './browserPage';
 import TargetTreeProvider from './targetTreeProvider';
 import * as EventEmitter from 'eventemitter2';
 import { ExtensionConfiguration } from './extensionConfiguration';
+import ContentProvider from './contentProvider';
+import DebugProvider from './debugProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   const windowManager = new BrowserViewWindowManager(context.extensionPath);
+  const debugProvider = new DebugProvider(windowManager);
 
   windowManager.on('windowOpenRequested', (params) => {
     windowManager.create(params.url);
   });
 
   vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());
+  vscode.debug.registerDebugConfigurationProvider('browser-preview', debugProvider.getProvider());
 
   context.subscriptions.push(
     vscode.commands.registerCommand('browser-preview.openPreview', (url?) => {
       windowManager.create(url);
     })
   );
-
-  vscode.debug.registerDebugConfigurationProvider('browser-preview', {
-    provideDebugConfigurations(
-      folder: vscode.WorkspaceFolder | undefined,
-      token?: vscode.CancellationToken
-    ): vscode.ProviderResult<vscode.DebugConfiguration[]> {
-      return Promise.resolve([
-        {
-          type: 'browser-preview',
-          name: 'Browser Preview: Attach',
-          request: 'attach'
-        },
-        {
-          type: `browser-preview`,
-          request: `launch`,
-          name: `Browser Preview: Launch`,
-          url: `http://localhost:3000`
-        }
-      ]);
-    },
-
-    resolveDebugConfiguration(
-      folder: vscode.WorkspaceFolder | undefined,
-      config: vscode.DebugConfiguration,
-      token?: vscode.CancellationToken
-    ): vscode.ProviderResult<vscode.DebugConfiguration> {
-      let debugConfig = {
-        name: `Browser Preview`,
-        type: `chrome`,
-        request: 'attach',
-        webRoot: config.webRoot,
-        pathMapping: config.pathMapping,
-        trace: config.trace,
-        sourceMapPathOverrides: config.sourceMapPathOverrides,
-        urlFilter: '',
-        url: '',
-        port: 9222
-      };
-
-      if (config && config.type === 'browser-preview') {
-        if (config.request && config.request === `attach`) {
-          debugConfig.name = `Browser Preview: Attach`;
-          debugConfig.port = windowManager.getDebugPort();
-
-          vscode.debug.startDebugging(folder, debugConfig);
-        } else if (config.request && config.request === `launch`) {
-          debugConfig.name = `Browser Preview: Launch`;
-          debugConfig.urlFilter = config.url;
-
-          // Launch new preview tab, set url filter, then attach
-          var launch = vscode.commands.executeCommand(`browser-preview.openPreview`, config.url);
-
-          launch.then(() => {
-            setTimeout(() => {
-              debugConfig.port = windowManager.getDebugPort();
-              vscode.debug.startDebugging(folder, debugConfig);
-            }, 1000);
-          });
-        }
-      } else {
-        vscode.window.showErrorMessage('No supported launch config was found.');
-      }
-      return;
-    }
-  });
-
-  vscode.debug.onDidTerminateDebugSession((e: vscode.DebugSession) => {
-    if (e.name === `Browser Preview: Launch` && e.configuration.urlFilter) {
-      // TODO: Improve this with some unique ID per browser window instead of url, to avoid closing multiple instances
-      windowManager.disposeByUrl(e.configuration.urlFilter);
-    }
-  });
 }
 
 class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
@@ -179,6 +111,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
   private _panel: vscode.WebviewPanel | null;
   private _disposables: vscode.Disposable[] = [];
+  private contentProvider: ContentProvider;
 
   private browserPage: BrowserPage | null;
   private browser: Browser;
@@ -190,6 +123,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     this._panel = null;
     this.browserPage = null;
     this.browser = browser;
+    this.contentProvider = new ContentProvider(this.config);
   }
 
   public async launch(startUrl?: string) {
@@ -214,7 +148,7 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       localResourceRoots: [vscode.Uri.file(path.join(this.config.extensionPath, 'build'))]
     });
 
-    this._panel.webview.html = this._getHtmlForWebview();
+    this._panel.webview.html = this.contentProvider.getContent();
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
     this._panel.webview.onDidReceiveMessage(
@@ -330,55 +264,5 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
     this.emit('disposed');
     this.removeAllListeners();
-  }
-
-  private _getHtmlForWebview() {
-    const manifest = require(path.join(this.config.extensionPath, 'build', 'asset-manifest.json'));
-    const mainScript = manifest['main.js'];
-    const mainStyle = manifest['main.css'];
-    const runtimeScript = manifest['runtime~main.js'];
-
-    // finding potential list of js chunk files
-    const chunkScriptsUri = [];
-    for (let key in manifest) {
-      if (key.endsWith('.chunk.js') && manifest.hasOwnProperty(key)) {
-        // finding their paths on the disk
-        let chunkScriptUri = vscode.Uri.file(path.join(this.config.extensionPath, 'build', manifest[key])).with({
-          scheme: 'vscode-resource'
-        });
-        // push the chunk Uri to the list of chunks
-        chunkScriptsUri.push(chunkScriptUri);
-      }
-    }
-
-    const runtimescriptPathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', runtimeScript));
-    const runtimescriptUri = runtimescriptPathOnDisk.with({
-      scheme: 'vscode-resource'
-    });
-    const mainScriptPathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', mainScript));
-    const mainScriptUri = mainScriptPathOnDisk.with({
-      scheme: 'vscode-resource'
-    });
-
-    const stylePathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', mainStyle));
-    const styleUri = stylePathOnDisk.with({ scheme: 'vscode-resource' });
-
-    return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="utf-8">
-				<link rel="stylesheet" type="text/css" href="${styleUri}">
-				<base href="${vscode.Uri.file(path.join(this.config.extensionPath, 'build')).with({
-          scheme: 'vscode-resource'
-        })}/">
-			</head>
-
-			<body>
-				<div id="root"></div>
-				<script src="${runtimescriptUri}"></script>
-				${chunkScriptsUri.map((item) => `<script src="${item}"></script>`)}
-				<script src="${mainScriptUri}"></script>
-			</body>
-			</html>`;
   }
 }

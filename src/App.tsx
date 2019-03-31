@@ -14,12 +14,17 @@ interface IState {
   isInspectEnabled: boolean;
   isDeviceEmulationEnabled: boolean;
   viewportMetadata: {
-    height: number;
-    width: number;
+    height: number | null;
+    width: number | null;
+    emulatedDeviceId: string | null;
     isLoading: boolean;
+    isFixedSize: boolean;
+    isFixedZoom: boolean;
+    isResizable: boolean;
     loadingPercent: number;
     highlightInfo: object | null;
-    padding: number;
+    deviceSizeRatio: number;
+    screenZoom: number;
   };
   history: {
     canGoBack: boolean;
@@ -45,12 +50,17 @@ class App extends React.Component<any, IState> {
         canGoForward: false
       },
       viewportMetadata: {
-        height: 500,
-        width: 500,
-        padding: 0,
+        deviceSizeRatio: 1,
+        height: null,
+        width: null,
         highlightInfo: null,
+        emulatedDeviceId: 'Responsive',
         isLoading: false,
-        loadingPercent: 0.0
+        isFixedSize: false,
+        isFixedZoom: false,
+        isResizable: true,
+        loadingPercent: 0.0,
+        screenZoom: 1
       }
     };
 
@@ -155,6 +165,8 @@ class App extends React.Component<any, IState> {
 
     // Initialize
     this.connection.send('Page.enable');
+    // this.connection.send('DOM.enable');
+    // this.connection.send('CSS.enable');
 
     this.requestNavigationHistory();
   }
@@ -170,23 +182,17 @@ class App extends React.Component<any, IState> {
       <div className="App">
         <Toolbar
           url={this.state.url}
+          viewport={this.state.viewportMetadata}
           onActionInvoked={this.onToolbarActionInvoked}
           canGoBack={this.state.history.canGoBack}
           canGoForward={this.state.history.canGoForward}
           isInspectEnabled={this.state.isInspectEnabled}
           isDeviceEmulationEnabled={this.state.isDeviceEmulationEnabled}
-          width={this.state.viewportMetadata.width}
-          height={this.state.viewportMetadata.height}
         />
         <Viewport
-          showLoading={this.state.viewportMetadata.isLoading}
-          width={this.state.viewportMetadata.width}
-          height={this.state.viewportMetadata.height}
+          viewport={this.state.viewportMetadata}
           isInspectEnabled={this.state.isInspectEnabled}
           isDeviceEmulationEnabled={this.state.isDeviceEmulationEnabled}
-          loadingPercent={this.state.viewportMetadata.loadingPercent}
-          highlightInfo={this.state.viewportMetadata.highlightInfo}
-          padding={this.state.viewportMetadata.padding}
           frame={this.state.frame}
           url={this.state.url}
           onViewportChanged={this.onViewportChanged}
@@ -203,12 +209,22 @@ class App extends React.Component<any, IState> {
   }
 
   public startCasting() {
-    this.connection.send('Page.startScreencast', {
+    var params = {
       quality: 80,
       format: this.state.format,
-      maxWidth: Math.floor(this.state.viewportMetadata.width * window.devicePixelRatio),
-      maxHeight: Math.floor(this.state.viewportMetadata.height * window.devicePixelRatio)
-    });
+      maxWidth: 2000,
+      maxHeight: 2000
+    };
+
+    if (this.state.viewportMetadata.width) {
+      params.maxWidth = Math.floor(this.state.viewportMetadata.width * window.devicePixelRatio);
+    }
+
+    if (this.state.viewportMetadata.height) {
+      params.maxHeight = Math.floor(this.state.viewportMetadata.height * window.devicePixelRatio);
+    }
+
+    this.connection.send('Page.startScreencast', params);
   }
 
   private async requestNavigationHistory() {
@@ -253,117 +269,152 @@ class App extends React.Component<any, IState> {
           y: data.params.position.y
         });
 
+        console.log('highlightNodeInfo', highlightNodeInfo);
+
         if (highlightNodeInfo) {
-          let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
-            backendNodeId: highlightNodeInfo.backendNodeId
+          // let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
+          //   backendNodeId: highlightNodeInfo.backendNodeId
+          // });
+
+          let nodeIdsReq: any = await this.connection.send('DOM.pushNodesByBackendIdsToFrontend', {
+            backendNodeIds: [highlightNodeInfo.backendNodeId]
           });
 
-          if (highlightBoxModel && highlightBoxModel.model) {
-            this.setState({
-              ...this.state,
-              viewportMetadata: {
-                ...this.state.viewportMetadata,
-                highlightInfo: highlightBoxModel.model
-              }
-            });
+          let nodeId = nodeIdsReq.nodeIds[0];
+          let computedStyleReq: any = await this.connection.send('CSS.getComputedStyleForNode', {
+            nodeId: nodeId
+          });
+
+          let cursorCSS = computedStyleReq.computedStyle.find((c: any) => c.name == 'cursor');
+
+          if (cursorCSS) {
+            console.log('cursorCSS', cursorCSS.value);
           }
+
+          // if (highlightBoxModel && highlightBoxModel.model) {
+          //   this.setState({
+          //     ...this.state,
+          //     viewportMetadata: {
+          //       ...this.state.viewportMetadata,
+          //       highlightInfo: highlightBoxModel.model
+          //     }
+          //   });
+          // }
         }
         break;
       case 'inspectElement':
-        const nodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
-          x: data.params.position.x,
-          y: data.params.position.y
-        });
-
-        const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
-          nodeId: nodeInfo.nodeId,
-          backendNodeId: nodeInfo.backendNodeId
-        });
-
-        // Trigger CDP request to enable DOM explorer
-        // TODO: No sure this works.
-        this.connection.send('Overlay.inspectNodeRequested', {
-          backendNodeId: nodeInfo.backendNodeId
-        });
-
-        if (nodeDetails.object) {
-          let objectId = nodeDetails.object.objectId;
-          const nodeProperties: any = await this.connection.send('Runtime.getProperties', {
-            objectId: objectId,
-            generatePreview: true
-          });
-
-          var props = nodeProperties.result as Array<object>;
-          var reactInternalRef: any = props.find((i: any) => i.name.startsWith('__reactInternalInstance'));
-
-          if (reactInternalRef) {
-            let reactInternalObjectId = reactInternalRef.value.objectId;
-            const reactInternalObject: any = await this.connection.send('Runtime.getProperties', {
-              objectId: reactInternalObjectId,
-              generatePreview: true
-            });
-
-            if (reactInternalObject) {
-              var reactObjectValues = reactInternalObject.result as Array<object>;
-              var reactDebugSourceRef: any = reactObjectValues.find((i: any) => i.name == '_debugSource');
-              let reactDebugSourceObjectId = reactDebugSourceRef.value.objectId;
-
-              if (reactDebugSourceObjectId) {
-                const reactDebugSourceRef: any = await this.connection.send('Runtime.getProperties', {
-                  objectId: reactDebugSourceObjectId,
-                  generatePreview: true
-                });
-
-                if (reactDebugSourceRef) {
-                  var reactDebugSourceProps = reactDebugSourceRef.result as Array<object>;
-
-                  var fileNameRef: any = reactDebugSourceProps.find((i: any) => i.name == 'fileName');
-                  var lineNumberRef: any = reactDebugSourceProps.find((i: any) => i.name == 'lineNumber');
-                  var fileNameValue = fileNameRef.value.value;
-                  var lineNumberValue = lineNumberRef.value.value;
-
-                  this.connection.send('extension.openFile', {
-                    uri: fileNameValue,
-                    lineNumber: lineNumberValue
-                  });
-                }
-              }
-            }
-          }
-        }
+        await this.handleInspectElementRequest(data);
         break;
       case 'interaction':
         this.connection.send(data.action, data.params);
         break;
 
       case 'size':
-        let height = Math.floor(data.height);
-        let width = Math.floor(data.width);
+        console.log('app.onViewportChanged.size', data);
+        let newViewport = {} as any;
+        if (data.height !== undefined && data.width !== undefined) {
+          let height = Math.floor(data.height);
+          let width = Math.floor(data.width);
 
-        // TODO: This means the viewport sent to the browser will be different than local state
-        // We should introduce notion of "deviceViewport" and "renderedViewport" or something.
-        if (this.state.isDeviceEmulationEnabled) {
-          height = height - this.state.viewportMetadata.padding;
-          width = width - this.state.viewportMetadata.padding;
+          this.connection.send('Page.setDeviceMetricsOverride', {
+            deviceScaleFactor: 2,
+            mobile: false,
+            height: height,
+            width: width
+          });
+
+          newViewport.height = height as number;
+          newViewport.width = width as number;
         }
 
-        this.connection.send('Page.setDeviceMetricsOverride', {
-          deviceScaleFactor: 2,
-          mobile: false,
-          height: height,
-          width: width
-        });
+        if (data.isResizable !== undefined) {
+          newViewport.isResizable = data.isResizable;
+        }
 
-        this.setState({
-          ...this.state,
-          viewportMetadata: {
-            ...this.state.viewportMetadata,
-            height: data.height as number,
-            width: data.width as number
+        if (data.isFixedSize !== undefined) {
+          newViewport.isFixedSize = data.isFixedSize;
+        }
+
+        if (data.isFixedZoom !== undefined) {
+          newViewport.isFixedZoom = data.isFixedZoom;
+        }
+
+        if (data.emulatedDeviceId !== undefined) {
+          newViewport.emulatedDeviceId = data.emulatedDeviceId;
+        }
+
+        if (data.screenZoom !== undefined) {
+          newViewport.screenZoom = data.screenZoom;
+        }
+
+        this.setState(
+          {
+            ...this.state,
+            viewportMetadata: {
+              ...this.state.viewportMetadata,
+              ...newViewport
+            }
+          },
+          () => {
+            this.viewport.calculateViewport();
           }
-        });
+        );
 
         break;
+    }
+  }
+
+  private async handleInspectElementRequest(data: any) {
+    const nodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
+      x: data.params.position.x,
+      y: data.params.position.y
+    });
+    const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
+      nodeId: nodeInfo.nodeId,
+      backendNodeId: nodeInfo.backendNodeId
+    });
+    // Trigger CDP request to enable DOM explorer
+    // TODO: No sure this works.
+    this.connection.send('Overlay.inspectNodeRequested', {
+      backendNodeId: nodeInfo.backendNodeId
+    });
+    if (nodeDetails.object) {
+      let objectId = nodeDetails.object.objectId;
+      const nodeProperties: any = await this.connection.send('Runtime.getProperties', {
+        objectId: objectId,
+        generatePreview: true
+      });
+      var props = nodeProperties.result as Array<object>;
+      var reactInternalRef: any = props.find((i: any) => i.name.startsWith('__reactInternalInstance'));
+      if (reactInternalRef) {
+        let reactInternalObjectId = reactInternalRef.value.objectId;
+        const reactInternalObject: any = await this.connection.send('Runtime.getProperties', {
+          objectId: reactInternalObjectId,
+          generatePreview: true
+        });
+        if (reactInternalObject) {
+          var reactObjectValues = reactInternalObject.result as Array<object>;
+          var reactDebugSourceRef: any = reactObjectValues.find((i: any) => i.name == '_debugSource');
+          let reactDebugSourceObjectId = reactDebugSourceRef.value.objectId;
+          if (reactDebugSourceObjectId) {
+            const reactDebugSourceRef: any = await this.connection.send('Runtime.getProperties', {
+              objectId: reactDebugSourceObjectId,
+              generatePreview: true
+            });
+            if (reactDebugSourceRef) {
+              var reactDebugSourceProps = reactDebugSourceRef.result as Array<object>;
+              var fileNameRef: any = reactDebugSourceProps.find((i: any) => i.name == 'fileName');
+              var lineNumberRef: any = reactDebugSourceProps.find((i: any) => i.name == 'lineNumber');
+              var fileNameValue = fileNameRef.value.value;
+              var lineNumberValue = lineNumberRef.value.value;
+              this.connection.send('extension.openFile', {
+                uri: fileNameValue,
+                lineNumber: lineNumberValue
+              });
+            }
+          }
+        }
+      }
     }
   }
 
@@ -379,76 +430,127 @@ class App extends React.Component<any, IState> {
         this.connection.send('Page.reload');
         break;
       case 'inspect':
-        if (this.state.isInspectEnabled) {
-          this.setState({
-            isInspectEnabled: false,
-            viewportMetadata: {
-              ...this.state.viewportMetadata,
-              highlightInfo: null
-            }
-          });
-        } else {
-          this.setState({
-            isInspectEnabled: true
-          });
-        }
+        this.handleToggleInspect();
         break;
       case 'emulateDevice':
-        if (this.state.isDeviceEmulationEnabled) {
-          this.viewport.resetViewportSize();
-          this.setState({
-            isDeviceEmulationEnabled: false,
-            viewportMetadata: {
-              ...this.state.viewportMetadata,
-              padding: 0
-            }
-          });
-        } else {
-          this.setState({
-            isDeviceEmulationEnabled: true,
-            viewportMetadata: {
-              ...this.state.viewportMetadata,
-              padding: 40
-            }
-          });
-        }
+        this.handleToggleDeviceEmulation();
         break;
       case 'urlChange':
-        this.connection.send('Page.navigate', {
-          url: data.url
-        });
-        this.setState({
-          ...this.state,
-          url: data.url
-        });
+        this.handleUrlChange(data);
         break;
       case 'readClipboard':
         return this.connection.send('Clipboard.readText');
       case 'writeClipboard':
-        // overwrite the clipboard only if there is a valid value
-        if (data && (data as any).value) {
-          return this.connection.send('Clipboard.writeText', data);
-        }
+        this.handleClipboardWrite(data);
         break;
-
       case 'viewportSizeChange':
-        this.onViewportChanged('size', {
-          width: data.width,
-          height: data.height
-        });
+        this.handleViewportSizeChange(data);
         break;
-
       case 'viewportDeviceChange':
-        let viewport = data.device.viewport;
-
-        this.onViewportChanged('size', {
-          width: viewport.width,
-          height: viewport.height
-        });
+        this.handleViewportDeviceChange(data);
         break;
     }
     // return an empty promise
     return Promise.resolve();
+  }
+
+  private handleToggleInspect() {
+    if (this.state.isInspectEnabled) {
+      this.setState({
+        isInspectEnabled: false,
+        viewportMetadata: {
+          ...this.state.viewportMetadata,
+          highlightInfo: null
+        }
+      });
+    } else {
+      this.setState({
+        isInspectEnabled: true
+      });
+    }
+  }
+
+  private handleUrlChange(data: any) {
+    this.connection.send('Page.navigate', {
+      url: data.url
+    });
+    this.setState({
+      ...this.state,
+      url: data.url
+    });
+  }
+
+  private handleViewportSizeChange(data: any) {
+    this.onViewportChanged('size', {
+      width: data.width,
+      height: data.height
+    });
+  }
+
+  private handleViewportDeviceChange(data: any) {
+    let isResizable = data.device.name === 'Responsive';
+    let isFixedSize = data.device.name !== 'Responsive';
+    let isFixedZoom = data.device.name === 'Responsive';
+    let width = data.device.viewport ? data.device.viewport.width : undefined;
+    let height = data.device.viewport ? data.device.viewport.height : undefined;
+    let screenZoom = 1;
+
+    this.onViewportChanged('size', {
+      emulatedDeviceId: data.device.name,
+      height: height,
+      isResizable: isResizable,
+      isFixedSize: isFixedSize,
+      isFixedZoom: isFixedZoom,
+      screenZoom: screenZoom,
+      width: width
+    });
+  }
+
+  private handleToggleDeviceEmulation() {
+    if (this.state.isDeviceEmulationEnabled) {
+      this.disableViewportDeviceEmulation();
+    } else {
+      this.enableViewportDeviceEmulation();
+    }
+  }
+
+  private disableViewportDeviceEmulation() {
+    console.log('app.disableViewportDeviceEmulation');
+    this.handleViewportDeviceChange({
+      device: {
+        name: 'Responsive',
+        viewport: {
+          width: this.state.viewportMetadata.width,
+          height: this.state.viewportMetadata.height
+        }
+      }
+    });
+    this.setState({
+      isDeviceEmulationEnabled: false
+    });
+  }
+
+  private enableViewportDeviceEmulation() {
+    console.log('app.enableViewportDeviceEmulation');
+    this.handleViewportDeviceChange({
+      device: {
+        name: 'Responsive',
+        viewport: {
+          width: this.state.viewportMetadata.width,
+          height: this.state.viewportMetadata.height
+        }
+      }
+    });
+    this.setState({
+      isDeviceEmulationEnabled: true
+    });
+  }
+
+  private handleClipboardWrite(data: any) {
+    // overwrite the clipboard only if there is a valid value
+    if (data && (data as any).value) {
+      return this.connection.send('Clipboard.writeText', data);
+    }
   }
 }
 

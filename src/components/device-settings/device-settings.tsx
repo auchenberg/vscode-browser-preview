@@ -5,7 +5,7 @@ const devices = require('browser-viewport-device-descriptions');
 
 class DeviceSettings extends React.Component<any, any> {
   private emulatedDevices: any[];
-  private zoomLevels: any[];
+  private viewportMetadata: any;
 
   constructor(props: any) {
     super(props);
@@ -14,26 +14,55 @@ class DeviceSettings extends React.Component<any, any> {
     this.handleHeightChange = this.handleHeightChange.bind(this);
     this.handleDeviceChange = this.handleDeviceChange.bind(this);
 
-    this.emulatedDevices = [{ name: 'Responsive', userAgent: '', viewport: [] }]
+    this.emulatedDevices = [
+      { name: 'Responsive', userAgent: '', viewport: [] },
+      {
+        name: 'Macbook 15',
+        userAgent: '',
+        viewport: {
+          width: 1440,
+          height: 900
+        }
+      },
+      {
+        name: 'Macbook 13',
+        userAgent: '',
+        viewport: {
+          width: 1280,
+          height: 800
+        }
+      }
+    ]
       .concat(devices)
       .filter((d: any) => !d.viewport.isLandscape);
-    this.zoomLevels = [
-      { name: 'Fit to Window', value: 'fit' },
-      { name: '50%', value: '50%' },
-      { name: '75%', value: '75%' },
-      { name: '100%', value: '100%' },
-      { name: '125%', value: '125%' },
-      { name: '150%', value: '150%' }
-    ];
   }
 
   public render() {
+    this.viewportMetadata = this.props.viewportMetadata;
+
+    let selectedDevice = this.viewportMetadata.emulatedDeviceId || '';
+
+    let procentageZoom = Math.round(this.viewportMetadata.screenZoom * 100);
+    let zoomLevels = [
+      { label: `Fit (${procentageZoom}%)`, value: 'fit' }
+      // { label: '50%', value: '0.5' },
+      // { label: '75%', value: '0.75' },
+      // { label: '100%', value: '1' },
+      // { label: '125%', value: '1.25' },
+      // { label: '150%', value: '1.50' }
+    ];
+
+    let viewportHeight = this.viewportMetadata.height | 0;
+    let viewportWidth = this.viewportMetadata.width | 0;
+
+    console.log(this.viewportMetadata, selectedDevice);
+
     return (
       <div className={`device-settings ` + (this.props.isVisible ? `active` : ``)}>
-        <select className="device-selector" onChange={this.handleDeviceChange}>
+        <select className="device-selector" onChange={this.handleDeviceChange} value={selectedDevice}>
           {this.emulatedDevices.map((device: any) => {
             return (
-              <option key={device.name} value={device.name}>
+              <option key={device.name} value={device.name} selected={device.selected}>
                 {device.name}
               </option>
             );
@@ -45,7 +74,7 @@ class DeviceSettings extends React.Component<any, any> {
             className="viewport-size-input"
             type="number"
             min="0"
-            value={this.props.width}
+            value={viewportWidth}
             onChange={this.handleWidthChange}
           />
           <span className="spacer">𝗑</span>
@@ -53,16 +82,16 @@ class DeviceSettings extends React.Component<any, any> {
             className="viewport-size-input"
             type="number"
             min="0"
-            value={this.props.height}
+            value={viewportHeight}
             onChange={this.handleHeightChange}
           />
         </span>
 
-        <select className="zoom-selector">
-          {this.zoomLevels.map((level: any) => {
+        <select className="zoom-selector" value="fit" onChange={this.handleZoomChange}>
+          {zoomLevels.map((level: any) => {
             return (
-              <option key={level.name} value={level.value}>
-                {level.name}
+              <option key={level.value} value={level.value}>
+                {level.label}
               </option>
             );
           })}
@@ -94,6 +123,10 @@ class DeviceSettings extends React.Component<any, any> {
       width: newVal,
       height: this.props.height
     });
+  }
+
+  private handleZoomChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    console.log('not implemented');
   }
 }
 
