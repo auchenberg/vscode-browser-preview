@@ -121,19 +121,25 @@ class Viewport extends React.Component<any, any> {
   }
 
   private calculateViewportZoom() {
-    let screenZoom;
+    let screenZoom = 1;
 
     if (this.viewportMetadata.isFixedZoom) {
       return;
     }
 
-    if (!this.viewportMetadata.isFixedSize) {
-      screenZoom = 1;
-    } else {
+    if (this.viewportMetadata.isFixedSize) {
       const screenViewportDimensions = {
         height: window.innerHeight - 38, // TODO: Remove hardcoded toolbar height
         width: window.innerWidth
       };
+
+      if (this.props.isDeviceEmulationEnabled) {
+        // Add padding to enable space for resizers
+        screenViewportDimensions.width =
+          screenViewportDimensions.width - this.viewportPadding.left - this.viewportPadding.right;
+        screenViewportDimensions.height =
+          screenViewportDimensions.height - this.viewportPadding.bottom - this.viewportPadding.top;
+      }
 
       screenZoom = Math.min(
         screenViewportDimensions.width / this.viewportMetadata.width,
