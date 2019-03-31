@@ -374,6 +374,9 @@ class Screencast extends React.Component<any, any> {
       return;
     }
 
+    let x = Math.round(event.offsetX / this.viewportMetadata.screenZoom);
+    let y = Math.round(event.offsetY / this.viewportMetadata.screenZoom);
+
     let type = (types as any)[event.type];
 
     if (type == 'mousePressed' || type == 'mouseReleased') {
@@ -382,8 +385,8 @@ class Screencast extends React.Component<any, any> {
 
     const params = {
       type: type,
-      x: event.offsetX,
-      y: event.offsetY,
+      x: x,
+      y: y,
       modifiers: this.modifiersForEvent(event),
       button: (buttons as any)[event.which],
       clickCount: clickCount,
@@ -392,8 +395,8 @@ class Screencast extends React.Component<any, any> {
     };
 
     if (type === 'mouseWheel') {
-      params.deltaX = event.deltaX;
-      params.deltaY = event.deltaY;
+      params.deltaX = event.deltaX / this.viewportMetadata.screenZoom;
+      params.deltaY = event.deltaY / this.viewportMetadata.screenZoom;
     }
 
     this.props.onInteraction('Input.dispatchMouseEvent', params);
