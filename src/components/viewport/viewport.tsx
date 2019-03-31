@@ -75,7 +75,7 @@ class Viewport extends React.Component<any, any> {
         height={height}
         width={width}
         frame={this.props.frame}
-        highlightInfo={this.viewportMetadata.highlightInfo}
+        viewportMetadata={this.viewportMetadata}
         isInspectEnabled={this.props.isInspectEnabled}
         onInspectElement={this.handleInspectElement}
         onInspectHighlightRequested={this.handleInspectHighlightRequested}
