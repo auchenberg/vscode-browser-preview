@@ -91,6 +91,7 @@ class Viewport extends React.Component<any, any> {
         <Loading percent={this.viewportMetadata.loadingPercent} />
         <ViewportInfo height={this.viewportMetadata.height} width={this.viewportMetadata.width} />
         <Resizable
+          className="viewport-resizable-wrap"
           size={{
             width: width,
             height: height
@@ -151,6 +152,8 @@ class Viewport extends React.Component<any, any> {
       return;
     }
 
+    console.log('viewport.calculateViewportZoom.emitChange');
+
     this.emitViewportChanges({
       screenZoom: screenZoom
     });
@@ -177,6 +180,8 @@ class Viewport extends React.Component<any, any> {
         return;
       }
 
+      console.log('viewport.calculateViewportSize.emitChange');
+
       this.emitViewportChanges({
         width: viewportWidth,
         height: viewportHeight
@@ -185,6 +190,7 @@ class Viewport extends React.Component<any, any> {
   }
 
   private handleViewportResize() {
+    console.log('viewport.handleViewportResize');
     this.calculateViewport();
   }
 

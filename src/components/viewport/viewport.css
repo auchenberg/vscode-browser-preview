@@ -11,6 +11,11 @@
   align-items: center;
 }
 
+.viewport-resizable-wrap {
+  box-shadow: 0 0 300px -50px rgba(0, 0, 0, 0.59);
+  border: 1px solid #d1d1d1;
+}
+
 .viewport-resizer {
   background: rgba(240, 240, 240, 1);
 }
