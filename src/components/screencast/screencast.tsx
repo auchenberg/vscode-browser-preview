@@ -9,6 +9,7 @@ class Screencast extends React.Component<any, any> {
   private canvasContext: CanvasRenderingContext2D | null;
   private frameId: number | null;
   private frame: string | null;
+  private viewportMetadata: any;
 
   constructor(props: any) {
     super(props);
@@ -25,8 +26,7 @@ class Screencast extends React.Component<any, any> {
     this.state = {
       imageZoom: 1,
       highlightInfo: null,
-      screenOffsetTop: 0,
-      screenZoom: 1
+      screenOffsetTop: 0
     };
   }
 
@@ -95,6 +95,7 @@ class Screencast extends React.Component<any, any> {
       return;
     }
 
+    this.viewportMetadata = this.props.viewportMetadata;
     this.canvasContext = this.canvasRef.current.getContext('2d');
     const canvasElement = this.canvasRef.current;
     const imageElement = this.imageRef.current;
@@ -115,13 +116,7 @@ class Screencast extends React.Component<any, any> {
 
     this.canvasContext.save();
     this.canvasContext.fillStyle = checkerboardPattern;
-    this.canvasContext.fillRect(0, 0, canvasWidth, this.state.screenOffsetTop * this.state.screenZoom);
-    this.canvasContext.fillRect(
-      0,
-      this.state.screenOffsetTop * this.state.screenZoom + imageElement.naturalHeight * this.state.imageZoom,
-      canvasWidth,
-      canvasHeight
-    );
+    this.canvasContext.fillRect(0, 0, canvasWidth, canvasHeight);
     this.canvasContext.restore();
 
     // Render highlight
@@ -156,9 +151,9 @@ class Screencast extends React.Component<any, any> {
     }
 
     // Render viewport frame
-    let dy = this.state.screenOffsetTop * this.state.screenZoom;
-    let dw = imageElement.naturalWidth * this.state.imageZoom;
-    let dh = imageElement.naturalHeight * this.state.imageZoom;
+    let dy = this.state.screenOffsetTop * this.viewportMetadata.screenZoom;
+    let dw = this.props.width;
+    let dh = this.props.height;
 
     this.canvasContext.drawImage(imageElement, 0, dy, dw, dh);
     this.canvasContext.restore();
@@ -176,26 +171,22 @@ class Screencast extends React.Component<any, any> {
       const metadata = screencastFrame.metadata;
       const deviceSizeRatio = metadata.deviceHeight / metadata.deviceWidth;
 
-      let imageZoom = Math.min(
-        canvasWidth / imageElement.naturalWidth,
-        canvasHeight / (imageElement.naturalWidth * deviceSizeRatio)
-      );
+      // let imageZoom = Math.min(
+      //   canvasWidth / metadata.deviceWidth,
+      //   canvasHeight / (metadata.deviceWidth * deviceSizeRatio)
+      // );
 
-      if (imageZoom < 1.01 / window.devicePixelRatio) {
-        imageZoom = 1 / window.devicePixelRatio;
-      }
-
-      let screenZoom = (imageElement.naturalWidth * imageZoom) / metadata.deviceWidth;
+      // if (imageZoom < 1.01 / window.devicePixelRatio) {
+      //   imageZoom = 1 / window.devicePixelRatio;
+      // }
 
       const highlightInfo = this.props.highlightInfo ? this.scaleBoxModelToViewport(this.props.highlightInfo) : null;
 
       this.setState({
-        imageZoom: imageZoom,
         highlightInfo: highlightInfo,
         screenOffsetTop: metadata.offsetTop,
         scrollOffsetX: metadata.scrollOffsetX,
-        scrollOffsetY: metadata.scrollOffsetY,
-        screenZoom: screenZoom
+        scrollOffsetY: metadata.scrollOffsetY
       });
 
       imageElement.src = 'data:image/jpg;base64,' + screencastFrame.base64Data;
@@ -242,6 +233,11 @@ class Screencast extends React.Component<any, any> {
         position: position
       });
     } else {
+      const position = this.convertIntoScreenSpace(event, this.state);
+      this.props.onInspectHighlightRequested({
+        position: position
+      });
+
       this.dispatchMouseEvent(event.nativeEvent);
     }
 
@@ -259,8 +255,8 @@ class Screencast extends React.Component<any, any> {
     }
 
     return {
-      x: Math.round(event.clientX / state.screenZoom + this.state.scrollOffsetX),
-      y: Math.round(event.clientY / state.screenZoom - screenOffsetTop + this.state.scrollOffsetY)
+      x: Math.round(event.clientX / this.viewportMetadata.screenZoom + this.state.scrollOffsetX),
+      y: Math.round(event.clientY / this.viewportMetadata.screenZoom - screenOffsetTop + this.state.scrollOffsetY)
     };
   }
 
@@ -295,7 +291,7 @@ class Screencast extends React.Component<any, any> {
   }
 
   private scaleBoxModelToViewport(model: any) {
-    let zoomFactor = this.state.screenZoom;
+    let zoomFactor = this.viewportMetadata.screenZoom;
     let offsetTop = this.state.screenOffsetTop;
 
     function scaleQuad(quad: any) {
@@ -378,6 +374,9 @@ class Screencast extends React.Component<any, any> {
       return;
     }
 
+    let x = Math.round(event.offsetX / this.viewportMetadata.screenZoom);
+    let y = Math.round(event.offsetY / this.viewportMetadata.screenZoom);
+
     let type = (types as any)[event.type];
 
     if (type == 'mousePressed' || type == 'mouseReleased') {
@@ -386,8 +385,8 @@ class Screencast extends React.Component<any, any> {
 
     const params = {
       type: type,
-      x: event.offsetX,
-      y: event.offsetY,
+      x: x,
+      y: y,
       modifiers: this.modifiersForEvent(event),
       button: (buttons as any)[event.which],
       clickCount: clickCount,
@@ -396,8 +395,8 @@ class Screencast extends React.Component<any, any> {
     };
 
     if (type === 'mouseWheel') {
-      params.deltaX = event.deltaX;
-      params.deltaY = event.deltaY;
+      params.deltaX = event.deltaX / this.viewportMetadata.screenZoom;
+      params.deltaY = event.deltaY / this.viewportMetadata.screenZoom;
     }
 
     this.props.onInteraction('Input.dispatchMouseEvent', params);

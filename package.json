@@ -15,8 +15,9 @@
   "engines": {
     "vscode": "^1.30.0"
   },
+  "extensionKind": "ui",
   "license": "MIT",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
@@ -195,6 +196,7 @@
     }
   },
   "dependencies": {
+    "browser-viewport-device-descriptions": "^1.1.0",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",
@@ -202,6 +204,7 @@
     "karma-chrome-launcher": "^2.2.0",
     "lodash": "^4.17.11",
     "puppeteer-core": "^1.11.0",
+    "re-resizable": "^4.11.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "vsls": "^0.3.967",
@@ -216,7 +219,7 @@
     "husky": "^1.3.1",
     "prettier": "^1.16.1",
     "pretty-quick": "^1.10.0",
-    "react-scripts": "2.1.3",
+    "react-scripts": "^2.1.5",
     "typescript": "3.2.2",
     "vscode": "^1.1.17"
   },

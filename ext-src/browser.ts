@@ -4,6 +4,7 @@ import { EventEmitter } from 'events';
 import BrowserPage from './browserPage';
 import * as whichChrome from 'which-chrome';
 import * as vscode from 'vscode';
+import * as os from 'os';
 import { ExtensionConfiguration } from './extensionConfiguration';
 
 const puppeteer = require('puppeteer-core');
@@ -19,12 +20,16 @@ export default class Browser extends EventEmitter {
 
   private async launchBrowser() {
     let chromePath = whichChrome.Chrome || whichChrome.Chromium;
+    let chromeArgs = [];
+    let platform = os.platform();
 
     if (this.config.chromeExecutable) {
       chromePath = this.config.chromeExecutable;
     }
 
-    this.remoteDebugPort = await getPort({ port: 9222 });
+    // Detect remote debugging port
+    this.remoteDebugPort = await getPort({ port: 9222, host: '127.0.0.1' });
+    chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
 
     if (!chromePath) {
       throw new Error(
@@ -32,9 +37,13 @@ export default class Browser extends EventEmitter {
       );
     }
 
+    if (platform === 'linux') {
+      chromeArgs.push('--no-sandbox');
+    }
+
     this.browser = await puppeteer.launch({
       executablePath: chromePath,
-      args: [`--remote-debugging-port=${this.remoteDebugPort}`]
+      args: chromeArgs
     });
   }
 

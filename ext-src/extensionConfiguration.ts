@@ -4,4 +4,5 @@ export interface ExtensionConfiguration {
   format?: 'jpeg' | 'png';
   isVerboseMode?: boolean;
   startUrl?: string;
+  columnNumber: number;
 }

@@ -7,15 +7,19 @@ import TargetTreeProvider from './targetTreeProvider';
 import * as EventEmitter from 'eventemitter2';
 import { ExtensionConfiguration } from './extensionConfiguration';
 import { setupLiveShare } from './liveShare';
+import ContentProvider from './contentProvider';
+import DebugProvider from './debugProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   const windowManager = new BrowserViewWindowManager(context.extensionPath);
+  const debugProvider = new DebugProvider(windowManager);
 
   windowManager.on('windowOpenRequested', (params) => {
     windowManager.create(params.url);
   });
 
   vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());
+  vscode.debug.registerDebugConfigurationProvider('browser-preview', debugProvider.getProvider());
 
   context.subscriptions.push(
     vscode.commands.registerCommand('browser-preview.openPreview', (url?) => {
@@ -101,15 +105,16 @@ export function activate(context: vscode.ExtensionContext) {
 export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   public openWindows: Set<BrowserViewWindow>;
   private browser: any;
-  private config: ExtensionConfiguration;
+  private defaultConfig: ExtensionConfiguration;
 
   constructor(extensionPath: string) {
     super();
     this.openWindows = new Set();
-    this.config = {
+    this.defaultConfig = {
       extensionPath: extensionPath,
       startUrl: 'http://code.visualstudio.com',
-      format: 'jpeg'
+      format: 'jpeg',
+      columnNumber: 2
     };
     this.refreshSettings();
   }
@@ -120,34 +125,50 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     if (extensionSettings) {
       let chromeExecutable = extensionSettings.get<string>('chromeExecutable');
       if (chromeExecutable !== undefined) {
-        this.config.chromeExecutable = chromeExecutable;
+        this.defaultConfig.chromeExecutable = chromeExecutable;
       }
 
       let startUrl = extensionSettings.get<string>('startUrl');
       if (startUrl !== undefined) {
-        this.config.startUrl = startUrl;
+        this.defaultConfig.startUrl = startUrl;
       }
 
       let isVerboseMode = extensionSettings.get<boolean>('verbose');
       if (isVerboseMode !== undefined) {
-        this.config.isVerboseMode = isVerboseMode;
+        this.defaultConfig.isVerboseMode = isVerboseMode;
       }
 
       let format = extensionSettings.get<string>('format');
       if (format !== undefined) {
-        this.config.format = format.includes('png') ? 'png' : 'jpeg';
+        this.defaultConfig.format = format.includes('png') ? 'png' : 'jpeg';
       }
     }
+  }
+
+  getLastColumnNumber() {
+    let lastWindow = Array.from(this.openWindows).pop();
+    if (lastWindow) {
+      return lastWindow.config.columnNumber;
+    }
+    return 1;
   }
 
   public create(startUrl?: string, title?: string) {
     this.refreshSettings();
 
+    let config = { ...this.defaultConfig };
+
     if (!this.browser) {
-      this.browser = new Browser(this.config);
+      this.browser = new Browser(config);
     }
 
-    let window = new BrowserViewWindow(this.config, this.browser);
+
+    let lastColumnNumber = this.getLastColumnNumber();
+    if (lastColumnNumber) {
+      config.columnNumber = lastColumnNumber + 1;
+    }
+
+    let window = new BrowserViewWindow(config, this.browser);
     window.launch(startUrl, title);
     window.once('disposed', () => {
       this.openWindows.delete(window);
@@ -184,6 +205,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
   private _panel: vscode.WebviewPanel | null;
   private _disposables: vscode.Disposable[] = [];
+  private contentProvider: ContentProvider;
 
   public browserPage: BrowserPage | null;
   private browser: Browser;
@@ -195,6 +217,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     this._panel = null;
     this.browserPage = null;
     this.browser = browser;
+    this.contentProvider = new ContentProvider(this.config);
   }
 
   public async launch(startUrl?: string, title: string = PANEL_TITLE) {
@@ -213,15 +236,21 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       vscode.window.showErrorMessage(err.message);
     }
 
-    let column = vscode.ViewColumn.Two;
+    // let columnNumber = <number>this.config.columnNumber;
+    // var column = <any>vscode.ViewColumn[columnNumber];
 
-    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, title, column, {
+    let showOptions = {
+      viewColumn: vscode.ViewColumn.Beside
+    };
+
+
+    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, title, showOptions, {
       enableScripts: true,
       retainContextWhenHidden: true,
       localResourceRoots: [vscode.Uri.file(path.join(this.config.extensionPath, 'build'))]
     });
 
-    this._panel.webview.html = this._getHtmlForWebview();
+    this._panel.webview.html = this.contentProvider.getContent();
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
     this._panel.webview.onDidReceiveMessage(
@@ -337,55 +366,5 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
     this.emit('disposed');
     this.removeAllListeners();
-  }
-
-  private _getHtmlForWebview() {
-    const manifest = require(path.join(this.config.extensionPath, 'build', 'asset-manifest.json'));
-    const mainScript = manifest['main.js'];
-    const mainStyle = manifest['main.css'];
-    const runtimeScript = manifest['runtime~main.js'];
-
-    // finding potential list of js chunk files
-    const chunkScriptsUri = [];
-    for (let key in manifest) {
-      if (key.endsWith('.chunk.js') && manifest.hasOwnProperty(key)) {
-        // finding their paths on the disk
-        let chunkScriptUri = vscode.Uri.file(path.join(this.config.extensionPath, 'build', manifest[key])).with({
-          scheme: 'vscode-resource'
-        });
-        // push the chunk Uri to the list of chunks
-        chunkScriptsUri.push(chunkScriptUri);
-      }
-    }
-
-    const runtimescriptPathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', runtimeScript));
-    const runtimescriptUri = runtimescriptPathOnDisk.with({
-      scheme: 'vscode-resource'
-    });
-    const mainScriptPathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', mainScript));
-    const mainScriptUri = mainScriptPathOnDisk.with({
-      scheme: 'vscode-resource'
-    });
-
-    const stylePathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', mainStyle));
-    const styleUri = stylePathOnDisk.with({ scheme: 'vscode-resource' });
-
-    return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="utf-8">
-				<link rel="stylesheet" type="text/css" href="${styleUri}">
-				<base href="${vscode.Uri.file(path.join(this.config.extensionPath, 'build')).with({
-          scheme: 'vscode-resource'
-        })}/">
-			</head>
-
-			<body>
-				<div id="root"></div>
-				<script src="${runtimescriptUri}"></script>
-				${chunkScriptsUri.map((item) => `<script src="${item}"></script>`)}
-				<script src="${mainScriptUri}"></script>
-			</body>
-			</html>`;
   }
 }
