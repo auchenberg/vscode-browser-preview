@@ -17,7 +17,7 @@
   },
   "extensionKind": "ui",
   "license": "MIT",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
@@ -195,6 +195,7 @@
     }
   },
   "dependencies": {
+    "browser-viewport-device-descriptions": "^1.1.0",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",

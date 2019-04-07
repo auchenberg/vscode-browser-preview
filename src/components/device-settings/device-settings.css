@@ -1,0 +1,35 @@
+.device-settings {
+  display: none;
+  border-top: 1px solid #d1d1d1;
+}
+
+.device-settings.active {
+  display: block;
+}
+
+select {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  height: 29px;
+  padding: 5px; /* If you add too much padding here, the options won't show in IE */
+}
+
+.viewport-size-input {
+  max-width: 45px;
+  text-align: center;
+  background: #f0f0f0;
+  box-shadow: none;
+  border: 1px solid transparent;
+  outline: 0;
+}
+
+.viewport-size-input:active,
+.viewport-size-input:focus {
+  border: 1px solid #d3d3d3;
+  background: #fff;
+}
+
+.metadata .spacer {
+  padding: 0 2px;
+}

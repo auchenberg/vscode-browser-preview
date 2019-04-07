@@ -6,12 +6,14 @@
   box-sizing: border-box;
   height: 100%;
   width: 100%;
-}
 
-.viewport-resizable {
-  padding: 10px;
   justify-content: center;
   align-items: center;
+}
+
+.viewport-resizable-wrap {
+  box-shadow: 0 0 300px -50px rgba(0, 0, 0, 0.59);
+  border: 1px solid #d1d1d1;
 }
 
 .viewport-resizer {
