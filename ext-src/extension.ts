@@ -30,15 +30,16 @@ export function activate(context: vscode.ExtensionContext) {
 class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   private openWindows: Set<BrowserViewWindow>;
   private browser: any;
-  private config: ExtensionConfiguration;
+  private defaultConfig: ExtensionConfiguration;
 
   constructor(extensionPath: string) {
     super();
     this.openWindows = new Set();
-    this.config = {
+    this.defaultConfig = {
       extensionPath: extensionPath,
       startUrl: 'http://code.visualstudio.com',
-      format: 'jpeg'
+      format: 'jpeg',
+      columnNumber: 2
     };
     this.refreshSettings();
   }
@@ -49,34 +50,49 @@ class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     if (extensionSettings) {
       let chromeExecutable = extensionSettings.get<string>('chromeExecutable');
       if (chromeExecutable !== undefined) {
-        this.config.chromeExecutable = chromeExecutable;
+        this.defaultConfig.chromeExecutable = chromeExecutable;
       }
 
       let startUrl = extensionSettings.get<string>('startUrl');
       if (startUrl !== undefined) {
-        this.config.startUrl = startUrl;
+        this.defaultConfig.startUrl = startUrl;
       }
 
       let isVerboseMode = extensionSettings.get<boolean>('verbose');
       if (isVerboseMode !== undefined) {
-        this.config.isVerboseMode = isVerboseMode;
+        this.defaultConfig.isVerboseMode = isVerboseMode;
       }
 
       let format = extensionSettings.get<string>('format');
       if (format !== undefined) {
-        this.config.format = format.includes('png') ? 'png' : 'jpeg';
+        this.defaultConfig.format = format.includes('png') ? 'png' : 'jpeg';
       }
     }
+  }
+
+  getLastColumnNumber() {
+    let lastWindow = Array.from(this.openWindows).pop();
+    if (lastWindow) {
+      return lastWindow.config.columnNumber;
+    }
+    return 1;
   }
 
   public create(startUrl?: string) {
     this.refreshSettings();
 
+    let config = { ...this.defaultConfig };
+
     if (!this.browser) {
-      this.browser = new Browser(this.config);
+      this.browser = new Browser(config);
     }
 
-    let window = new BrowserViewWindow(this.config, this.browser);
+    let lastColumnNumber = this.getLastColumnNumber();
+    if (lastColumnNumber) {
+      config.columnNumber = lastColumnNumber + 1;
+    }
+
+    let window = new BrowserViewWindow(config, this.browser);
     window.launch(startUrl);
     window.once('disposed', () => {
       this.openWindows.delete(window);
@@ -140,9 +156,14 @@ class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       vscode.window.showErrorMessage(err.message);
     }
 
-    let column = vscode.ViewColumn.Two;
+    let columnNumber = <number>this.config.columnNumber;
+    var column = <any>vscode.ViewColumn[columnNumber];
+    let showOptions = {
+      viewColumn: column,
+      preserveFocus: false
+    };
 
-    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, 'Browser Preview', column, {
+    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, 'Browser Preview', showOptions, {
       enableScripts: true,
       retainContextWhenHidden: true,
       localResourceRoots: [vscode.Uri.file(path.join(this.config.extensionPath, 'build'))]
