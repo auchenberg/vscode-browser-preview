@@ -6,7 +6,15 @@ const REQUEST_GET_WINDOWS = 'getWindows';
 const NOTIFICATION_WINDOW_CREATED = 'windowCreated';
 const NOTIFICATION_WINDOW_INTERACTION = 'windowInteraction';
 
-const DISPATCHED_EVENTS = ['Input.dispatchMouseEvent', 'Input.dispatchKeyEvent'];
+const DISPATCHED_EVENTS = [
+  'Input.dispatchKeyEvent',
+  'Input.dispatchMouseEvent',
+  'Page.goBackward',
+  'Page.goForward',
+  'Page.navigate',
+  'Page.reload'
+];
+
 const SHARED_PANEL_TITLE = `${PANEL_TITLE} (Shared)`;
 
 export async function setupLiveShare(windowManager: BrowserViewWindowManager) {
@@ -35,7 +43,7 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
 
         return {
           startUrl: window.config.startUrl, // TODO: This needs to be the current URL
-          viewport
+          viewport // TODO: This needs to be the actual viewport
         };
       });
     });
