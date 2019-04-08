@@ -97,4 +97,14 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
       }
     });
   }
+
+  public getByUrl(url: string) {
+    let match = undefined;
+    this.openWindows.forEach((b: BrowserViewWindow) => {
+      if (b.config.startUrl == url) {
+        match = b;
+      }
+    });
+    return match;
+  }
 }
