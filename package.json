@@ -20,6 +20,7 @@
   "version": "0.5.0",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
+    "*",
     "onView:targetTree",
     "onCommand:browser-preview.openPreview",
     "onDebugInitialConfigurations",
@@ -54,11 +55,29 @@
     },
     "commands": [
       {
-        "category": "Browser Preview",
         "command": "browser-preview.openPreview",
-        "title": "Open Preview"
+        "title": "Open Browser Preview",
+        "category": "Browser Preview"
+      },
+      {
+        "command": "browser-preview.openPreviewToSide",
+        "title": "Open Browser Preview",
+        "category": "Browser Preview",
+        "icon": {
+          "light": "./resources/icon_light.svg",
+          "dark": "./resources/icon_dark.svg"
+        }
       }
     ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "browser-preview.openPreviewToSide",
+          "alt": "browser-preview.openPreview",
+          "group": "navigation"
+        }
+      ]
+    },
     "debuggers": [
       {
         "type": "browser-preview",
