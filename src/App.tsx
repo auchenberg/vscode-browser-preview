@@ -25,6 +25,8 @@ interface IState {
     highlightInfo: object | null;
     deviceSizeRatio: number;
     screenZoom: number;
+    scrollOffsetX: number;
+    scrollOffsetY: number;
   };
   history: {
     canGoBack: boolean;
@@ -120,6 +122,11 @@ class App extends React.Component<any, IState> {
         frame: {
           base64Data: data,
           metadata: metadata
+        },
+        viewportMetadata: {
+          ...this.state.viewportMetadata,
+          scrollOffsetX: metadata.scrollOffsetX,
+          scrollOffsetY: metadata.scrollOffsetY
         }
       });
     });
