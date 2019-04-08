@@ -1,5 +1,6 @@
 import * as vsls from 'vsls/vscode';
-import { BrowserViewWindowManager, BrowserViewWindow, PANEL_TITLE } from './extension';
+import { BrowserViewWindowManager } from './BrowserViewWindowManager';
+import { BrowserViewWindow, PANEL_TITLE } from './BrowserViewWindow';
 
 const SERVICE_NAME = 'browser-preview';
 const REQUEST_GET_WINDOWS = 'getWindows';
@@ -38,14 +39,7 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
 
     service.onRequest(REQUEST_GET_WINDOWS, () => {
       const windows = Array.from(windowManager.openWindows);
-      return windows.map((window) => {
-        const viewport = window.browserPage!.page.viewport();
-
-        return {
-          startUrl: window.config.startUrl, // TODO: This needs to be the current URL
-          viewport // TODO: This needs to be the actual viewport
-        };
-      });
+      return windows.map((window) => window.getState());
     });
   } else if (liveShare.session.role === vsls.Role.Guest) {
     service = await liveShare.getSharedService(SERVICE_NAME);
@@ -57,13 +51,13 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
 
     const windows = await service.request(REQUEST_GET_WINDOWS, []);
     if (windows && windows.length > 0) {
-      windows.forEach(({ startUrl, viewport }: any) => {
-        windowManager.create(startUrl, SHARED_PANEL_TITLE);
+      windows.forEach(({ url }: any) => {
+        windowManager.create(url, SHARED_PANEL_TITLE);
       });
     }
 
     service.onNotify(NOTIFICATION_WINDOW_CREATED, async (args: any) => {
-      await windowManager.create(args.startUrl, SHARED_PANEL_TITLE);
+      await windowManager.create(args.url, SHARED_PANEL_TITLE);
     });
   }
 
@@ -118,12 +112,7 @@ function handleLocalWindowCreation(
 ) {
   windowManager.on(NOTIFICATION_WINDOW_CREATED, async (window: BrowserViewWindow) => {
     if (liveShare.session.role === vsls.Role.Host) {
-      const viewport = await window.browserPage!.page.viewport();
-
-      service.notify(NOTIFICATION_WINDOW_CREATED, {
-        startUrl: window.config.startUrl,
-        viewport
-      });
+      service.notify(NOTIFICATION_WINDOW_CREATED, window.getState());
     }
     // Listen for any local browser interactions,
     // and synronize them to all other guests.
