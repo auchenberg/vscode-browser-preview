@@ -2,7 +2,7 @@ import { env } from 'vscode';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-export default class ContentProvider {
+export default class DebugProvider {
   private windowManager: any;
 
   constructor(windowManager: any) {
