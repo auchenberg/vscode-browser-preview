@@ -90,7 +90,7 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
 
     this.openWindows.add(window);
 
-    this.emit('windowCreated', window);
+    this.emit('windowCreated', window.id);
 
     return window;
   }
