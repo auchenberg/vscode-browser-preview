@@ -144,6 +144,10 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     });
   }
 
+  public getState() {
+    return this.state;
+  }
+
   public dispose() {
     if (this._panel) {
       this._panel.dispose();
