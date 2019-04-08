@@ -21,6 +21,10 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
       columnNumber: 2
     };
     this.refreshSettings();
+
+    this.on('windowOpenRequested', (params) => {
+      this.create(params.url);
+    });
   }
 
   private refreshSettings() {

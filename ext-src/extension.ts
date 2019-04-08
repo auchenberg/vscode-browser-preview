@@ -8,10 +8,6 @@ export function activate(context: vscode.ExtensionContext) {
   const windowManager = new BrowserViewWindowManager(context.extensionPath);
   const debugProvider = new DebugProvider(windowManager);
 
-  windowManager.on('windowOpenRequested', (params) => {
-    windowManager.create(params.url);
-  });
-
   vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());
   vscode.debug.registerDebugConfigurationProvider('browser-preview', debugProvider.getProvider());
 
