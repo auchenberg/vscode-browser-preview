@@ -62,7 +62,9 @@ class App extends React.Component<any, IState> {
         isFixedZoom: false,
         isResizable: true,
         loadingPercent: 0.0,
-        screenZoom: 1
+        screenZoom: 1,
+        scrollOffsetX: 0,
+        scrollOffsetY: 0
       }
     };
 
