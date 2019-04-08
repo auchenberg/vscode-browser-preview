@@ -6,6 +6,7 @@ import Browser from './browser';
 import BrowserPage from './browserPage';
 import { ExtensionConfiguration } from './extensionConfiguration';
 import ContentProvider from './contentProvider';
+const uuidv4 = require('uuid/v4');
 
 export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   private static readonly viewType = 'browser-preview';
@@ -15,6 +16,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   private contentProvider: ContentProvider;
   private browserPage: BrowserPage | null;
   private browser: Browser;
+  public id: string;
   public config: ExtensionConfiguration;
 
   constructor(config: ExtensionConfiguration, browser: Browser) {
@@ -24,6 +26,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     this.browserPage = null;
     this.browser = browser;
     this.contentProvider = new ContentProvider(this.config);
+    this.id = uuidv4();
   }
 
   public async launch(startUrl?: string) {
