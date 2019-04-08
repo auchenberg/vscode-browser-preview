@@ -74,11 +74,14 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
 
     window.launch(startUrl);
     window.once('disposed', () => {
+      let id = window.id;
       this.openWindows.delete(window);
       if (this.openWindows.size === 0) {
         this.browser.dispose();
         this.browser = null;
       }
+
+      this.emit('windowDisposed', id);
     });
 
     window.on('windowOpenRequested', (params) => {
@@ -86,6 +89,8 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     });
 
     this.openWindows.add(window);
+
+    this.emit('windowCreated', window);
 
     return window;
   }
