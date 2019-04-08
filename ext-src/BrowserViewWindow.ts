@@ -11,10 +11,12 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   private static readonly viewType = 'browser-preview';
   private _panel: vscode.WebviewPanel | null;
   private _disposables: vscode.Disposable[] = [];
+  private state = {};
   private contentProvider: ContentProvider;
   private browserPage: BrowserPage | null;
   private browser: Browser;
   public config: ExtensionConfiguration;
+
   constructor(config: ExtensionConfiguration, browser: Browser) {
     super();
     this.config = config;
@@ -23,6 +25,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     this.browser = browser;
     this.contentProvider = new ContentProvider(this.config);
   }
+
   public async launch(startUrl?: string) {
     try {
       this.browserPage = await this.browser.newPage();
@@ -115,6 +118,11 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
             });
           }
         }
+
+        if (msg.type === 'extension.appStateChanged') {
+          this.state = msg.params.state;
+        }
+
         if (this.browserPage) {
           try {
             this.browserPage.send(msg.type, msg.params, msg.callbackId);
@@ -135,6 +143,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       result: this.config
     });
   }
+
   public dispose() {
     if (this._panel) {
       this._panel.dispose();

@@ -80,7 +80,7 @@ class App extends React.Component<any, IState> {
 
       if (isMainFrame) {
         this.requestNavigationHistory();
-        this.setState({
+        this.updateState({
           ...this.state,
           viewportMetadata: {
             ...this.state.viewportMetadata,
@@ -92,7 +92,7 @@ class App extends React.Component<any, IState> {
     });
 
     this.connection.on('Page.loadEventFired', (result: any) => {
-      this.setState({
+      this.updateState({
         ...this.state,
         viewportMetadata: {
           ...this.state.viewportMetadata,
@@ -101,7 +101,7 @@ class App extends React.Component<any, IState> {
       });
 
       setTimeout(() => {
-        this.setState({
+        this.updateState({
           ...this.state,
           viewportMetadata: {
             ...this.state.viewportMetadata,
@@ -115,7 +115,7 @@ class App extends React.Component<any, IState> {
     this.connection.on('Page.screencastFrame', (result: any) => {
       const { sessionId, data, metadata } = result;
       this.connection.send('Page.screencastFrameAck', { sessionId });
-      this.setState({
+      this.updateState({
         ...this.state,
         frame: {
           base64Data: data,
@@ -150,7 +150,7 @@ class App extends React.Component<any, IState> {
         return;
       }
 
-      this.setState({
+      this.updateState({
         isVerboseMode: payload.isVerboseMode ? payload.isVerboseMode : false,
         url: payload.startUrl ? payload.startUrl : 'about:blank',
         format: payload.format ? payload.format : 'jpeg'
@@ -175,6 +175,12 @@ class App extends React.Component<any, IState> {
     const { isVerboseMode } = this.state;
 
     this.connection.enableVerboseLogging(isVerboseMode);
+  }
+
+  private sendStatetoHost() {
+    this.connection.send('extension.appStateChanged', {
+      state: this.state
+    });
   }
 
   public render() {
@@ -245,7 +251,7 @@ class App extends React.Component<any, IState> {
       url = match[1];
     }
 
-    this.setState({
+    this.updateState({
       ...this.state,
       url: url,
       history: {
@@ -347,21 +353,26 @@ class App extends React.Component<any, IState> {
           newViewport.screenZoom = data.screenZoom;
         }
 
-        this.setState(
-          {
-            ...this.state,
-            viewportMetadata: {
-              ...this.state.viewportMetadata,
-              ...newViewport
-            }
-          },
-          () => {
-            this.viewport.calculateViewport();
+        await this.updateState({
+          ...this.state,
+          viewportMetadata: {
+            ...this.state.viewportMetadata,
+            ...newViewport
           }
-        );
+        });
+        this.viewport.calculateViewport();
 
         break;
     }
+  }
+
+  private async updateState(newState: any) {
+    return new Promise((resolve, reject) => {
+      this.setState(newState, () => {
+        this.sendStatetoHost();
+        resolve();
+      });
+    });
   }
 
   private async handleInspectElementRequest(data: any) {
@@ -456,7 +467,7 @@ class App extends React.Component<any, IState> {
 
   private handleToggleInspect() {
     if (this.state.isInspectEnabled) {
-      this.setState({
+      this.updateState({
         isInspectEnabled: false,
         viewportMetadata: {
           ...this.state.viewportMetadata,
@@ -464,7 +475,7 @@ class App extends React.Component<any, IState> {
         }
       });
     } else {
-      this.setState({
+      this.updateState({
         isInspectEnabled: true
       });
     }
@@ -474,7 +485,7 @@ class App extends React.Component<any, IState> {
     this.connection.send('Page.navigate', {
       url: data.url
     });
-    this.setState({
+    this.updateState({
       ...this.state,
       url: data.url
     });
@@ -525,7 +536,7 @@ class App extends React.Component<any, IState> {
         }
       }
     });
-    this.setState({
+    this.updateState({
       isDeviceEmulationEnabled: false
     });
   }
@@ -541,7 +552,7 @@ class App extends React.Component<any, IState> {
         }
       }
     });
-    this.setState({
+    this.updateState({
       isDeviceEmulationEnabled: true
     });
   }
