@@ -208,6 +208,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "vsls": "^0.3.967",
+    "uuid": "^3.3.2",
     "which-chrome": "^0.1.1"
   },
   "devDependencies": {

@@ -176,7 +176,13 @@ class Viewport extends React.Component<any, any> {
         viewportHeight = viewportHeight - this.viewportPadding.bottom - this.viewportPadding.top;
       }
 
-      if (viewportWidth === this.viewportMetadata.width && viewportHeight === this.viewportMetadata.height) {
+      viewportHeight = this.roundNumber(viewportHeight);
+      viewportWidth = this.roundNumber(viewportWidth);
+
+      if (
+        viewportWidth === this.roundNumber(this.viewportMetadata.width) &&
+        viewportHeight === this.roundNumber(this.viewportMetadata.height)
+      ) {
         return;
       }
 
@@ -219,6 +225,10 @@ class Viewport extends React.Component<any, any> {
       action: action,
       params: params
     });
+  }
+
+  private roundNumber(value: number) {
+    return Math.round(value * 100) / 100;
   }
 
   private emitViewportChanges(newViewport: any) {
