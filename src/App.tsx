@@ -13,25 +13,27 @@ interface IState {
   isVerboseMode: boolean;
   isInspectEnabled: boolean;
   isDeviceEmulationEnabled: boolean;
-  viewportMetadata: {
-    height: number | null;
-    width: number | null;
-    emulatedDeviceId: string | null;
-    isLoading: boolean;
-    isFixedSize: boolean;
-    isFixedZoom: boolean;
-    isResizable: boolean;
-    loadingPercent: number;
-    highlightInfo: object | null;
-    deviceSizeRatio: number;
-    screenZoom: number;
-    scrollOffsetX: number;
-    scrollOffsetY: number;
-  };
+  viewportMetadata: IViewport;
   history: {
     canGoBack: boolean;
     canGoForward: boolean;
   };
+}
+
+interface IViewport {
+  height: number | null;
+  width: number | null;
+  emulatedDeviceId: string | null;
+  isLoading: boolean;
+  isFixedSize: boolean;
+  isFixedZoom: boolean;
+  isResizable: boolean;
+  loadingPercent: number;
+  highlightInfo: object | null;
+  deviceSizeRatio: number;
+  screenZoom: number;
+  scrollOffsetX: number;
+  scrollOffsetY: number;
 }
 
 class App extends React.Component<any, IState> {
@@ -170,6 +172,12 @@ class App extends React.Component<any, IState> {
           url: payload.startUrl
         });
       }
+    });
+
+    this.connection.on('extension.viewport', (viewport: IViewport) => {
+      this.handleViewportSizeChange(viewport);
+
+      // TODO: Scroll the page
     });
 
     // Initialize

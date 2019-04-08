@@ -51,13 +51,15 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
 
     const windows = await service.request(REQUEST_GET_WINDOWS, []);
     if (windows && windows.length > 0) {
-      windows.forEach(({ url }: any) => {
-        windowManager.create(url, SHARED_PANEL_TITLE);
+      windows.forEach((state: any) => {
+        const window = windowManager.create(state.url, SHARED_PANEL_TITLE);
+        window.setViewport(state.viewportMetadata);
       });
     }
 
     service.onNotify(NOTIFICATION_WINDOW_CREATED, async (args: any) => {
-      await windowManager.create(args.url, SHARED_PANEL_TITLE);
+      const window = windowManager.create(args.url, SHARED_PANEL_TITLE);
+      window.setViewport(args.viewportMetadata);
     });
   }
 
@@ -93,11 +95,8 @@ function handleRemoteInteractions(
       return;
     }
 
-    windowManager.openWindows.forEach((b: BrowserViewWindow) => {
-      if (b.config.startUrl == url) {
-        b.browserPage!.send(data.type, data.params);
-      }
-    });
+    const window = windowManager.getByUrl(url);
+    window!.browserPage!.send(data.type, data.params);
 
     if (liveShare.session.role === vsls.Role.Host) {
       service.notify(NOTIFICATION_WINDOW_INTERACTION, args);

@@ -155,6 +155,13 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     return this.state;
   }
 
+  public setViewport(viewport: any) {
+    this._panel.webview.postMessage({
+      method: 'extension.viewport',
+      result: viewport
+    });
+  }
+
   public dispose() {
     if (this._panel) {
       this._panel.dispose();
