@@ -82,6 +82,8 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     });
 
     this.openWindows.add(window);
+
+    return window;
   }
 
   public getDebugPort() {
