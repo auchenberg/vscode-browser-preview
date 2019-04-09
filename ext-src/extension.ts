@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import TargetTreeProvider from './targetTreeProvider';
 import DebugProvider from './debugProvider';
 import { BrowserViewWindowManager } from './BrowserViewWindowManager';
+import { setupLiveShare } from './liveShare';
 
 export function activate(context: vscode.ExtensionContext) {
   const windowManager = new BrowserViewWindowManager(context.extensionPath);
@@ -16,4 +17,6 @@ export function activate(context: vscode.ExtensionContext) {
       windowManager.create(url);
     })
   );
+
+  setupLiveShare(windowManager);
 }

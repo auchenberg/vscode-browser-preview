@@ -13,25 +13,27 @@ interface IState {
   isVerboseMode: boolean;
   isInspectEnabled: boolean;
   isDeviceEmulationEnabled: boolean;
-  viewportMetadata: {
-    height: number | null;
-    width: number | null;
-    emulatedDeviceId: string | null;
-    isLoading: boolean;
-    isFixedSize: boolean;
-    isFixedZoom: boolean;
-    isResizable: boolean;
-    loadingPercent: number;
-    highlightInfo: object | null;
-    deviceSizeRatio: number;
-    screenZoom: number;
-    scrollOffsetX: number;
-    scrollOffsetY: number;
-  };
+  viewportMetadata: IViewport;
   history: {
     canGoBack: boolean;
     canGoForward: boolean;
   };
+}
+
+interface IViewport {
+  height: number | null;
+  width: number | null;
+  emulatedDeviceId: string | null;
+  isLoading: boolean;
+  isFixedSize: boolean;
+  isFixedZoom: boolean;
+  isResizable: boolean;
+  loadingPercent: number;
+  highlightInfo: object | null;
+  deviceSizeRatio: number;
+  screenZoom: number;
+  scrollOffsetX: number;
+  scrollOffsetY: number;
 }
 
 class App extends React.Component<any, IState> {
@@ -170,6 +172,13 @@ class App extends React.Component<any, IState> {
           url: payload.startUrl
         });
       }
+    });
+
+    this.connection.on('extension.viewport', (viewport: IViewport) => {
+      this.handleViewportSizeChange(viewport);
+      this.enableViewportDeviceEmulation('Live Share');
+
+      // TODO: Scroll the page
     });
 
     // Initialize
@@ -550,11 +559,11 @@ class App extends React.Component<any, IState> {
     });
   }
 
-  private enableViewportDeviceEmulation() {
+  private enableViewportDeviceEmulation(deviceName: string = 'Responsive') {
     console.log('app.enableViewportDeviceEmulation');
     this.handleViewportDeviceChange({
       device: {
-        name: 'Responsive',
+        name: deviceName,
         viewport: {
           width: this.state.viewportMetadata.width,
           height: this.state.viewportMetadata.height

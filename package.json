@@ -17,13 +17,14 @@
   },
   "extensionKind": "ui",
   "license": "MIT",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
     "onCommand:browser-preview.openPreview",
     "onDebugInitialConfigurations",
-    "onDebug"
+    "onDebug",
+    "onFileSystem:vsls"
   ],
   "contributes": {
     "configuration": {
@@ -206,6 +207,7 @@
     "re-resizable": "^4.11.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
+    "vsls": "^0.3.967",
     "uuid": "^3.3.2",
     "which-chrome": "^0.1.1"
   },

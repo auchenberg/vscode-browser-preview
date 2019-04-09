@@ -7,7 +7,7 @@ import { ExtensionConfiguration } from './extensionConfiguration';
 import { BrowserViewWindow } from './BrowserViewWindow';
 
 export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
-  private openWindows: Set<BrowserViewWindow>;
+  public openWindows: Set<BrowserViewWindow>;
   private browser: any;
   private defaultConfig: ExtensionConfiguration;
 
@@ -57,7 +57,7 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     return 1;
   }
 
-  public create(startUrl?: string) {
+  public async create(startUrl?: string, id?: string) {
     this.refreshSettings();
     let config = { ...this.defaultConfig };
 
@@ -70,9 +70,9 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
       config.columnNumber = lastColumnNumber + 1;
     }
 
-    let window = new BrowserViewWindow(config, this.browser);
+    let window = new BrowserViewWindow(config, this.browser, id);
 
-    window.launch(startUrl);
+    await window.launch(startUrl);
     window.once('disposed', () => {
       let id = window.id;
       this.openWindows.delete(window);
@@ -107,7 +107,7 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     });
   }
 
-  public getByUrl(url: string) {
+  public getByUrl(url: string): BrowserViewWindow | undefined {
     let match = undefined;
     this.openWindows.forEach((b: BrowserViewWindow) => {
       if (b.config.startUrl == url) {
@@ -117,7 +117,7 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     return match;
   }
 
-  public getById(id: string) {
+  public getById(id: string): BrowserViewWindow | undefined {
     let match = undefined;
     this.openWindows.forEach((b: BrowserViewWindow) => {
       if (b.id == id) {

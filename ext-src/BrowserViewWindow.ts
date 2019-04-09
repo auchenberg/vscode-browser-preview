@@ -8,25 +8,27 @@ import { ExtensionConfiguration } from './extensionConfiguration';
 import ContentProvider from './contentProvider';
 const uuidv4 = require('uuid/v4');
 
+export const PANEL_TITLE = 'Browser Preview';
+
 export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   private static readonly viewType = 'browser-preview';
   private _panel: vscode.WebviewPanel | null;
   private _disposables: vscode.Disposable[] = [];
   private state = {};
   private contentProvider: ContentProvider;
-  private browserPage: BrowserPage | null;
+  public browserPage: BrowserPage | null;
   private browser: Browser;
   public id: string;
   public config: ExtensionConfiguration;
 
-  constructor(config: ExtensionConfiguration, browser: Browser) {
+  constructor(config: ExtensionConfiguration, browser: Browser, id?: string) {
     super();
     this.config = config;
     this._panel = null;
     this.browserPage = null;
     this.browser = browser;
     this.contentProvider = new ContentProvider(this.config);
-    this.id = uuidv4();
+    this.id = id || uuidv4();
   }
 
   public async launch(startUrl?: string) {
@@ -130,6 +132,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
         if (this.browserPage) {
           try {
             this.browserPage.send(msg.type, msg.params, msg.callbackId);
+            this.emit(msg.type, msg.params);
           } catch (err) {
             vscode.window.showErrorMessage(err);
           }
@@ -150,6 +153,13 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
   public getState() {
     return this.state;
+  }
+
+  public setViewport(viewport: any) {
+    this._panel!.webview.postMessage({
+      method: 'extension.viewport',
+      result: viewport
+    });
   }
 
   public dispose() {
