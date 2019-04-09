@@ -104,15 +104,17 @@ class Screencast extends React.Component<any, any> {
       return;
     }
 
+    let devicePixelRatio = window.devicePixelRatio || 1;
+
     const canvasWidth = this.props.width;
     const canvasHeight = this.props.height;
     const checkerboardPattern = this.getCheckerboardPattern(canvasElement, this.canvasContext);
 
-    canvasElement.width = window.devicePixelRatio * canvasWidth;
-    canvasElement.height = window.devicePixelRatio * canvasHeight;
+    canvasElement.width = canvasWidth * devicePixelRatio;
+    canvasElement.height = canvasHeight * devicePixelRatio;
 
     this.canvasContext.save();
-    this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+    this.canvasContext.scale(devicePixelRatio, devicePixelRatio);
 
     this.canvasContext.save();
     this.canvasContext.fillStyle = checkerboardPattern;
