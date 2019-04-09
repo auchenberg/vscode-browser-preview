@@ -40,8 +40,6 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
             this._panel.webview.postMessage(data);
           }
         });
-
-        this.emit('windowCreated', this.browserPage);
       }
     } catch (err) {
       vscode.window.showErrorMessage(err.message);
@@ -133,6 +131,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
         if (this.browserPage) {
           try {
             this.browserPage.send(msg.type, msg.params, msg.callbackId);
+            this.emit(msg.type, msg.params);
           } catch (err) {
             vscode.window.showErrorMessage(err);
           }
@@ -156,7 +155,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   }
 
   public setViewport(viewport: any) {
-    this._panel.webview.postMessage({
+    this._panel!.webview.postMessage({
       method: 'extension.viewport',
       result: viewport
     });

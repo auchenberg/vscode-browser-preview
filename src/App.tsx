@@ -176,6 +176,7 @@ class App extends React.Component<any, IState> {
 
     this.connection.on('extension.viewport', (viewport: IViewport) => {
       this.handleViewportSizeChange(viewport);
+      this.enableViewportDeviceEmulation('Live Share');
 
       // TODO: Scroll the page
     });
@@ -558,11 +559,11 @@ class App extends React.Component<any, IState> {
     });
   }
 
-  private enableViewportDeviceEmulation() {
+  private enableViewportDeviceEmulation(deviceName: string = 'Responsive') {
     console.log('app.enableViewportDeviceEmulation');
     this.handleViewportDeviceChange({
       device: {
-        name: 'Responsive',
+        name: deviceName,
         viewport: {
           width: this.state.viewportMetadata.width,
           height: this.state.viewportMetadata.height
