@@ -228,7 +228,7 @@ class Viewport extends React.Component<any, any> {
   }
 
   private roundNumber(value: number) {
-    return Math.round(value * 100) / 100;
+    return Math.floor(value);
   }
 
   private emitViewportChanges(newViewport: any) {

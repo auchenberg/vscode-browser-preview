@@ -126,6 +126,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
         if (msg.type === 'extension.appStateChanged') {
           this.state = msg.params.state;
+          this.emit('stateChanged');
         }
 
         if (this.browserPage) {
