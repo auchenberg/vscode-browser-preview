@@ -3,11 +3,8 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
 
-trigger:
-- master
-
-pool:
-  vmImage: 'Hosted VS 2017'
+queue:
+  name: Hosted VS2017
 
 steps:
 - task: NodeTool@0
