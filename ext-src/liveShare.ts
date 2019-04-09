@@ -7,6 +7,7 @@ const REQUEST_GET_WINDOWS = 'getWindows';
 const NOTIFICATION_WINDOW_CREATED = 'windowCreated';
 const NOTIFICATION_WINDOW_DISPOSED = 'windowDisposed';
 const NOTIFICATION_WINDOW_INTERACTION = 'windowInteraction';
+const NOTIFICATION_WINDOW_RESIZED = 'windowResized';
 
 const DISPATCHED_EVENTS = [
   'Input.dispatchKeyEvent',
@@ -80,6 +81,13 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
       const window = windowManager.getByUrl(args.url)!;
       window.dispose();
     });
+
+    service.onNotify(NOTIFICATION_WINDOW_RESIZED, async (args: any) => {
+      log('Window resized', args);
+
+      const window = windowManager.getByUrl(args.url)!;
+      window.setViewport(args.viewportMetadata);
+    });
   }
 
   handleRemoteInteractions(service!, liveShare, windowManager);
@@ -146,6 +154,18 @@ function handleLocalWindowCreation(
           window.on('disposed', () => {
             log('Notifying guets of window disposal', state.url);
             service.notify(NOTIFICATION_WINDOW_DISPOSED, { url: state.url });
+          });
+
+          let previousDimensions = { height: state.viewportMetadata, width: state.viewportMetadata.width };
+          window.on('stateChanged', () => {
+            const { url, viewportMetadata } = <any>window.getState();
+            if (
+              viewportMetadata.height !== previousDimensions.height ||
+              viewportMetadata.width !== previousDimensions.width
+            ) {
+              previousDimensions = { height: viewportMetadata.height, width: viewportMetadata.width };
+              service.notify(NOTIFICATION_WINDOW_RESIZED, { url, viewportMetadata });
+            }
           });
         }
       }, 1000);
