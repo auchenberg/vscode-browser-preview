@@ -16,3 +16,10 @@ steps:
     npm install
     npm run build
   displayName: 'npm install and build'
+
+- task: upload-cache-build-task@0
+  inputs:
+    vsckEndpoint: 'vscloudkernel-dev'
+    nugetpat: 'vscloudkernel-nuget'
+    language: typescript
+    githubpat: 'vsls-contrib'
