@@ -41,7 +41,7 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
 
     service.onRequest(REQUEST_GET_WINDOWS, () => {
       const windows = Array.from(windowManager.openWindows);
-      const windowStates = windows.map((window) => window.getState());
+      const windowStates = windows.map((window) => ({ ...window.getState(), id: window.id }));
 
       console.log('Returning browser windows to guest', windowStates);
       return windowStates;
