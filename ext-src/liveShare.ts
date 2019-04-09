@@ -1,6 +1,5 @@
 import * as vsls from 'vsls/vscode';
 import { BrowserViewWindowManager } from './BrowserViewWindowManager';
-import { BrowserViewWindow, PANEL_TITLE } from './BrowserViewWindow';
 
 const SERVICE_NAME = 'browser-preview';
 const REQUEST_GET_WINDOWS = 'getWindows';
@@ -17,8 +16,6 @@ const DISPATCHED_EVENTS = [
   'Page.navigate',
   'Page.reload'
 ];
-
-const SHARED_PANEL_TITLE = `${PANEL_TITLE} (Shared)`;
 
 function log(message: string, ...params: any[]) {
   console.log(`Browser Preview (Live Share): ${message}`, ...params);
@@ -63,7 +60,7 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
     if (windows && windows.length > 0) {
       windows.forEach(async (state: any) => {
         log('Creating window', state);
-        const window = await windowManager.create(state.url, SHARED_PANEL_TITLE);
+        const window = await windowManager.create(state.url, state.id);
         window.setViewport(state.viewportMetadata);
       });
     }
@@ -71,21 +68,21 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
     service.onNotify(NOTIFICATION_WINDOW_CREATED, async (args: any) => {
       log('Window created', args);
 
-      const window = await windowManager.create(args.url, SHARED_PANEL_TITLE);
+      const window = await windowManager.create(args.url, args.id);
       window.setViewport(args.viewportMetadata);
     });
 
     service.onNotify(NOTIFICATION_WINDOW_DISPOSED, async (args: any) => {
       log('Window disposed', args);
 
-      const window = windowManager.getByUrl(args.url)!;
+      const window = windowManager.getById(args.id)!;
       window.dispose();
     });
 
     service.onNotify(NOTIFICATION_WINDOW_RESIZED, async (args: any) => {
       log('Window resized', args);
 
-      const window = windowManager.getByUrl(args.url)!;
+      const window = windowManager.getById(args.id)!;
       window.setViewport(args.viewportMetadata);
     });
   }
@@ -115,7 +112,7 @@ function handleRemoteInteractions(
 ) {
   log('Setting up remote listeners');
   service.onNotify(NOTIFICATION_WINDOW_INTERACTION, async (args: any) => {
-    const { peerNumber, url, data } = args;
+    const { peerNumber, id, data } = args;
 
     if (peerNumber === liveShare.session.peerNumber) {
       // This is a re-broadcasted event from
@@ -123,8 +120,8 @@ function handleRemoteInteractions(
       return;
     }
 
-    log('Received client event', data);
-    const window = windowManager.getByUrl(url);
+    const window = windowManager.getById(id);
+    log('Received client event', data, window);
     window!.browserPage!.send(data.type, data.params);
 
     if (liveShare.session.role === vsls.Role.Host) {
@@ -149,22 +146,22 @@ function handleLocalWindowCreation(
         if (state.viewportMetadata && typeof state.viewportMetadata.height === 'number') {
           clearInterval(intervalId);
           log('Notifying guests of window', state);
-          service.notify(NOTIFICATION_WINDOW_CREATED, state);
+          service.notify(NOTIFICATION_WINDOW_CREATED, { ...state, id: id });
 
           window.on('disposed', () => {
-            log('Notifying guets of window disposal', state.url);
-            service.notify(NOTIFICATION_WINDOW_DISPOSED, { url: state.url });
+            log('Notifying guets of window disposal', state.id);
+            service.notify(NOTIFICATION_WINDOW_DISPOSED, { id: window.id });
           });
 
           let previousDimensions = { height: state.viewportMetadata, width: state.viewportMetadata.width };
           window.on('stateChanged', () => {
-            const { url, viewportMetadata } = <any>window.getState();
+            const { viewportMetadata } = <any>window.getState();
             if (
               viewportMetadata.height !== previousDimensions.height ||
               viewportMetadata.width !== previousDimensions.width
             ) {
               previousDimensions = { height: viewportMetadata.height, width: viewportMetadata.width };
-              service.notify(NOTIFICATION_WINDOW_RESIZED, { url, viewportMetadata });
+              service.notify(NOTIFICATION_WINDOW_RESIZED, { id: window.id, viewportMetadata });
             }
           });
         }
@@ -181,11 +178,10 @@ function handleLocalWindowCreation(
 
         log('Sending client event', type, params);
 
-        const { url } = <any>window.getState();
         service.notify(NOTIFICATION_WINDOW_INTERACTION, {
           peerNumber: liveShare.session.peerNumber,
           data: { params: params[0], type },
-          url
+          id: window.id
         });
       }
     );

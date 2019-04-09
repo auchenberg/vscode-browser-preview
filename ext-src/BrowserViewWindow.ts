@@ -21,17 +21,17 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
   public id: string;
   public config: ExtensionConfiguration;
 
-  constructor(config: ExtensionConfiguration, browser: Browser) {
+  constructor(config: ExtensionConfiguration, browser: Browser, id?: string) {
     super();
     this.config = config;
     this._panel = null;
     this.browserPage = null;
     this.browser = browser;
     this.contentProvider = new ContentProvider(this.config);
-    this.id = uuidv4();
+    this.id = id || uuidv4();
   }
 
-  public async launch(startUrl?: string, title: string = PANEL_TITLE) {
+  public async launch(startUrl?: string) {
     try {
       this.browserPage = await this.browser.newPage();
       if (this.browserPage) {
@@ -49,7 +49,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     let showOptions = {
       viewColumn: vscode.ViewColumn.Beside
     };
-    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, title, showOptions, {
+    this._panel = vscode.window.createWebviewPanel(BrowserViewWindow.viewType, 'Browser Preview', showOptions, {
       enableScripts: true,
       retainContextWhenHidden: true,
       localResourceRoots: [vscode.Uri.file(path.join(this.config.extensionPath, 'build'))]

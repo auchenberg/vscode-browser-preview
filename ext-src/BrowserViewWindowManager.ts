@@ -57,7 +57,7 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     return 1;
   }
 
-  public async create(startUrl?: string, title?: string) {
+  public async create(startUrl?: string, id?: string) {
     this.refreshSettings();
     let config = { ...this.defaultConfig };
 
@@ -70,9 +70,9 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
       config.columnNumber = lastColumnNumber + 1;
     }
 
-    let window = new BrowserViewWindow(config, this.browser);
+    let window = new BrowserViewWindow(config, this.browser, id);
 
-    await window.launch(startUrl, title);
+    await window.launch(startUrl);
     window.once('disposed', () => {
       let id = window.id;
       this.openWindows.delete(window);
