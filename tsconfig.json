@@ -14,7 +14,9 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
-    "sourceMap": true
+    "sourceMap": true,
+    "rootDir": "src",
+    "outDir": "build"
   },
   "include": ["src"]
 }
