@@ -1,5 +1,6 @@
 import { Event, EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeItemCollapsibleState } from 'vscode';
 import { LiveShare, View, Role } from 'vsls/vscode';
+import { BrowserViewWindow } from '../BrowserViewWindow';
 import { BrowserViewWindowManager } from '../BrowserViewWindowManager';
 import * as path from 'path';
 
@@ -13,7 +14,7 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
     private windowManager: BrowserViewWindowManager
   ) {
     windowManager.openWindows.forEach((window) => {
-      window.on('stateChanged', this.refresh);
+      window.on('stateChanged', this.refreshWhenUrlChanges(window));
     });
 
     windowManager.on('windowCreated', (id: string) => {
@@ -22,7 +23,7 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
         return;
       }
 
-      window.on('stateChanged', this.refresh);
+      window.on('stateChanged', this.refreshWhenUrlChanges(window));
       this.refresh();
     });
 
@@ -66,7 +67,6 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
   private getNoSharedBrowserTreeItem() {
     return new TreeItem('No browsers shared');
   }
-
   private getSharedBrowserTreeItems() {
     const result = [...this.windowManager.openWindows];
 
@@ -89,6 +89,17 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
 
   private refresh = () => {
     this._onDidChangeTreeData.fire();
+  };
+
+  private refreshWhenUrlChanges = (window: BrowserViewWindow) => {
+    let previousUrl = (<any>window.getState()).url;
+    return () => {
+      const { url } = <any>window.getState();
+      if (previousUrl !== url) {
+        previousUrl = url;
+        this.refresh();
+      }
+    };
   };
 }
 

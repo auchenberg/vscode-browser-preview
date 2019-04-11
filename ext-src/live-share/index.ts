@@ -2,6 +2,7 @@ import * as vsls from 'vsls/vscode';
 import { BrowserViewWindowManager } from '../BrowserViewWindowManager';
 import registerTreeDataProvider from './tree-provider';
 import * as vscode from 'vscode';
+import { BrowserViewWindow } from '../BrowserViewWindow';
 
 const SERVICE_NAME = 'browser-preview';
 const REQUEST_GET_WINDOWS = 'getWindows';
@@ -49,6 +50,12 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
   if (liveShare.session.role === vsls.Role.Host) {
     log('Initializing host service');
     service = (await liveShare.shareService(SERVICE_NAME))!;
+
+    windowManager.openWindows.forEach((window) => handleWindowResizing(window, <vsls.SharedService>service));
+    windowManager.on(NOTIFICATION_WINDOW_DISPOSED, (id: string) => {
+      log('Notifying guests of window disposal', id);
+      service.notify(NOTIFICATION_WINDOW_DISPOSED, { id });
+    });
 
     service.onRequest(REQUEST_GET_WINDOWS, () => {
       const windows = Array.from(windowManager.openWindows);
@@ -154,29 +161,18 @@ function handleLocalWindowCreation(
     if (liveShare.session.role === vsls.Role.Host) {
       const intervalId = setInterval(function() {
         const state: any = window.getState();
-        if (state.viewportMetadata && typeof state.viewportMetadata.height === 'number') {
+        if (
+          state.viewportMetadata &&
+          state.url !== 'about:blank' &&
+          typeof state.viewportMetadata.height === 'number'
+        ) {
           clearInterval(intervalId);
           log('Notifying guests of window', state);
           service.notify(NOTIFICATION_WINDOW_CREATED, { ...state, id: id });
 
-          window.on('disposed', () => {
-            log('Notifying guets of window disposal', state.id);
-            service.notify(NOTIFICATION_WINDOW_DISPOSED, { id: window.id });
-          });
-
-          let previousDimensions = { height: state.viewportMetadata, width: state.viewportMetadata.width };
-          window.on('stateChanged', () => {
-            const { viewportMetadata } = <any>window.getState();
-            if (
-              viewportMetadata.height !== previousDimensions.height ||
-              viewportMetadata.width !== previousDimensions.width
-            ) {
-              previousDimensions = { height: viewportMetadata.height, width: viewportMetadata.width };
-              service.notify(NOTIFICATION_WINDOW_RESIZED, { id: window.id, viewportMetadata });
-            }
-          });
+          handleWindowResizing(window, <vsls.SharedService>service);
         }
-      }, 1000);
+      }, 100);
     }
 
     // Listen for any local browser interactions,
@@ -196,5 +192,19 @@ function handleLocalWindowCreation(
         });
       }
     );
+  });
+}
+
+function handleWindowResizing(window: BrowserViewWindow, service: vsls.SharedService) {
+  const state = <any>window.getState();
+  let currentDimensions = { height: state.viewportMetadata.height, width: state.viewportMetadata.width };
+  window.on('stateChanged', () => {
+    const { viewportMetadata } = <any>window.getState();
+    if (viewportMetadata.height !== currentDimensions.height || viewportMetadata.width !== currentDimensions.width) {
+      currentDimensions = { height: viewportMetadata.height, width: viewportMetadata.width };
+
+      log('Notifying guests of window resize');
+      service.notify(NOTIFICATION_WINDOW_RESIZED, { id: window.id, viewportMetadata });
+    }
   });
 }
