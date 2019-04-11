@@ -40,13 +40,6 @@ export async function setupLiveShare(extensionPath: string, windowManager: Brows
     }
   });
 
-  vscode.commands.registerCommand('browser-preview.closeSharedBrowser', (id: string) => {
-    const window = windowManager.getById(id);
-    if (window) {
-      window.dispose();
-    }
-  });
-
   setupServices(liveShare, windowManager);
 }
 
