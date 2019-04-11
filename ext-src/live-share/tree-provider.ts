@@ -1,29 +1,21 @@
-import {
-  Command,
-  Event,
-  EventEmitter,
-  ProviderResult,
-  TreeDataProvider,
-  TreeItem,
-  TreeItemCollapsibleState
-} from 'vscode';
+import { Event, EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeItemCollapsibleState } from 'vscode';
 import { LiveShare, View, Role } from 'vsls/vscode';
-import * as path from 'path';
 import { BrowserViewWindowManager } from '../BrowserViewWindowManager';
-
-enum Items {
-  Root,
-  Browsers,
-  ShareBrowser,
-  NoSharedBrowsers
-}
+import * as path from 'path';
 
 class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
+  private _onDidChangeTreeData = new EventEmitter<TreeItem>();
+  public readonly onDidChangeTreeData: Event<TreeItem> = this._onDidChangeTreeData.event;
+
   constructor(
     private extensionPath: string,
     private vslsApi: LiveShare,
     private windowManager: BrowserViewWindowManager
   ) {
+    windowManager.openWindows.forEach((window) => {
+      window.on('stateChanged', this.refresh);
+    });
+
     windowManager.on('windowCreated', (id: string) => {
       const window = windowManager.getById(id);
       if (!window) {
@@ -31,16 +23,11 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
       }
 
       window.on('stateChanged', this.refresh);
-      this.refreshBrowsers();
+      this.refresh();
     });
 
-    windowManager.on('windowDisposed', (id: string) => {
-      this.refreshBrowsers();
-    });
+    windowManager.on('windowDisposed', this.refresh);
   }
-
-  private _onDidChangeTreeData = new EventEmitter<TreeItem>();
-  public readonly onDidChangeTreeData: Event<TreeItem> = this._onDidChangeTreeData.event;
 
   getChildren(element?: TreeItem): ProviderResult<TreeItem[]> {
     if (!element) {
@@ -54,7 +41,8 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
         return [this.getNoSharedBrowserTreeItem()];
       }
     }
-    return this.getShareBrowsersTreeItem();
+
+    return this.getSharedBrowserTreeItems();
   }
 
   getTreeItem(element: TreeItem): TreeItem {
@@ -63,9 +51,7 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
 
   private getRootTreeItem() {
     const label = `Shared Browsers (${this.windowManager.openWindows.size})`;
-    const treeItem = new TreeItem(label);
-    treeItem.collapsibleState = TreeItemCollapsibleState.Expanded;
-    return treeItem;
+    return new TreeItem(label, TreeItemCollapsibleState.Expanded);
   }
 
   private getShareBrowserTreeItem() {
@@ -81,7 +67,7 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
     return new TreeItem('No browsers shared');
   }
 
-  private getShareBrowsersTreeItem() {
+  private getSharedBrowserTreeItems() {
     const result = [...this.windowManager.openWindows];
 
     return result.map((item) => {
@@ -104,10 +90,6 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
   private refresh = () => {
     this._onDidChangeTreeData.fire();
   };
-
-  private refreshBrowsers() {
-    this.refresh();
-  }
 }
 
 export default function(extensionPath: string, vslsApi: LiveShare, windowManager: BrowserViewWindowManager) {
