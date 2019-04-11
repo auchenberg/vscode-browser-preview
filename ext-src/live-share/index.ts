@@ -1,5 +1,7 @@
 import * as vsls from 'vsls/vscode';
-import { BrowserViewWindowManager } from './BrowserViewWindowManager';
+import { BrowserViewWindowManager } from '../BrowserViewWindowManager';
+import registerTreeDataProvider from './tree-provider';
+import * as vscode from 'vscode';
 
 const SERVICE_NAME = 'browser-preview';
 const REQUEST_GET_WINDOWS = 'getWindows';
@@ -21,7 +23,7 @@ function log(message: string, ...params: any[]) {
   console.log(`Browser Preview (Live Share): ${message}`, ...params);
 }
 
-export async function setupLiveShare(windowManager: BrowserViewWindowManager) {
+export async function setupLiveShare(extensionPath: string, windowManager: BrowserViewWindowManager) {
   const liveShare = await vsls.getApi();
   if (!liveShare) {
     log('Extension not installed, so skipping initialization');
@@ -29,6 +31,15 @@ export async function setupLiveShare(windowManager: BrowserViewWindowManager) {
   }
 
   await sessionStarted(liveShare);
+  registerTreeDataProvider(extensionPath, liveShare, windowManager);
+
+  vscode.commands.registerCommand('browser-preview.openSharedBrowser', (id: string) => {
+    const window = windowManager.getById(id);
+    if (window) {
+      window.show();
+    }
+  });
+
   setupServices(liveShare, windowManager);
 }
 

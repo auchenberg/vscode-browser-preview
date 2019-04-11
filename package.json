@@ -24,7 +24,12 @@
     "onCommand:browser-preview.openPreview",
     "onDebugInitialConfigurations",
     "onDebug",
-    "onFileSystem:vsls"
+    "onFileSystem:vsls",
+    "onCommand:liveshare.start",
+    "onCommand:liveshare.startFromActivityBar",
+    "onCommand:liveshare.startReadOnly",
+    "onCommand:liveshare.startReadOnlyFromActivityBar",
+    "onCommand:liveshare.startReadOnlyFromSessionExplorer"
   ],
   "contributes": {
     "configuration": {
@@ -58,6 +63,11 @@
         "category": "Browser Preview",
         "command": "browser-preview.openPreview",
         "title": "Open Preview"
+      },
+      {
+        "category": "Browser Preview",
+        "command": "browser-preview.openSharedBrowser",
+        "title": "Open Shared Browser"
       }
     ],
     "debuggers": [
@@ -191,6 +201,14 @@
           "icon": "resources/icon.svg",
           "id": "browser-preview",
           "title": "Browser Preview"
+        }
+      ]
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "browser-preview.openSharedBrowser",
+          "when": "false"
         }
       ]
     }
