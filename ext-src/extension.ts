@@ -15,6 +15,20 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('browser-preview.openPreview', (url?) => {
       windowManager.create(url);
+    }),
+
+    vscode.commands.registerCommand('browser-preview.openActiveFile', () => {
+      const activeEditor = vscode.window.activeTextEditor;
+      if (!activeEditor) {
+        return; // no active editor: ignore the command
+      }
+
+      // get active url
+      const filename = activeEditor.document.fileName;
+
+      if (filename) {
+        windowManager.create(`file://${filename}`);
+      }
     })
   );
 

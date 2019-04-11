@@ -22,6 +22,7 @@
   "activationEvents": [
     "onView:targetTree",
     "onCommand:browser-preview.openPreview",
+    "onCommand:browser-preview.openActiveFile",
     "onDebugInitialConfigurations",
     "onDebug",
     "onFileSystem:vsls",
@@ -68,6 +69,11 @@
         "category": "Browser Preview",
         "command": "browser-preview.openSharedBrowser",
         "title": "Open Shared Browser"
+      },
+      {
+        "category": "Browser Preview",
+        "command": "browser-preview.openActiveFile",
+        "title": "Open Active File in Preview"
       }
     ],
     "debuggers": [
