@@ -183,6 +183,7 @@ class Screencast extends React.Component<any, any> {
       // }
 
       const highlightInfo = this.props.highlightInfo ? this.scaleBoxModelToViewport(this.props.highlightInfo) : null;
+      const format = this.props.format === 'jpeg' ? 'jpg' : 'png';
 
       this.setState({
         highlightInfo: highlightInfo,
@@ -191,7 +192,7 @@ class Screencast extends React.Component<any, any> {
         scrollOffsetY: metadata.scrollOffsetY
       });
 
-      imageElement.src = 'data:image/jpg;base64,' + screencastFrame.base64Data;
+      imageElement.src = 'data:image/' + format + ';base64,' + screencastFrame.base64Data;
     }
   }
 

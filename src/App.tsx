@@ -218,6 +218,7 @@ class App extends React.Component<any, IState> {
           isInspectEnabled={this.state.isInspectEnabled}
           isDeviceEmulationEnabled={this.state.isDeviceEmulationEnabled}
           frame={this.state.frame}
+          format={this.state.format}
           url={this.state.url}
           onViewportChanged={this.onViewportChanged}
           ref={(c) => {
