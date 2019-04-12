@@ -341,8 +341,10 @@ class App extends React.Component<any, IState> {
           let height = Math.floor(data.height);
           let width = Math.floor(data.width);
 
+          let devicePixelRatio = window.devicePixelRatio || 1;
+
           this.connection.send('Page.setDeviceMetricsOverride', {
-            deviceScaleFactor: 2,
+            deviceScaleFactor: devicePixelRatio,
             mobile: false,
             height: height,
             width: width
