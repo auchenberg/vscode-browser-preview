@@ -183,7 +183,7 @@ class Screencast extends React.Component<any, any> {
       // }
 
       const highlightInfo = this.props.highlightInfo ? this.scaleBoxModelToViewport(this.props.highlightInfo) : null;
-      const format = this.props.format === 'jpeg' ? 'jpg' : 'png';
+      const format = this.props.format;
 
       this.setState({
         highlightInfo: highlightInfo,
