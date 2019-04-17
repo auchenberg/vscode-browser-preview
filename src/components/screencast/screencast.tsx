@@ -102,6 +102,9 @@ class Screencast extends React.Component<any, any> {
 
     if (!this.canvasContext) {
       return;
+    } else {
+      // disable smoothing when calling drawImage
+      this.canvasContext['imageSmoothingEnabled'] = false;
     }
 
     let devicePixelRatio = window.devicePixelRatio || 1;
@@ -236,10 +239,14 @@ class Screencast extends React.Component<any, any> {
         position: position
       });
     } else {
-      const position = this.convertIntoScreenSpace(event, this.state);
-      this.props.onInspectHighlightRequested({
-        position: position
-      });
+      // only calls InspectHighlightRequested if inspect is enabled: fixes
+      // uncaught rejected promise later because position.x/y is NaN
+      if (this.props.isInspectEnabled) {
+        const position = this.convertIntoScreenSpace(event, this.state);
+        this.props.onInspectHighlightRequested({
+          position: position
+        });
+      }
 
       this.dispatchMouseEvent(event.nativeEvent);
     }

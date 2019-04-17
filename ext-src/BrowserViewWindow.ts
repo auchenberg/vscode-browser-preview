@@ -131,7 +131,11 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
 
         if (this.browserPage) {
           try {
-            this.browserPage.send(msg.type, msg.params, msg.callbackId);
+            // not sure about this one but this throws later with unhandled
+            // 'extension.appStateChanged' message
+            if (msg.type !== 'extension.appStateChanged') {
+              this.browserPage.send(msg.type, msg.params, msg.callbackId);
+            }
             this.emit(msg.type, msg.params);
           } catch (err) {
             vscode.window.showErrorMessage(err);

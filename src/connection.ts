@@ -57,7 +57,7 @@ export default class Connection extends EventEmitter2 {
         if (callback) {
           this.callbacks.delete(object.callbackId);
           if (object.error) {
-            callback.reject(callback.error, callback.method, object);
+            callback.reject(object.error, callback.method, object);
           } else {
             callback.resolve(object.result);
           }

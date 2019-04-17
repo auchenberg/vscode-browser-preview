@@ -294,8 +294,6 @@ class App extends React.Component<any, IState> {
           y: data.params.position.y
         });
 
-        console.log('highlightNodeInfo', highlightNodeInfo);
-
         if (highlightNodeInfo) {
           // let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
           //   backendNodeId: highlightNodeInfo.backendNodeId
