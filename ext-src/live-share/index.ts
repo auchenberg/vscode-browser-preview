@@ -69,7 +69,7 @@ async function setupServices(liveShare: vsls.LiveShare, windowManager: BrowserVi
     service = (await liveShare.getSharedService(SERVICE_NAME))!;
 
     if (!service) {
-      log("Host doesn't have the Browsr Preview extension installed, skipping initialization");
+      log("Host doesn't have the Browser Preview extension installed, skipping initialization");
       return;
     }
 
