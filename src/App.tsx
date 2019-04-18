@@ -187,6 +187,7 @@ class App extends React.Component<any, IState> {
     // this.connection.send('CSS.enable');
 
     this.requestNavigationHistory();
+    this.startCasting();
   }
 
   public componentDidUpdate() {
