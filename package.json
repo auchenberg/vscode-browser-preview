@@ -147,7 +147,15 @@
             }
           },
           "attach": {
+            "required": [
+              "port"
+            ],
             "properties": {
+              "port": {
+                "type": "number",
+                "description": "Port to use for Chrome remote debugging",
+                "default": 9222
+              },
               "urlFilter": {
                 "type": "string",
                 "description": "Will search for a page with this url and attach to it, if found. Can have * wildcards.",
