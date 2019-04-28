@@ -17,7 +17,7 @@ export default class DebugProvider {
   }
 
   getProvider(): vscode.DebugConfigurationProvider {
-    let debugPort = this.windowManager.getDebugPort();
+    let manager = this.windowManager;
 
     return {
       provideDebugConfigurations(
@@ -59,7 +59,7 @@ export default class DebugProvider {
         if (config && config.type === 'browser-preview') {
           if (config.request && config.request === `attach`) {
             debugConfig.name = `Browser Preview: Attach`;
-            debugConfig.port = debugPort;
+            debugConfig.port = debugConfig.port as number;
 
             vscode.debug.startDebugging(folder, debugConfig);
           } else if (config.request && config.request === `launch`) {
@@ -71,7 +71,7 @@ export default class DebugProvider {
 
             launch.then(() => {
               setTimeout(() => {
-                debugConfig.port = debugPort;
+                debugConfig.port = manager.getDebugPort();
                 vscode.debug.startDebugging(folder, debugConfig);
               }, 1000);
             });
