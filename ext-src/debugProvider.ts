@@ -53,15 +53,20 @@ export default class DebugProvider {
           sourceMapPathOverrides: config.sourceMapPathOverrides,
           urlFilter: '',
           url: '',
-          port: 9222
+          port: null
         };
 
         if (config && config.type === 'browser-preview') {
           if (config.request && config.request === `attach`) {
             debugConfig.name = `Browser Preview: Attach`;
-            debugConfig.port = debugConfig.port as number;
-
-            vscode.debug.startDebugging(folder, debugConfig);
+            debugConfig.port = manager.getDebugPort();
+            if (debugConfig.port === null) {
+              vscode.window.showErrorMessage(
+                'No Browser Preview window was found. Open a Browser Preview window or use the "launch" request type.'
+              );
+            } else {
+              vscode.debug.startDebugging(folder, debugConfig);
+            }
           } else if (config.request && config.request === `launch`) {
             debugConfig.name = `Browser Preview: Launch`;
             debugConfig.urlFilter = config.url;
