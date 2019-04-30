@@ -57,13 +57,19 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     return 1;
   }
 
-  public async create(startUrl?: string, id?: string) {
+  public async launch() {
     this.refreshSettings();
-    let config = { ...this.defaultConfig };
 
     if (!this.browser) {
-      this.browser = new Browser(config);
+      this.browser = new Browser({ ...this.defaultConfig });
     }
+
+    await this.browser.launchBrowser();
+  }
+
+  public async create(startUrl?: string, id?: string) {
+    await this.launch();
+    let config = { ...this.defaultConfig };
 
     let lastColumnNumber = this.getLastColumnNumber();
     if (lastColumnNumber) {

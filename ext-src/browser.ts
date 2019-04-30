@@ -18,7 +18,11 @@ export default class Browser extends EventEmitter {
     super();
   }
 
-  private async launchBrowser() {
+  public async launchBrowser() {
+    if (this.browser) {
+      return;
+    }
+
     let chromePath = whichChrome.Chrome || whichChrome.Chromium;
     let chromeArgs = [];
     let platform = os.platform();
@@ -48,9 +52,7 @@ export default class Browser extends EventEmitter {
   }
 
   public async newPage(): Promise<BrowserPage> {
-    if (!this.browser) {
-      await this.launchBrowser();
-    }
+    await this.launchBrowser();
 
     var page = new BrowserPage(this.browser);
     await page.launch();
