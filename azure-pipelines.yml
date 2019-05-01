@@ -17,9 +17,10 @@ steps:
       npm run build
     displayName: 'npm install and build'
 
-  - task: upload-cache-build-task@0
+  - task: RichCodeNavIndexer@0
     inputs:
-      vsckEndpoint: 'vscloudkernel-dev'
-      nugetpat: 'vscloudkernel-nuget'
-      language: typescript
-      githubpat: auchenberg
+      serviceConnection: 'rich-code-nav'
+      nugetServiceConnection: 'rich-code-nav-nuget'
+      githubServiceConnection: auchenberg
+      languages: typescript
+      serviceEndpoint: 'https://prod.richnav.vsengsaas.visualstudio.com'
