@@ -183,8 +183,8 @@ class App extends React.Component<any, IState> {
 
     // Initialize
     this.connection.send('Page.enable');
-    // this.connection.send('DOM.enable');
-    // this.connection.send('CSS.enable');
+    this.connection.send('DOM.enable');
+    this.connection.send('CSS.enable');
 
     this.requestNavigationHistory();
     this.startCasting();
