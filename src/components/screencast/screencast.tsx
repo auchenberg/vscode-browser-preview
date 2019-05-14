@@ -25,7 +25,6 @@ class Screencast extends React.Component<any, any> {
 
     this.state = {
       imageZoom: 1,
-      highlightInfo: null,
       screenOffsetTop: 0
     };
   }
@@ -102,39 +101,51 @@ class Screencast extends React.Component<any, any> {
 
     if (!this.canvasContext) {
       return;
-    } else {
-      // disable smoothing when calling drawImage
-      this.canvasContext['imageSmoothingEnabled'] = false;
     }
 
+    this.canvasContext.imageSmoothingEnabled = false;
+
+    const checkerboardPattern = this.getCheckerboardPattern(canvasElement, this.canvasContext);
     let devicePixelRatio = window.devicePixelRatio || 1;
 
+    // Resize and scale canvas
     const canvasWidth = this.props.width;
     const canvasHeight = this.props.height;
-    const checkerboardPattern = this.getCheckerboardPattern(canvasElement, this.canvasContext);
 
+    // TODO Move out to increase performanc
     canvasElement.width = canvasWidth * devicePixelRatio;
     canvasElement.height = canvasHeight * devicePixelRatio;
-
-    this.canvasContext.save();
     this.canvasContext.scale(devicePixelRatio, devicePixelRatio);
 
+    // Render checkerboard
     this.canvasContext.save();
     this.canvasContext.fillStyle = checkerboardPattern;
     this.canvasContext.fillRect(0, 0, canvasWidth, canvasHeight);
     this.canvasContext.restore();
 
-    // Render highlight
-    let config = {
-      contentColor: 'rgba(111, 168, 220, .66)',
-      paddingColor: 'rgba(147, 196, 125, .55)',
-      borderColor: 'rgba(255, 229, 153, .66)',
-      marginColor: 'rgba(246, 178, 107, .66)'
-    };
+    // Render viewport frame
+    let dy = this.state.screenOffsetTop * this.viewportMetadata.screenZoom;
+    let dw = this.props.width;
+    let dh = this.props.height;
 
-    if (this.state.highlightInfo) {
-      let model = this.state.highlightInfo;
+    // Render screen frame
+    this.canvasContext.save();
+    this.canvasContext.drawImage(imageElement, 0, dy, dw, dh);
+    this.canvasContext.restore();
+
+    // Render element highlight
+    if (this.props.viewportMetadata && this.props.viewportMetadata.highlightInfo) {
+      let model = this.scaleBoxModelToViewport(this.props.viewportMetadata.highlightInfo);
+      let config = {
+        contentColor: 'rgba(111, 168, 220, .66)',
+        paddingColor: 'rgba(147, 196, 125, .55)',
+        borderColor: 'rgba(255, 229, 153, .66)',
+        marginColor: 'rgba(246, 178, 107, .66)'
+      };
+
       this.canvasContext.save();
+      this.canvasContext.globalAlpha = 0.66;
+
       const transparentColor = 'rgba(0, 0, 0, 0)';
       const quads = [];
       if (model.content && config.contentColor !== transparentColor)
@@ -145,28 +156,25 @@ class Screencast extends React.Component<any, any> {
         quads.push({ quad: model.border, color: config.borderColor });
       if (model.margin && config.marginColor !== transparentColor)
         quads.push({ quad: model.margin, color: config.marginColor });
+
       for (let i = quads.length - 1; i > 0; --i) {
+        this.canvasContext.save();
         this.drawOutlinedQuadWithClip(this.canvasContext, quads[i].quad, quads[i - 1].quad, quads[i].color);
+        this.canvasContext.restore();
       }
+
       if (quads.length > 0) {
+        this.canvasContext.save();
         this.drawOutlinedQuad(this.canvasContext, quads[0].quad, quads[0].color);
+        this.canvasContext.restore();
       }
+
       this.canvasContext.restore();
-      this.canvasContext.globalCompositeOperation = 'destination-over';
     }
-
-    // Render viewport frame
-    let dy = this.state.screenOffsetTop * this.viewportMetadata.screenZoom;
-    let dw = this.props.width;
-    let dh = this.props.height;
-
-    this.canvasContext.drawImage(imageElement, 0, dy, dw, dh);
-    this.canvasContext.restore();
   }
 
   public renderScreencastFrame() {
     const screencastFrame = this.props.frame;
-
     const imageElement = this.imageRef.current;
 
     if (imageElement && screencastFrame) {
@@ -185,11 +193,9 @@ class Screencast extends React.Component<any, any> {
       //   imageZoom = 1 / window.devicePixelRatio;
       // }
 
-      const highlightInfo = this.props.highlightInfo ? this.scaleBoxModelToViewport(this.props.highlightInfo) : null;
       const format = this.props.format;
 
       this.setState({
-        highlightInfo: highlightInfo,
         screenOffsetTop: metadata.offsetTop,
         scrollOffsetX: metadata.scrollOffsetX,
         scrollOffsetY: metadata.scrollOffsetY
@@ -228,26 +234,19 @@ class Screencast extends React.Component<any, any> {
   }
 
   private handleMouseEvent(event: any) {
-    if (this.props.isInspectEnabled && event.type === 'click') {
-      const position = this.convertIntoScreenSpace(event, this.state);
-      this.props.onInspectElement({
-        position: position
-      });
-    } else if (this.props.isInspectEnabled && event.type === 'mousemove') {
-      const position = this.convertIntoScreenSpace(event, this.state);
-      this.props.onInspectHighlightRequested({
-        position: position
-      });
-    } else {
-      // only calls InspectHighlightRequested if inspect is enabled: fixes
-      // uncaught rejected promise later because position.x/y is NaN
-      if (this.props.isInspectEnabled) {
+    if (this.props.isInspectEnabled) {
+      if (event.type === 'click') {
+        const position = this.convertIntoScreenSpace(event, this.state);
+        this.props.onInspectElement({
+          position: position
+        });
+      } else if (event.type === 'mousemove') {
         const position = this.convertIntoScreenSpace(event, this.state);
         this.props.onInspectHighlightRequested({
           position: position
         });
       }
-
+    } else {
       this.dispatchMouseEvent(event.nativeEvent);
     }
 
@@ -281,23 +280,19 @@ class Screencast extends React.Component<any, any> {
   }
 
   private drawOutlinedQuad(context: any, quad: any, fillColor: any) {
-    context.save();
     context.lineWidth = 2;
     this.quadToPath(context, quad).clip();
     context.fillStyle = fillColor;
     context.fill();
-    context.restore();
   }
 
   private drawOutlinedQuadWithClip(context: any, quad: any, clipQuad: any, fillColor: any) {
     context.fillStyle = fillColor;
-    context.save();
     context.lineWidth = 0;
     this.quadToPath(context, quad).fill();
     context.globalCompositeOperation = 'destination-out';
     context.fillStyle = 'red';
     this.quadToPath(context, clipQuad).fill();
-    context.restore();
   }
 
   private scaleBoxModelToViewport(model: any) {
