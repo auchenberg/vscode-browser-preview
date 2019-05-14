@@ -112,7 +112,7 @@ class Screencast extends React.Component<any, any> {
     const canvasWidth = this.props.width;
     const canvasHeight = this.props.height;
 
-    // TODO Move out to increase performanc
+    // TODO Move out to increase performance
     canvasElement.width = canvasWidth * devicePixelRatio;
     canvasElement.height = canvasHeight * devicePixelRatio;
     this.canvasContext.scale(devicePixelRatio, devicePixelRatio);
@@ -144,18 +144,25 @@ class Screencast extends React.Component<any, any> {
       };
 
       this.canvasContext.save();
-      this.canvasContext.globalAlpha = 0.66;
 
       const transparentColor = 'rgba(0, 0, 0, 0)';
       const quads = [];
-      if (model.content && config.contentColor !== transparentColor)
+
+      if (model.content && config.contentColor !== transparentColor) {
         quads.push({ quad: model.content, color: config.contentColor });
-      if (model.padding && config.paddingColor !== transparentColor)
+      }
+
+      if (model.padding && config.paddingColor !== transparentColor) {
         quads.push({ quad: model.padding, color: config.paddingColor });
-      if (model.border && config.borderColor !== transparentColor)
+      }
+
+      if (model.border && config.borderColor !== transparentColor) {
         quads.push({ quad: model.border, color: config.borderColor });
-      if (model.margin && config.marginColor !== transparentColor)
+      }
+
+      if (model.margin && config.marginColor !== transparentColor) {
         quads.push({ quad: model.margin, color: config.marginColor });
+      }
 
       for (let i = quads.length - 1; i > 0; --i) {
         this.canvasContext.save();
@@ -178,11 +185,9 @@ class Screencast extends React.Component<any, any> {
     const imageElement = this.imageRef.current;
 
     if (imageElement && screencastFrame) {
-      const canvasWidth = this.props.width;
-      const canvasHeight = this.props.height;
-
-      const metadata = screencastFrame.metadata;
-      const deviceSizeRatio = metadata.deviceHeight / metadata.deviceWidth;
+      // const canvasWidth = this.props.width;
+      // const canvasHeight = this.props.height;
+      // const deviceSizeRatio = metadata.deviceHeight / metadata.deviceWidth;
 
       // let imageZoom = Math.min(
       //   canvasWidth / metadata.deviceWidth,
@@ -193,6 +198,7 @@ class Screencast extends React.Component<any, any> {
       //   imageZoom = 1 / window.devicePixelRatio;
       // }
 
+      const metadata = screencastFrame.metadata;
       const format = this.props.format;
 
       this.setState({
