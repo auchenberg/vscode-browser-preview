@@ -296,34 +296,34 @@ class App extends React.Component<any, IState> {
         });
 
         if (highlightNodeInfo) {
-          // let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
-          //   backendNodeId: highlightNodeInfo.backendNodeId
+          let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
+            backendNodeId: highlightNodeInfo.backendNodeId
+          });
+
+          // let nodeIdsReq: any = await this.connection.send('DOM.pushNodesByBackendIdsToFrontend', {
+          //   backendNodeIds: [highlightNodeInfo.backendNodeId]
           // });
 
-          let nodeIdsReq: any = await this.connection.send('DOM.pushNodesByBackendIdsToFrontend', {
-            backendNodeIds: [highlightNodeInfo.backendNodeId]
-          });
+          // let nodeId = nodeIdsReq.nodeIds[0];
+          // let computedStyleReq: any = await this.connection.send('CSS.getComputedStyleForNode', {
+          //   nodeId: nodeId
+          // });
 
-          let nodeId = nodeIdsReq.nodeIds[0];
-          let computedStyleReq: any = await this.connection.send('CSS.getComputedStyleForNode', {
-            nodeId: nodeId
-          });
+          // let cursorCSS = computedStyleReq.computedStyle.find((c: any) => c.name == 'cursor');
 
-          let cursorCSS = computedStyleReq.computedStyle.find((c: any) => c.name == 'cursor');
-
-          if (cursorCSS) {
-            console.log('cursorCSS', cursorCSS.value);
-          }
-
-          // if (highlightBoxModel && highlightBoxModel.model) {
-          //   this.setState({
-          //     ...this.state,
-          //     viewportMetadata: {
-          //       ...this.state.viewportMetadata,
-          //       highlightInfo: highlightBoxModel.model
-          //     }
-          //   });
+          // if (cursorCSS) {
+          //   console.log('cursorCSS', cursorCSS.value);
           // }
+
+          if (highlightBoxModel && highlightBoxModel.model) {
+            this.setState({
+              ...this.state,
+              viewportMetadata: {
+                ...this.state.viewportMetadata,
+                highlightInfo: highlightBoxModel.model
+              }
+            });
+          }
         }
         break;
       case 'inspectElement':
