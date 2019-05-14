@@ -328,6 +328,7 @@ class App extends React.Component<any, IState> {
         break;
       case 'inspectElement':
         await this.handleInspectElementRequest(data);
+        this.handleToggleInspect();
         break;
       case 'interaction':
         this.connection.send(data.action, data.params);
