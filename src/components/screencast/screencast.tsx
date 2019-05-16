@@ -145,27 +145,28 @@ class Screencast extends React.Component<any, any> {
 
       this.canvasContext.save();
 
-      const transparentColor = 'rgba(0, 0, 0, 0)';
       const quads = [];
 
-      if (model.content && config.contentColor !== transparentColor) {
+      if (model.content) {
         quads.push({ quad: model.content, color: config.contentColor });
       }
 
-      if (model.padding && config.paddingColor !== transparentColor) {
+      if (model.padding) {
         quads.push({ quad: model.padding, color: config.paddingColor });
       }
 
-      if (model.border && config.borderColor !== transparentColor) {
+      if (model.border) {
         quads.push({ quad: model.border, color: config.borderColor });
       }
 
-      if (model.margin && config.marginColor !== transparentColor) {
+      if (model.margin) {
         quads.push({ quad: model.margin, color: config.marginColor });
       }
 
       for (let i = quads.length - 1; i > 0; --i) {
         this.canvasContext.save();
+        this.canvasContext.globalAlpha = 0.66;
+
         this.drawOutlinedQuadWithClip(this.canvasContext, quads[i].quad, quads[i - 1].quad, quads[i].color);
         this.canvasContext.restore();
       }
