@@ -72,6 +72,8 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
         if (msg.type === 'extension.openFile') {
           let uri = vscode.Uri.file(msg.params.uri);
           let lineNumber = msg.params.lineNumber;
+          let columnNumber = msg.params.columnNumber | 0;
+
           // Open document
           vscode.workspace.openTextDocument(uri).then(
             (document: vscode.TextDocument) => {
@@ -79,10 +81,9 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
               vscode.window.showTextDocument(document, vscode.ViewColumn.One).then(
                 (document) => {
                   if (lineNumber) {
-                    document.revealRange(
-                      new vscode.Range(lineNumber, 0, lineNumber, 0),
-                      vscode.TextEditorRevealType.InCenter
-                    );
+                    // Adjust line position from 1 to zero-based.
+                    let pos = new vscode.Position(-1 + lineNumber, columnNumber);
+                    document.selection = new vscode.Selection(pos, pos);
                   }
                 },
                 (reason) => {
