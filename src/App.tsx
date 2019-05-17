@@ -410,6 +410,7 @@ class App extends React.Component<any, IState> {
     this.connection.send('Overlay.inspectNodeRequested', {
       backendNodeId: nodeInfo.backendNodeId
     });
+
     if (nodeDetails.object) {
       let objectId = nodeDetails.object.objectId;
       const nodeProperties: any = await this.connection.send('Runtime.getProperties', {
