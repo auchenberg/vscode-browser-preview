@@ -5,6 +5,7 @@ import Toolbar from './components/toolbar/toolbar';
 import Viewport from './components/viewport/viewport';
 import Connection from './connection';
 import { ExtensionConfiguration } from '../ext-src/extensionConfiguration';
+import { resolve as getElementSourceMetadata } from 'element-to-source';
 
 interface IState {
   format: 'jpeg' | 'png';
@@ -290,41 +291,7 @@ class App extends React.Component<any, IState> {
   private async onViewportChanged(action: string, data: any) {
     switch (action) {
       case 'inspectHighlightRequested':
-        let highlightNodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
-          x: data.params.position.x,
-          y: data.params.position.y
-        });
-
-        if (highlightNodeInfo) {
-          let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
-            backendNodeId: highlightNodeInfo.backendNodeId
-          });
-
-          // let nodeIdsReq: any = await this.connection.send('DOM.pushNodesByBackendIdsToFrontend', {
-          //   backendNodeIds: [highlightNodeInfo.backendNodeId]
-          // });
-
-          // let nodeId = nodeIdsReq.nodeIds[0];
-          // let computedStyleReq: any = await this.connection.send('CSS.getComputedStyleForNode', {
-          //   nodeId: nodeId
-          // });
-
-          // let cursorCSS = computedStyleReq.computedStyle.find((c: any) => c.name == 'cursor');
-
-          // if (cursorCSS) {
-          //   console.log('cursorCSS', cursorCSS.value);
-          // }
-
-          if (highlightBoxModel && highlightBoxModel.model) {
-            this.setState({
-              ...this.state,
-              viewportMetadata: {
-                ...this.state.viewportMetadata,
-                highlightInfo: highlightBoxModel.model
-              }
-            });
-          }
-        }
+        this.handleInspectHighlightRequested(data);
         break;
       case 'inspectElement':
         await this.handleInspectElementRequest(data);
@@ -396,15 +363,55 @@ class App extends React.Component<any, IState> {
     });
   }
 
+  private async handleInspectHighlightRequested(data: any) {
+    let highlightNodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
+      x: data.params.position.x,
+      y: data.params.position.y
+    });
+
+    if (highlightNodeInfo) {
+      let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
+        backendNodeId: highlightNodeInfo.backendNodeId
+      });
+
+      // let nodeIdsReq: any = await this.connection.send('DOM.pushNodesByBackendIdsToFrontend', {
+      //   backendNodeIds: [highlightNodeInfo.backendNodeId]
+      // });
+
+      // let nodeId = nodeIdsReq.nodeIds[0];
+      // let computedStyleReq: any = await this.connection.send('CSS.getComputedStyleForNode', {
+      //   nodeId: nodeId
+      // });
+
+      // let cursorCSS = computedStyleReq.computedStyle.find((c: any) => c.name == 'cursor');
+
+      // if (cursorCSS) {
+      //   console.log('cursorCSS', cursorCSS.value);
+      // }
+
+      if (highlightBoxModel && highlightBoxModel.model) {
+        this.setState({
+          ...this.state,
+          viewportMetadata: {
+            ...this.state.viewportMetadata,
+            highlightInfo: highlightBoxModel.model
+          }
+        });
+      }
+    }
+  }
+
   private async handleInspectElementRequest(data: any) {
     const nodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
       x: data.params.position.x,
       y: data.params.position.y
     });
+
     const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
       nodeId: nodeInfo.nodeId,
       backendNodeId: nodeInfo.backendNodeId
     });
+
     // Trigger CDP request to enable DOM explorer
     // TODO: No sure this works.
     this.connection.send('Overlay.inspectNodeRequested', {
@@ -413,40 +420,21 @@ class App extends React.Component<any, IState> {
 
     if (nodeDetails.object) {
       let objectId = nodeDetails.object.objectId;
-      const nodeProperties: any = await this.connection.send('Runtime.getProperties', {
-        objectId: objectId,
-        generatePreview: true
-      });
-      var props = nodeProperties.result as Array<object>;
-      var reactInternalRef: any = props.find((i: any) => i.name.startsWith('__reactInternalInstance'));
-      if (reactInternalRef) {
-        let reactInternalObjectId = reactInternalRef.value.objectId;
-        const reactInternalObject: any = await this.connection.send('Runtime.getProperties', {
-          objectId: reactInternalObjectId,
-          generatePreview: true
-        });
-        if (reactInternalObject) {
-          var reactObjectValues = reactInternalObject.result as Array<object>;
-          var reactDebugSourceRef: any = reactObjectValues.find((i: any) => i.name == '_debugSource');
-          let reactDebugSourceObjectId = reactDebugSourceRef.value.objectId;
-          if (reactDebugSourceObjectId) {
-            const reactDebugSourceRef: any = await this.connection.send('Runtime.getProperties', {
-              objectId: reactDebugSourceObjectId,
-              generatePreview: true
-            });
-            if (reactDebugSourceRef) {
-              var reactDebugSourceProps = reactDebugSourceRef.result as Array<object>;
-              var fileNameRef: any = reactDebugSourceProps.find((i: any) => i.name == 'fileName');
-              var lineNumberRef: any = reactDebugSourceProps.find((i: any) => i.name == 'lineNumber');
-              var fileNameValue = fileNameRef.value.value;
-              var lineNumberValue = lineNumberRef.value.value;
-              this.connection.send('extension.openFile', {
-                uri: fileNameValue,
-                lineNumber: lineNumberValue
-              });
-            }
-          }
+      let nodeProperties = await this.resolveElementProperties(objectId, 4);
+
+      if (nodeProperties) {
+        let sourceMetadata = getElementSourceMetadata(nodeProperties);
+
+        if (!sourceMetadata.fileName) {
+          return;
         }
+
+        this.connection.send('extension.openFile', {
+          fileName: sourceMetadata.fileName,
+          lineNumber: sourceMetadata.lineNumber,
+          columnNumber: sourceMetadata.columnNumber,
+          charNumber: sourceMetadata.charNumber
+        });
       }
     }
   }
@@ -584,6 +572,48 @@ class App extends React.Component<any, IState> {
     if (data && (data as any).value) {
       return this.connection.send('Clipboard.writeText', data);
     }
+  }
+
+  private async resolveElementProperties(objectId: any, maxDepth: number) {
+    let currentDepth = 0;
+    let initialProperties = await this.getProperties(objectId, currentDepth);
+
+    let resolve = (props: Array<any>) => {
+      let result = {};
+      currentDepth = currentDepth + 1;
+
+      props.forEach(async (item: any) => {
+        let properties: any = null;
+
+        if (item.value) {
+          if (item.value.objectId && currentDepth < maxDepth) {
+            properties = await this.getProperties(item.value.objectId, currentDepth);
+            if (Array.isArray(properties)) {
+              properties = resolve(properties);
+            }
+          } else if (item.value.value) {
+            properties = item.value.value;
+          }
+        }
+
+        Object.defineProperty(result, item.name, {
+          value: properties
+        });
+      });
+
+      return result;
+    };
+
+    let result = resolve(initialProperties);
+    return result;
+  }
+
+  private async getProperties(objectId: string, currentDepth: number) {
+    const data: any = await this.connection.send('Runtime.getProperties', {
+      objectId: objectId
+    });
+
+    return data.result as Array<object>;
   }
 }
 

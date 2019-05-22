@@ -70,7 +70,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
           });
         }
         if (msg.type === 'extension.openFile') {
-          let uri = vscode.Uri.file(msg.params.uri);
+          let uri = vscode.Uri.file(msg.params.fileName);
           let lineNumber = msg.params.lineNumber;
           let columnNumber = msg.params.columnNumber | 0;
 

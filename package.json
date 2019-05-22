@@ -229,6 +229,7 @@
   },
   "dependencies": {
     "browser-viewport-device-descriptions": "^1.1.0",
+    "element-to-source": "^1.0.1",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
     "get-chrome": "0.0.2",
@@ -239,8 +240,8 @@
     "re-resizable": "^4.11.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "vsls": "^0.3.967",
     "uuid": "^3.3.2",
+    "vsls": "^0.3.967",
     "which-chrome": "^0.1.1"
   },
   "devDependencies": {
