@@ -171,7 +171,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     let lineNumber = params.lineNumber;
     let columnNumber = params.columnNumber | params.charNumber | 0;
 
-    let workspacePath = (vscode.workspace.rootPath || '') + './';
+    let workspacePath = (vscode.workspace.rootPath || '') + '/';
     let relativePath = params.fileName.replace(workspacePath, '');
 
     vscode.workspace.findFiles(relativePath, '', 1).then((file) => {
