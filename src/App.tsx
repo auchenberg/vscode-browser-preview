@@ -420,11 +420,13 @@ class App extends React.Component<any, IState> {
 
     if (nodeDetails.object) {
       let objectId = nodeDetails.object.objectId;
-      let nodeProperties = await this.resolveElementProperties(objectId, 4);
+      let nodeProperties = await this.resolveElementProperties(objectId, 10);
 
       if (nodeProperties) {
         let sourceMetadata = getElementSourceMetadata(nodeProperties);
 
+        console.log('nodeProperties', nodeProperties);
+        console.log('sourceMetadata', sourceMetadata);
         if (!sourceMetadata.fileName) {
           return;
         }
@@ -576,42 +578,52 @@ class App extends React.Component<any, IState> {
 
   private async resolveElementProperties(objectId: any, maxDepth: number) {
     let currentDepth = 0;
-    let initialProperties = await this.getProperties(objectId, currentDepth);
+    let initialProperties = await this.getProperties(objectId);
 
-    let resolve = (props: Array<any>) => {
-      let result = {};
+    let resolve = async (props: Array<any>) => {
+      let resolveResult: any = {};
       currentDepth = currentDepth + 1;
+      console.log('resolveElementProperties.resolve.start');
 
-      props.forEach(async (item: any) => {
+      for (const item of props) {
         let properties: any = null;
-
         if (item.value) {
           if (item.value.objectId && currentDepth < maxDepth) {
-            properties = await this.getProperties(item.value.objectId, currentDepth);
+            properties = await this.getProperties(item.value.objectId);
             if (Array.isArray(properties)) {
-              properties = resolve(properties);
+              properties = await resolve(properties);
             }
           } else if (item.value.value) {
             properties = item.value.value;
           }
         }
 
-        Object.defineProperty(result, item.name, {
-          value: properties
-        });
-      });
-
-      return result;
+        if (properties) {
+          console.log('resolveElementProperties.resolve.define', item.name);
+          Object.defineProperty(resolveResult, item.name, {
+            value: properties,
+            enumerable: item.enumerable,
+            configurable: item.configurable,
+            writable: item.writable
+          });
+        }
+      }
+      console.log('resolveElementProperties.resolveResult', resolveResult);
+      return resolveResult;
     };
 
-    let result = resolve(initialProperties);
+    let result = await resolve(initialProperties);
+    console.log('resolveElementProperties.result', result);
+
     return result;
   }
 
-  private async getProperties(objectId: string, currentDepth: number) {
+  private async getProperties(objectId: string) {
     const data: any = await this.connection.send('Runtime.getProperties', {
       objectId: objectId
     });
+
+    console.log('getProperties.data', data);
 
     return data.result as Array<object>;
   }
