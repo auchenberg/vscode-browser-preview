@@ -17,7 +17,7 @@
   },
   "extensionKind": "ui",
   "license": "MIT",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
