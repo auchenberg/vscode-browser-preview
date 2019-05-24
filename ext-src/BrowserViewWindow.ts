@@ -70,31 +70,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
           });
         }
         if (msg.type === 'extension.openFile') {
-          let uri = vscode.Uri.file(msg.params.fileName);
-          let lineNumber = msg.params.lineNumber;
-          let columnNumber = msg.params.columnNumber | 0;
-
-          // Open document
-          vscode.workspace.openTextDocument(uri).then(
-            (document: vscode.TextDocument) => {
-              // Show the document
-              vscode.window.showTextDocument(document, vscode.ViewColumn.One).then(
-                (document) => {
-                  if (lineNumber) {
-                    // Adjust line position from 1 to zero-based.
-                    let pos = new vscode.Position(-1 + lineNumber, columnNumber);
-                    document.selection = new vscode.Selection(pos, pos);
-                  }
-                },
-                (reason) => {
-                  vscode.window.showErrorMessage(`Failed to show file. ${reason}`);
-                }
-              );
-            },
-            (err) => {
-              vscode.window.showErrorMessage(`Failed to open file. ${err}`);
-            }
-          );
+          this.handleOpenFileRequest(msg.params);
         }
         if (msg.type === 'extension.windowDialogRequested') {
           const { message, type } = msg.params;
@@ -189,5 +165,43 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     }
     this.emit('disposed');
     this.removeAllListeners();
+  }
+
+  private handleOpenFileRequest(params: any) {
+    let lineNumber = params.lineNumber;
+    let columnNumber = params.columnNumber | params.charNumber | 0;
+
+    let workspacePath = (vscode.workspace.rootPath || '') + './';
+    let relativePath = params.fileName.replace(workspacePath, '');
+
+    vscode.workspace.findFiles(relativePath, '', 1).then((file) => {
+      if (!file || !file.length) {
+        return;
+      }
+
+      var firstFile = file[0];
+
+      // Open document
+      vscode.workspace.openTextDocument(firstFile).then(
+        (document: vscode.TextDocument) => {
+          // Show the document
+          vscode.window.showTextDocument(document, vscode.ViewColumn.One).then(
+            (document) => {
+              if (lineNumber) {
+                // Adjust line position from 1 to zero-based.
+                let pos = new vscode.Position(-1 + lineNumber, columnNumber);
+                document.selection = new vscode.Selection(pos, pos);
+              }
+            },
+            (reason) => {
+              vscode.window.showErrorMessage(`Failed to show file. ${reason}`);
+            }
+          );
+        },
+        (err) => {
+          vscode.window.showErrorMessage(`Failed to open file. ${err}`);
+        }
+      );
+    });
   }
 }
