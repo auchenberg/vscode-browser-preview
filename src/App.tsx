@@ -31,6 +31,7 @@ interface IViewport {
   isFixedZoom: boolean;
   isResizable: boolean;
   loadingPercent: number;
+  highlightNode: object | null;
   highlightInfo: object | null;
   deviceSizeRatio: number;
   screenZoom: number;
@@ -60,6 +61,7 @@ class App extends React.Component<any, IState> {
         deviceSizeRatio: 1,
         height: null,
         width: null,
+        highlightNode: null,
         highlightInfo: null,
         emulatedDeviceId: 'Responsive',
         isLoading: false,
@@ -122,20 +124,7 @@ class App extends React.Component<any, IState> {
     });
 
     this.connection.on('Page.screencastFrame', (result: any) => {
-      const { sessionId, data, metadata } = result;
-      this.connection.send('Page.screencastFrameAck', { sessionId });
-      this.updateState({
-        ...this.state,
-        frame: {
-          base64Data: data,
-          metadata: metadata
-        },
-        viewportMetadata: {
-          ...this.state.viewportMetadata,
-          scrollOffsetX: metadata.scrollOffsetX,
-          scrollOffsetY: metadata.scrollOffsetY
-        }
-      });
+      this.handleScreencastFrame(result);
     });
 
     this.connection.on('Page.windowOpen', (result: any) => {
@@ -157,6 +146,18 @@ class App extends React.Component<any, IState> {
     this.connection.on('Page.frameResized', (result: any) => {
       this.stopCasting();
       this.startCasting();
+    });
+
+    this.connection.on('Overlay.nodeHighlightRequested', (result: any) => {
+      console.log('nodeHighlightRequested', result);
+
+      // this.handleInspectHighlightRequested();
+    });
+
+    this.connection.on('Overlay.inspectNodeRequested', (result: any) => {
+      console.log('inspectNodeRequested', result);
+
+      // this.handleInspectHighlightRequested();
     });
 
     this.connection.on('extension.appConfiguration', (payload: ExtensionConfiguration) => {
@@ -188,11 +189,32 @@ class App extends React.Component<any, IState> {
     this.connection.send('Page.enable');
     this.connection.send('DOM.enable');
     this.connection.send('CSS.enable');
+    this.connection.send('Overlay.enable');
 
     this.requestNavigationHistory();
     this.startCasting();
 
     this.cdpHelper = new CDPHelper(this.connection);
+  }
+
+  private handleScreencastFrame(result: any) {
+    const { sessionId, data, metadata } = result;
+    this.connection.send('Page.screencastFrameAck', { sessionId });
+
+    this.requestNodeHighlighting();
+
+    this.updateState({
+      ...this.state,
+      frame: {
+        base64Data: data,
+        metadata: metadata
+      },
+      viewportMetadata: {
+        ...this.state.viewportMetadata,
+        scrollOffsetX: metadata.scrollOffsetX,
+        scrollOffsetY: metadata.scrollOffsetY
+      }
+    });
   }
 
   public componentDidUpdate() {
@@ -374,45 +396,13 @@ class App extends React.Component<any, IState> {
     });
 
     if (highlightNodeInfo) {
-      let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
-        backendNodeId: highlightNodeInfo.backendNodeId
-      });
-
-      // Trigger hightlight in regular browser.
-      await this.connection.send('Overlay.highlightNode', {
-        backendNodeId: highlightNodeInfo.backendNodeId,
-        highlightConfig: {
-          showInfo: true,
-          showStyles: true,
-          showRulers: true,
-          showExtensionLines: true
+      this.setState({
+        ...this.state,
+        viewportMetadata: {
+          ...this.state.viewportMetadata,
+          highlightNode: highlightNodeInfo.backendNodeId
         }
       });
-
-      // let nodeIdsReq: any = await this.connection.send('DOM.pushNodesByBackendIdsToFrontend', {
-      //   backendNodeIds: [highlightNodeInfo.backendNodeId]
-      // });
-
-      // let nodeId = nodeIdsReq.nodeIds[0];
-      // let computedStyleReq: any = await this.connection.send('CSS.getComputedStyleForNode', {
-      //   nodeId: nodeId
-      // });
-
-      // let cursorCSS = computedStyleReq.computedStyle.find((c: any) => c.name == 'cursor');
-
-      // if (cursorCSS) {
-      //   console.log('cursorCSS', cursorCSS.value);
-      // }
-
-      if (highlightBoxModel && highlightBoxModel.model) {
-        this.setState({
-          ...this.state,
-          viewportMetadata: {
-            ...this.state.viewportMetadata,
-            highlightInfo: highlightBoxModel.model
-          }
-        });
-      }
     }
   }
 
@@ -496,7 +486,8 @@ class App extends React.Component<any, IState> {
         isInspectEnabled: false,
         viewportMetadata: {
           ...this.state.viewportMetadata,
-          highlightInfo: null
+          highlightInfo: null,
+          highlightNode: null
         }
       });
     } else {
@@ -586,6 +577,35 @@ class App extends React.Component<any, IState> {
     // overwrite the clipboard only if there is a valid value
     if (data && (data as any).value) {
       return this.connection.send('Clipboard.writeText', data);
+    }
+  }
+
+  private async requestNodeHighlighting() {
+    if (this.state.viewportMetadata.highlightNode) {
+      let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
+        backendNodeId: this.state.viewportMetadata.highlightNode
+      });
+
+      // Trigger hightlight in regular browser.
+      await this.connection.send('Overlay.highlightNode', {
+        backendNodeId: this.state.viewportMetadata.highlightNode,
+        highlightConfig: {
+          showInfo: true,
+          showStyles: true,
+          showRulers: true,
+          showExtensionLines: true
+        }
+      });
+
+      if (highlightBoxModel && highlightBoxModel.model) {
+        this.setState({
+          ...this.state,
+          viewportMetadata: {
+            ...this.state.viewportMetadata,
+            highlightInfo: highlightBoxModel.model
+          }
+        });
+      }
     }
   }
 }
