@@ -378,6 +378,17 @@ class App extends React.Component<any, IState> {
         backendNodeId: highlightNodeInfo.backendNodeId
       });
 
+      // Trigger hightlight in regular browser.
+      await this.connection.send('Overlay.highlightNode', {
+        backendNodeId: highlightNodeInfo.backendNodeId,
+        highlightConfig: {
+          showInfo: true,
+          showStyles: true,
+          showRulers: true,
+          showExtensionLines: true
+        }
+      });
+
       // let nodeIdsReq: any = await this.connection.send('DOM.pushNodesByBackendIdsToFrontend', {
       //   backendNodeIds: [highlightNodeInfo.backendNodeId]
       // });
