@@ -69,11 +69,16 @@ class Screencast extends React.Component<any, any> {
   }
 
   public render() {
+    let canvasStyle = {
+      cursor: this.viewportMetadata ? this.viewportMetadata.cursor : 'auto'
+    };
+
     return (
       <>
         <img ref={this.imageRef} className="img-hidden" />
         <canvas
           className="screencast"
+          style={canvasStyle}
           ref={this.canvasRef}
           onMouseDown={this.handleMouseEvent}
           onMouseUp={this.handleMouseEvent}
@@ -255,6 +260,13 @@ class Screencast extends React.Component<any, any> {
       }
     } else {
       this.dispatchMouseEvent(event.nativeEvent);
+    }
+
+    if (event.type === 'mousemove') {
+      const position = this.convertIntoScreenSpace(event, this.state);
+      this.props.onMouseMoved({
+        position: position
+      });
     }
 
     if (event.type === 'mousedown') {

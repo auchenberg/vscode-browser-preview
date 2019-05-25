@@ -25,6 +25,7 @@ interface IState {
 interface IViewport {
   height: number | null;
   width: number | null;
+  cursor: string | null;
   emulatedDeviceId: string | null;
   isLoading: boolean;
   isFixedSize: boolean;
@@ -58,6 +59,7 @@ class App extends React.Component<any, IState> {
         canGoForward: false
       },
       viewportMetadata: {
+        cursor: null,
         deviceSizeRatio: 1,
         height: null,
         width: null,
@@ -323,6 +325,9 @@ class App extends React.Component<any, IState> {
         await this.handleInspectElementRequest(data);
         this.handleToggleInspect();
         break;
+      case 'hoverElementChanged':
+        await this.handleElementChanged(data);
+        break;
       case 'interaction':
         this.connection.send(data.action, data.params);
         break;
@@ -578,6 +583,23 @@ class App extends React.Component<any, IState> {
     if (data && (data as any).value) {
       return this.connection.send('Clipboard.writeText', data);
     }
+  }
+
+  private async handleElementChanged(data: any) {
+    const nodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
+      x: data.params.position.x,
+      y: data.params.position.y
+    });
+
+    var cursor = await this.cdpHelper.getCursorForNode(nodeInfo);
+
+    this.setState({
+      ...this.state,
+      viewportMetadata: {
+        ...this.state.viewportMetadata,
+        cursor: cursor
+      }
+    });
   }
 
   private async requestNodeHighlighting() {
