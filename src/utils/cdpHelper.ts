@@ -61,4 +61,26 @@ export class CDPHelper {
 
     return data.result as Array<object>;
   }
+
+  public async getCursorForNode(nodeInfo: any) {
+    let nodeId = nodeInfo.nodeId;
+    if (!nodeInfo.nodeId) {
+      await this.connection.send('DOM.getDocument');
+      let nodeIdsReq = await this.connection.send('DOM.pushNodesByBackendIdsToFrontend', {
+        backendNodeIds: [nodeInfo.backendNodeId]
+      });
+
+      if (nodeIdsReq) {
+        nodeId = nodeIdsReq.nodeIds[0];
+      }
+    }
+
+    let computedStyleReq = await this.connection.send('CSS.getComputedStyleForNode', {
+      nodeId: nodeId
+    });
+
+    let cursorCSS = computedStyleReq.computedStyle.find((c: any) => c.name == 'cursor');
+
+    return cursorCSS.value;
+  }
 }

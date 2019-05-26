@@ -29,6 +29,7 @@ class Viewport extends React.Component<any, any> {
     this.handleInspectHighlightRequested = this.handleInspectHighlightRequested.bind(this);
     this.handleScreencastInteraction = this.handleScreencastInteraction.bind(this);
     this.handleResizeStop = this.handleResizeStop.bind(this);
+    this.handleMouseMoved = this.handleMouseMoved.bind(this);
   }
 
   public componentDidMount() {
@@ -81,6 +82,7 @@ class Viewport extends React.Component<any, any> {
         onInspectElement={this.handleInspectElement}
         onInspectHighlightRequested={this.handleInspectHighlightRequested}
         onInteraction={this.handleScreencastInteraction}
+        onMouseMoved={this.handleMouseMoved}
       />
     );
 
@@ -224,6 +226,12 @@ class Viewport extends React.Component<any, any> {
   private handleScreencastInteraction(action: string, params: object) {
     this.props.onViewportChanged('interaction', {
       action: action,
+      params: params
+    });
+  }
+
+  private handleMouseMoved(params: object) {
+    this.props.onViewportChanged('hoverElementChanged', {
       params: params
     });
   }
