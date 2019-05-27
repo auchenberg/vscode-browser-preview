@@ -417,10 +417,23 @@ class App extends React.Component<any, IState> {
       y: data.params.position.y
     });
 
-    const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
-      nodeId: nodeInfo.nodeId,
-      backendNodeId: nodeInfo.backendNodeId
-    });
+    if (!nodeInfo) {
+      return;
+    }
+
+    let resolveNodeParams = {} as any;
+
+    if (nodeInfo.nodeId) {
+      resolveNodeParams.nodeId = nodeInfo.nodeId;
+    } else if (nodeInfo.backendNodeId) {
+      resolveNodeParams.backendNodeId = nodeInfo.backendNodeId;
+    }
+
+    if (!resolveNodeParams.nodeId && resolveNodeParams.backendNodeId) {
+      return;
+    }
+
+    const nodeDetails: any = await this.connection.send('DOM.resolveNode', resolveNodeParams);
 
     // Trigger CDP request to enable DOM explorer
     // TODO: No sure this works.
@@ -487,10 +500,9 @@ class App extends React.Component<any, IState> {
 
   private handleToggleInspect() {
     if (this.state.isInspectEnabled) {
-
       // Hide browser highlight
-      this.connection.send('Overlay.hideHighlight');    
-      
+      this.connection.send('Overlay.hideHighlight');
+
       // Hide local highlight
       this.updateState({
         isInspectEnabled: false,
