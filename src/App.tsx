@@ -32,7 +32,9 @@ interface IViewport {
   isFixedZoom: boolean;
   isResizable: boolean;
   loadingPercent: number;
-  highlightNode: object | null;
+  highlightNode: {
+    nodeId: string;
+  } | null;
   highlightInfo: object | null;
   deviceSizeRatio: number;
   screenZoom: number;
@@ -401,44 +403,41 @@ class App extends React.Component<any, IState> {
     });
 
     if (highlightNodeInfo) {
+      let nodeId = highlightNodeInfo.nodeId;
+
+      if (!highlightNodeInfo.nodeId && highlightNodeInfo.backendNodeId) {
+        nodeId = await this.cdpHelper.getNodeIdFromBackendId(highlightNodeInfo.backendNodeId);
+      }
+
       this.setState({
         ...this.state,
         viewportMetadata: {
           ...this.state.viewportMetadata,
-          highlightNode: highlightNodeInfo.backendNodeId
+          highlightNode: {
+            nodeId: nodeId
+          }
         }
       });
+
+      this.requestNodeHighlighting();
     }
   }
 
   private async handleInspectElementRequest(data: any) {
-    const nodeInfo: any = await this.connection.send('DOM.getNodeForLocation', {
-      x: data.params.position.x,
-      y: data.params.position.y
+    if (!this.state.viewportMetadata.highlightNode) {
+      return;
+    }
+
+    let nodeId = this.state.viewportMetadata.highlightNode.nodeId;
+
+    const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
+      nodeId: nodeId
     });
-
-    if (!nodeInfo) {
-      return;
-    }
-
-    let resolveNodeParams = {} as any;
-
-    if (nodeInfo.nodeId) {
-      resolveNodeParams.nodeId = nodeInfo.nodeId;
-    } else if (nodeInfo.backendNodeId) {
-      resolveNodeParams.backendNodeId = nodeInfo.backendNodeId;
-    }
-
-    if (!resolveNodeParams.nodeId && resolveNodeParams.backendNodeId) {
-      return;
-    }
-
-    const nodeDetails: any = await this.connection.send('DOM.resolveNode', resolveNodeParams);
 
     // Trigger CDP request to enable DOM explorer
     // TODO: No sure this works.
     this.connection.send('Overlay.inspectNodeRequested', {
-      backendNodeId: nodeInfo.backendNodeId
+      nodeId: nodeId
     });
 
     if (nodeDetails.object) {
@@ -621,13 +620,14 @@ class App extends React.Component<any, IState> {
 
   private async requestNodeHighlighting() {
     if (this.state.viewportMetadata.highlightNode) {
+      let nodeId = this.state.viewportMetadata.highlightNode.nodeId;
       let highlightBoxModel: any = await this.connection.send('DOM.getBoxModel', {
-        backendNodeId: this.state.viewportMetadata.highlightNode
+        nodeId: nodeId
       });
 
       // Trigger hightlight in regular browser.
       await this.connection.send('Overlay.highlightNode', {
-        backendNodeId: this.state.viewportMetadata.highlightNode,
+        nodeId: nodeId,
         highlightConfig: {
           showInfo: true,
           showStyles: true,
