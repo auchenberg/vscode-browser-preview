@@ -487,6 +487,11 @@ class App extends React.Component<any, IState> {
 
   private handleToggleInspect() {
     if (this.state.isInspectEnabled) {
+
+      // Hide browser highlight
+      this.connection.send('Overlay.hideHighlight');    
+      
+      // Hide local highlight
       this.updateState({
         isInspectEnabled: false,
         viewportMetadata: {
