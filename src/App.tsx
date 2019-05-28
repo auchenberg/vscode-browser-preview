@@ -8,6 +8,13 @@ import { ExtensionConfiguration } from '../ext-src/extensionConfiguration';
 import { resolve as getElementSourceMetadata } from 'element-to-source';
 import { CDPHelper } from './utils/cdpHelper';
 
+interface ElementSource {
+  charNumber: number;
+  columnNumber: number;
+  fileName: string;
+  lineNumber: string;
+}
+
 interface IState {
   format: 'jpeg' | 'png';
   frame: object | null;
@@ -34,6 +41,7 @@ interface IViewport {
   loadingPercent: number;
   highlightNode: {
     nodeId: string;
+    sourceMetadata: ElementSource | null;
   } | null;
   highlightInfo: object | null;
   deviceSizeRatio: number;
@@ -414,29 +422,46 @@ class App extends React.Component<any, IState> {
         viewportMetadata: {
           ...this.state.viewportMetadata,
           highlightNode: {
-            nodeId: nodeId
+            nodeId: nodeId,
+            sourceMetadata: null
           }
         }
       });
+
+      // await this.handleHighlightNodeClickType();
 
       this.requestNodeHighlighting();
     }
   }
 
-  private async handleInspectElementRequest(data: any) {
+  // private async handleHighlightNodeClickType() {
+  //   if (!this.state.viewportMetadata.highlightNode) {
+  //     return;
+  //   }
+
+  //   let cursor = 'not-allowed';
+  //   let sourceMetadata = this.state.viewportMetadata.highlightNode.sourceMetadata;
+
+  //   if(sourceMetadata && sourceMetadata.fileName) {
+  //     cursor = 'pointer';
+  //   }
+
+  //   this.setState({
+  //     ...this.state,
+  //     viewportMetadata: {
+  //       ...this.state.viewportMetadata,
+  //       cursor: cursor
+  //     }
+  //   });
+  // }
+
+  private async resolveHighlightNodeSourceMetadata() {
     if (!this.state.viewportMetadata.highlightNode) {
       return;
     }
 
     let nodeId = this.state.viewportMetadata.highlightNode.nodeId;
-
     const nodeDetails: any = await this.connection.send('DOM.resolveNode', {
-      nodeId: nodeId
-    });
-
-    // Trigger CDP request to enable DOM explorer
-    // TODO: No sure this works.
-    this.connection.send('Overlay.inspectNodeRequested', {
       nodeId: nodeId
     });
 
@@ -451,13 +476,49 @@ class App extends React.Component<any, IState> {
           return;
         }
 
-        this.connection.send('extension.openFile', {
-          fileName: sourceMetadata.fileName,
-          lineNumber: sourceMetadata.lineNumber,
-          columnNumber: sourceMetadata.columnNumber,
-          charNumber: sourceMetadata.charNumber
+        this.setState({
+          ...this.state,
+          viewportMetadata: {
+            ...this.state.viewportMetadata,
+            highlightNode: {
+              ...this.state.viewportMetadata.highlightNode,
+              sourceMetadata: {
+                fileName: sourceMetadata.fileName,
+                columnNumber: sourceMetadata.columnNumber,
+                lineNumber: sourceMetadata.lineNumber,
+                charNumber: sourceMetadata.charNumber
+              }
+            }
+          }
         });
       }
+    }
+  }
+
+  private async handleInspectElementRequest(data: any) {
+    if (!this.state.viewportMetadata.highlightNode) {
+      return;
+    }
+
+    await this.resolveHighlightNodeSourceMetadata();
+
+    let nodeId = this.state.viewportMetadata.highlightNode.nodeId;
+
+    // Trigger CDP request to enable DOM explorer
+    // TODO: No sure this works.
+    this.connection.send('Overlay.inspectNodeRequested', {
+      nodeId: nodeId
+    });
+
+    let sourceMetadata = this.state.viewportMetadata.highlightNode.sourceMetadata;
+
+    if (sourceMetadata) {
+      this.connection.send('extension.openFile', {
+        fileName: sourceMetadata.fileName,
+        lineNumber: sourceMetadata.lineNumber,
+        columnNumber: sourceMetadata.columnNumber,
+        charNumber: sourceMetadata.charNumber
+      });
     }
   }
 
