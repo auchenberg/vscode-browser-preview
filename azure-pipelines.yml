@@ -20,7 +20,5 @@ steps:
   - task: RichCodeNavIndexer@0
     inputs:
       serviceConnection: 'rich-code-nav'
-      nugetServiceConnection: 'rich-code-nav-nuget'
       githubServiceConnection: auchenberg
       languages: typescript
-      serviceEndpoint: 'https://prod.richnav.vsengsaas.visualstudio.com'
