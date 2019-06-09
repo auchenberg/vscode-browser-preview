@@ -6,7 +6,7 @@ import Resizable from 're-resizable';
 import Screencast from '../screencast/screencast';
 import ViewportInfo from '../viewport-info/viewport-info';
 
-import * as _ from 'lodash';
+import debounce from 'lodash/debounce';
 
 class Viewport extends React.Component<any, any> {
   private viewportRef: React.RefObject<HTMLDivElement>;
@@ -24,7 +24,7 @@ class Viewport extends React.Component<any, any> {
       bottom: 30
     };
 
-    this.debouncedResizeHandler = _.debounce(this.handleViewportResize.bind(this), 50);
+    this.debouncedResizeHandler = debounce(this.handleViewportResize.bind(this), 50);
     this.handleInspectElement = this.handleInspectElement.bind(this);
     this.handleInspectHighlightRequested = this.handleInspectHighlightRequested.bind(this);
     this.handleScreencastInteraction = this.handleScreencastInteraction.bind(this);
