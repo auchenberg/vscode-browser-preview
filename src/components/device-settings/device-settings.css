@@ -15,6 +15,12 @@ select {
   padding: 5px; /* If you add too much padding here, the options won't show in IE */
 }
 
+.device-settings > button.rotate-device {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTYuNDggMi41MmMzLjI3IDEuNTUgNS42MSA0LjcyIDUuOTcgOC40OGgxLjVDMjMuNDQgNC44NCAxOC4yOSAwIDEyIDBsLS42Ni4wMyAzLjgxIDMuODEgMS4zMy0xLjMyem0tNi4yNS0uNzdjLS41OS0uNTktMS41NC0uNTktMi4xMiAwTDEuNzUgOC4xMWMtLjU5LjU5LS41OSAxLjU0IDAgMi4xMmwxMi4wMiAxMi4wMmMuNTkuNTkgMS41NC41OSAyLjEyIDBsNi4zNi02LjM2Yy41OS0uNTkuNTktMS41NCAwLTIuMTJMMTAuMjMgMS43NXptNC42IDE5LjQ0TDIuODEgOS4xN2w2LjM2LTYuMzYgMTIuMDIgMTIuMDItNi4zNiA2LjM2em0tNy4zMS4yOUM0LjI1IDE5Ljk0IDEuOTEgMTYuNzYgMS41NSAxM0guMDVDLjU2IDE5LjE2IDUuNzEgMjQgMTIgMjRsLjY2LS4wMy0zLjgxLTMuODEtMS4zMyAxLjMyeiIvPjwvc3ZnPg==);
+  background-size: 14px 14px;
+  vertical-align: middle;
+}
+
 .viewport-size-input {
   max-width: 45px;
   text-align: center;

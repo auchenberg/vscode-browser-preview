@@ -13,6 +13,7 @@ class DeviceSettings extends React.Component<any, any> {
     this.handleWidthChange = this.handleWidthChange.bind(this);
     this.handleHeightChange = this.handleHeightChange.bind(this);
     this.handleDeviceChange = this.handleDeviceChange.bind(this);
+    this.handleRotateDevice = this.handleRotateDevice.bind(this);
 
     this.emulatedDevices = [
       { name: 'Responsive', userAgent: '', viewport: [] },
@@ -96,8 +97,24 @@ class DeviceSettings extends React.Component<any, any> {
             );
           })}
         </select>
+        <button
+          className="rotate-device"
+          onClick={this.handleRotateDevice}
+          disabled={this.props.viewportMetadata.emulatedDeviceId == 'Responsive' ? true : false}
+        />
       </div>
     );
+  }
+
+  private handleRotateDevice() {
+    let device = this.emulatedDevices.find((d: any) => d.name == this.props.viewportMetadata.emulatedDeviceId);
+    device.viewport.height = this.props.viewportMetadata.width;
+    device.viewport.width = this.props.viewportMetadata.height;
+
+    this.props.onDeviceChange(device);
+
+    // dispatch the orientationchange event
+    window.dispatchEvent(new Event('onorientationchange'));
   }
 
   private handleDeviceChange(e: React.ChangeEvent<HTMLSelectElement>) {
