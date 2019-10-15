@@ -14,6 +14,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand('browser-preview.openPreview', (url?) => {
+      if (url != null && url instanceof vscode.Uri && url.scheme === 'file') {
+        windowManager.create(url.toString());
+        return;
+      }
       windowManager.create(url);
     }),
 

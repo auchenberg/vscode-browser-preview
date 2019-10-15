@@ -218,6 +218,13 @@
           "command": "browser-preview.openSharedBrowser",
           "when": "false"
         }
+      ],
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder == false",
+          "command": "browser-preview.openPreview",
+          "group": "navigation"
+        }
       ]
     }
   },
