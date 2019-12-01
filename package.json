@@ -15,7 +15,7 @@
   "engines": {
     "vscode": "^1.30.0"
   },
-  "extensionKind": "ui",
+  "extensionKind": ["ui", "workspace"],
   "license": "MIT",
   "version": "0.5.9",
   "main": "./build/ext-src/extension.js",
