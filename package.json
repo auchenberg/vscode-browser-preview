@@ -46,7 +46,7 @@
         },
         "browser-preview.chromeExecutable": {
           "default": "",
-          "description": "The full path to the executable, including the complete filename of the exectuable",
+          "description": "The full path to the executable, including the complete filename of the executable",
           "type": "string"
         },
         "browser-preview.verbose": {
