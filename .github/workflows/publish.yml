@@ -3,9 +3,10 @@
 name: Publish
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types:
+      - published
+      # - created
 
 jobs:
   publish:
