@@ -9,7 +9,7 @@
 
 <h4 align="center">A real browser preview inside your editor that you can debug.</h4>
 
-![CI](https://github.com/auchenberg/vscode-browser-preview/workflows/CI/badge.svg)
+![CI](https://github.com/auchenberg/vscode-browser-preview/workflows/Build/badge.svg)
 
 Browser Preview for VS Code enables you to open a real browser preview inside your editor that you can debug. Browser Preview is powered by [Chrome Headless](https://developers.google.com/web/updates/2017/04/headless-chrome), and works by starting a headless Chrome instance in a new process. This enables a secure way to render web content inside VS Code, and enables interesting features such as in-editor debugging and more!
 
