@@ -7,10 +7,11 @@ import { setupLiveShare } from './live-share';
 import { Telemetry } from './telemetry';
 
 export function activate(context: vscode.ExtensionContext) {
-  const windowManager = new BrowserViewWindowManager(context.extensionPath);
-  const debugProvider = new DebugProvider(windowManager);
-
   const telemetry = new Telemetry();
+
+  const windowManager = new BrowserViewWindowManager(context.extensionPath, telemetry);
+  const debugProvider = new DebugProvider(windowManager, telemetry);
+
   telemetry.sendEvent('activate');
 
   vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());

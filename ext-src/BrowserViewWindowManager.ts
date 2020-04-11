@@ -5,15 +5,18 @@ import * as EventEmitter from 'eventemitter2';
 import Browser from './browser';
 import { ExtensionConfiguration } from './extensionConfiguration';
 import { BrowserViewWindow } from './BrowserViewWindow';
+import { Telemetry } from './telemetry';
 
 export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
   public openWindows: Set<BrowserViewWindow>;
   private browser: any;
   private defaultConfig: ExtensionConfiguration;
+  private telemetry: Telemetry;
 
-  constructor(extensionPath: string) {
+  constructor(extensionPath: string, telemetry: Telemetry) {
     super();
     this.openWindows = new Set();
+    this.telemetry = telemetry;
     this.defaultConfig = {
       extensionPath: extensionPath,
       startUrl: 'http://code.visualstudio.com',
@@ -62,7 +65,7 @@ export class BrowserViewWindowManager extends EventEmitter.EventEmitter2 {
     let config = { ...this.defaultConfig };
 
     if (!this.browser) {
-      this.browser = new Browser(config);
+      this.browser = new Browser(config, this.telemetry);
     }
 
     let lastColumnNumber = this.getLastColumnNumber();

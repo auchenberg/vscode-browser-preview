@@ -1,12 +1,15 @@
 import { env } from 'vscode';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { Telemetry } from './telemetry';
 
 export default class DebugProvider {
   private windowManager: any;
+  private telemetry: Telemetry;
 
-  constructor(windowManager: any) {
+  constructor(windowManager: any, telemetry: Telemetry) {
     this.windowManager = windowManager;
+    this.telemetry = telemetry;
 
     vscode.debug.onDidTerminateDebugSession((e: vscode.DebugSession) => {
       if (e.name === `Browser Preview: Launch` && e.configuration.urlFilter) {
@@ -18,6 +21,7 @@ export default class DebugProvider {
 
   getProvider(): vscode.DebugConfigurationProvider {
     let manager = this.windowManager;
+    let telemetry = this.telemetry;
 
     return {
       provideDebugConfigurations(
@@ -57,9 +61,14 @@ export default class DebugProvider {
         };
 
         if (config && config.type === 'browser-preview') {
+          telemetry.sendEvent('openDebug', {
+            type: config.request
+          });
+
           if (config.request && config.request === `attach`) {
             debugConfig.name = `Browser Preview: Attach`;
             debugConfig.port = manager.getDebugPort();
+
             if (debugConfig.port === null) {
               vscode.window.showErrorMessage(
                 'No Browser Preview window was found. Open a Browser Preview window or use the "launch" request type.'

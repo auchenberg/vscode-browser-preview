@@ -6,16 +6,19 @@ import * as whichChrome from 'which-chrome';
 import * as vscode from 'vscode';
 import * as os from 'os';
 import { ExtensionConfiguration } from './extensionConfiguration';
+import { Telemetry } from './telemetry';
 
 const puppeteer = require('puppeteer-core');
 const getPort = require('get-port');
 
 export default class Browser extends EventEmitter {
   private browser: any;
+  private telemetry: Telemetry;
   public remoteDebugPort: number = 0;
 
-  constructor(private config: ExtensionConfiguration) {
+  constructor(private config: ExtensionConfiguration, telemetry: Telemetry) {
     super();
+    this.telemetry = telemetry;
   }
 
   private async launchBrowser() {
@@ -32,6 +35,10 @@ export default class Browser extends EventEmitter {
     chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
 
     if (!chromePath) {
+      this.telemetry.sendEvent('error', {
+        type: 'chromeNotFound'
+      });
+
       throw new Error(
         `No Chrome installation found, or no Chrome executable set in the settings - used path ${chromePath}`
       );
