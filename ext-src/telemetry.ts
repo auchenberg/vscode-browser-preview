@@ -1,7 +1,6 @@
 var Mixpanel = require('mixpanel');
 import * as vscode from 'vscode';
 import osName = require('os-name');
-import readPkgUp = require('read-pkg-up');
 
 export class Telemetry {
   client: any;
@@ -14,9 +13,8 @@ export class Telemetry {
   }
 
   async setup() {
-    const packageMetadata = await readPkgUp();
-
-    let extensionVersion = packageMetadata ? packageMetadata.packageJson.version : '<none>';
+    let extension = vscode.extensions.getExtension('auchenberg.vscode-browser-preview');
+    let extensionVersion = extension ? extension.packageJSON.version : '<none>';
 
     this.client.people.set(this.userId, {
       sessionId: vscode.env.sessionId,

@@ -239,7 +239,6 @@
     "re-resizable": "^4.11.0",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "read-pkg-up": "^7.0.1",
     "uuid": "^3.3.2",
     "vsls": "^0.3.967",
     "which-chrome": "^0.1.1"
