@@ -1,6 +1,5 @@
-var EventEmitter2 = require('eventemitter2').EventEmitter2;
-
 import Logger from './utils/logger';
+var EventEmitter2 = require('eventemitter2').EventEmitter2;
 
 export default class Connection extends EventEmitter2 {
   private lastId: number;
