@@ -11,6 +11,7 @@ export function activate(context: vscode.ExtensionContext) {
   const debugProvider = new DebugProvider(windowManager);
 
   const telemetry = new Telemetry();
+  telemetry.sendEvent('activate');
 
   vscode.window.registerTreeDataProvider('targetTree', new TargetTreeProvider());
   vscode.debug.registerDebugConfigurationProvider('browser-preview', debugProvider.getProvider());
