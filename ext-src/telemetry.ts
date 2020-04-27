@@ -2,9 +2,11 @@ var Mixpanel = require('mixpanel');
 import * as vscode from 'vscode';
 const osName = require('os-name');
 const publicIp = require('public-ip');
+var Amplitude = require('amplitude');
 
 export class Telemetry {
   client: any;
+  amplitude: any;
   userId: string;
   ip: string;
   isTelemetryEnabled: boolean;
@@ -29,6 +31,7 @@ export class Telemetry {
     }
 
     this.client = Mixpanel.init('d0149f7b700b44a18fa53e2cab03b564');
+    this.amplitude = new Amplitude('ab1883d0fa15e411b12ee8fdf476b952');
 
     let extension = vscode.extensions.getExtension('auchenberg.vscode-browser-preview');
     let extensionVersion = extension ? extension.packageJSON.version : '<none>';
@@ -36,6 +39,7 @@ export class Telemetry {
     // Store
     this.ip = await publicIp.v4();
 
+    // Mixpanel
     this.client.people.set(this.userId, {
       sessionId: vscode.env.sessionId,
       language: vscode.env.language,
@@ -43,6 +47,19 @@ export class Telemetry {
       platform: osName(),
       version: extensionVersion,
       ip: this.ip
+    });
+
+    // Amplitude
+    this.amplitude.identify({
+      user_id: this.userId,
+      language: vscode.env.language,
+      platform: osName(),
+      app_version: extensionVersion,
+      ip_address: this.ip,
+      user_properties: {
+        sessionId: vscode.env.sessionId,
+        vscodeVersion: vscode.version
+      }
     });
   }
 
@@ -57,7 +74,16 @@ export class Telemetry {
       ip: this.ip
     };
 
+    // Mixpanel
     this.client.track(eventName, data);
+
+    // Amplitude
+    this.amplitude.track({
+      event_type: eventName,
+      event_properties: params,
+      user_id: this.userId,
+      ip_address: this.ip
+    });
   }
 
   configurationChanged(e: vscode.ConfigurationChangeEvent) {

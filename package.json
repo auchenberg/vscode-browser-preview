@@ -225,6 +225,7 @@
     }
   },
   "dependencies": {
+    "amplitude": "^4.0.1",
     "browser-viewport-device-descriptions": "^1.1.0",
     "element-to-source": "^1.0.1",
     "event-emitter-enhancer": "^1.0.57",
