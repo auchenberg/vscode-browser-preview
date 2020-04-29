@@ -55,9 +55,9 @@ export class Telemetry {
       language: vscode.env.language,
       platform: osName(),
       app_version: extensionVersion,
-      ip_address: this.ip,
+      ip: this.ip,
       user_properties: {
-        sessionId: vscode.env.sessionId,
+        vscodeSessionId: vscode.env.sessionId,
         vscodeVersion: vscode.version
       }
     });
@@ -82,7 +82,7 @@ export class Telemetry {
       event_type: eventName,
       event_properties: params,
       user_id: this.userId,
-      ip_address: this.ip
+      ip: this.ip
     });
   }
 
