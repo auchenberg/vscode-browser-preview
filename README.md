@@ -33,6 +33,7 @@ Make sure you have Google Chrome installed on your computer.
 - Option to set the type of rendering via `browser-preview.format` with the support for `jpeg` (default one) and `png` formats
 
 ## How to change the default start url / start page?
+
 Go to your settings, search for "browser preview" and set `browser-preview.startUrl` to your desired url.
 
 ![](assets/settings.png)
@@ -43,20 +44,20 @@ You can enable in-editor debugging of Browser Preview by installing [Debugger fo
 
 ```json
 {
-    "version": "0.1.0",
-    "configurations": [
-        {
-            "type": "browser-preview",
-            "request": "attach",
-            "name": "Browser Preview: Attach"
-        },
-        {
-            "type": "browser-preview",
-            "request": "launch",
-            "name": "Browser Preview: Launch",
-            "url": "http://localhost:3000"
-        }
-    ]
+  "version": "0.1.0",
+  "configurations": [
+    {
+      "type": "browser-preview",
+      "request": "attach",
+      "name": "Browser Preview: Attach"
+    },
+    {
+      "type": "browser-preview",
+      "request": "launch",
+      "name": "Browser Preview: Launch",
+      "url": "http://localhost:3000"
+    }
+  ]
 }
 ```
 
@@ -75,4 +76,5 @@ Browser Preview has the following settings:
 "browser-preview.verbose": false // Enable verbose logging of messages sent between VS Code and Chrome instance
 "browser-preview.chromeExecutable": // The full path to the executable, including the complete filename of the executable
 "browser-preview.format": // Option to set the type of rendering with the support for `jpeg` (default one) and `png` formats
+"browser-preview.ignoreHttpsErrors": false // Ignore HTTPS errors if you are using self-signed SSL certificates
 ```

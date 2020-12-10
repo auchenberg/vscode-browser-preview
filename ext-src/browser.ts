@@ -48,9 +48,12 @@ export default class Browser extends EventEmitter {
       chromeArgs.push('--no-sandbox');
     }
 
+    let extensionSettings = vscode.workspace.getConfiguration('browser-preview');
+    let ignoreHTTPSErrors = extensionSettings.get<boolean>('ignoreHttpsErrors');
     this.browser = await puppeteer.launch({
       executablePath: chromePath,
-      args: chromeArgs
+      args: chromeArgs,
+      ignoreHTTPSErrors
     });
   }
 
