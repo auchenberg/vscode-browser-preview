@@ -80,6 +80,7 @@ export default class Browser extends EventEmitter {
     const knownChromiums = [...Object.keys(chrome), ...Object.keys(edge)];
 
     knownChromiums.forEach((key) => {
+      if (foundPath) return;
       if (!key.startsWith('launcher')) return;
 
       // @ts-ignore
