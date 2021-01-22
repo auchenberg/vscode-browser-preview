@@ -229,9 +229,9 @@
     "element-to-source": "^1.0.1",
     "event-emitter-enhancer": "^1.0.57",
     "eventemitter2": "^5.0.1",
-    "get-chrome": "0.0.2",
     "get-port": "^4.1.0",
-    "karma-chrome-launcher": "^2.2.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "@chiragrupani/karma-chromium-edge-launcher": "^2.1.0",
     "lodash": "^4.17.15",
     "os-name": "^3.1.0",
     "public-ip": "^4.0.1",
@@ -240,8 +240,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "uuid": "^3.3.2",
-    "vsls": "^0.3.967",
-    "which-chrome": "^0.1.1"
+    "vsls": "^0.3.967"
   },
   "devDependencies": {
     "@types/jest": "23.3.12",
