@@ -75,7 +75,7 @@ class Screencast extends React.Component<any, any> {
 
     return (
       <>
-        <img ref={this.imageRef} className="img-hidden" />
+        <img ref={this.imageRef} className="img-pointer-events-passthrough" />
         <canvas
           className="screencast"
           style={canvasStyle}

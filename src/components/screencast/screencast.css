@@ -4,6 +4,11 @@
   image-rendering: pixelated; /* Disables interpolation. See https://stackoverflow.com/questions/7615009/disable-interpolation-when-scaling-a-canvas */
 }
 
-.img-hidden {
-  display: none;
+.img-pointer-events-passthrough {
+  pointer-events: none;
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
 }
