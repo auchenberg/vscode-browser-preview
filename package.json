@@ -60,6 +60,11 @@
           "default": "jpeg",
           "description": "The type of image used in rendering preview. Supported values are: `jpeg` (default) and `png`",
           "type": "string"
+        },
+        "browser-preview.ignoreHttpsErrors": {
+          "default": "",
+          "description": "Ignore HTTPS errors if you are using self-signed SSL certificates",
+          "type": "boolean"
         }
       }
     },
