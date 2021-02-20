@@ -11,7 +11,7 @@
 
 ![CI](https://img.shields.io/github/workflow/status/auchenberg/vscode-browser-preview/Build.svg)
 
-Browser Preview for VS Code enables you to open a real browser preview inside your editor that you can debug. Browser Preview is powered by [Chrome Headless](https://developers.google.com/web/updates/2017/04/headless-chrome), and works by starting a headless Chrome instance in a new process. This enables a secure way to render web content inside VS Code, and enables interesting features such as in-editor debugging and more!
+Browser Preview for VS Code enables you to open a real browser preview inside your editor that you can debug. Browser Preview is powered by [headless Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome), and works by starting a headless Chromium instance in a new process. This can either be Google Chrome or Microsoft Edge. This enables a secure way to render web content inside VS Code, and enables interesting features such as in-editor debugging and more!
 
 ![](resources/demo.gif)
 
@@ -24,7 +24,7 @@ Make sure you have Google Chrome installed on your computer.
 
 ## Features
 
-- Browser preview inside VS Code (Powered by [Chrome Headless](https://developers.google.com/web/updates/2017/04/headless-chrome)).
+- Browser preview inside VS Code (Powered by [headless Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome)).
 - Ability to have multiple previews open at the same time.
 - Debuggable. Launch urls and attach [Debugger for Chrome](https://marketplace.visualstudio.com/items?itemName=msjsdiag.debugger-for-chrome) to the browser view instance, and debug within VS Code.
 - Attach Chrome DevTools via `chrome://inspect`

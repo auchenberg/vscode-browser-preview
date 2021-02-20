@@ -2,11 +2,12 @@
 
 import { EventEmitter } from 'events';
 import BrowserPage from './browserPage';
-import * as whichChrome from 'which-chrome';
 import * as vscode from 'vscode';
 import * as os from 'os';
 import { ExtensionConfiguration } from './extensionConfiguration';
 import { Telemetry } from './telemetry';
+import * as edge from '@chiragrupani/karma-chromium-edge-launcher';
+import * as chrome from 'karma-chrome-launcher';
 
 const puppeteer = require('puppeteer-core');
 const getPort = require('get-port');
@@ -22,7 +23,7 @@ export default class Browser extends EventEmitter {
   }
 
   private async launchBrowser() {
-    let chromePath = whichChrome.Chrome || whichChrome.Chromium;
+    let chromePath = this.getChromiumPath();
     let chromeArgs = [];
     let platform = os.platform();
 
@@ -67,7 +68,7 @@ export default class Browser extends EventEmitter {
     return page;
   }
 
-  public dispose(): Promise<any> {
+  public dispose(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.browser) {
         this.browser.close();
@@ -75,5 +76,29 @@ export default class Browser extends EventEmitter {
       }
       resolve();
     });
+  }
+
+  public getChromiumPath(): string | undefined {
+    let foundPath: string | undefined = undefined;
+    const knownChromiums = [...Object.keys(chrome), ...Object.keys(edge)];
+
+    knownChromiums.forEach((key) => {
+      if (foundPath) return;
+      if (!key.startsWith('launcher')) return;
+
+      // @ts-ignore
+      const info: typeof import('karma-chrome-launcher').example = chrome[key] || edge[key];
+
+      if (!info[1].prototype) return;
+      if (!info[1].prototype.DEFAULT_CMD) return;
+
+      const possiblePaths = info[1].prototype.DEFAULT_CMD;
+      const maybeThisPath = possiblePaths[process.platform];
+      if (maybeThisPath && typeof maybeThisPath === 'string') {
+        foundPath = maybeThisPath;
+      }
+    });
+
+    return foundPath;
   }
 }
