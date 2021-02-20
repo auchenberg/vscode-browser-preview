@@ -72,7 +72,7 @@
       {
         "category": "Browser Preview",
         "command": "browser-preview.openPreview",
-        "title": "Open Preview"
+        "title": "Open in Browser Preview"
       },
       {
         "category": "Browser Preview",
@@ -224,6 +224,13 @@
         {
           "command": "browser-preview.openSharedBrowser",
           "when": "false"
+        }
+      ],
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder == false",
+          "command": "browser-preview.openPreview",
+          "group": "2_workspace"
         }
       ]
     }
