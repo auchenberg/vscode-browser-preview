@@ -88,7 +88,7 @@ class BroswerTreeDataProvider implements TreeDataProvider<TreeItem> {
   }
 
   private refresh = () => {
-    this._onDidChangeTreeData.fire();
+    // this._onDidChangeTreeData.fire();
   };
 
   private refreshWhenUrlChanges = (window: BrowserViewWindow) => {

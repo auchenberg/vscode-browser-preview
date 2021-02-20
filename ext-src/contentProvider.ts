@@ -9,7 +9,7 @@ export default class ContentProvider {
     this.config = config;
   }
 
-  getContent() {
+  getContent(webview: vscode.Webview) {
     const manifest = require(path.join(this.config.extensionPath, 'build', 'asset-manifest.json'));
     const mainScript = manifest['main.js'];
     const mainStyle = manifest['main.css'];
@@ -20,34 +20,31 @@ export default class ContentProvider {
     for (let key in manifest) {
       if (key.endsWith('.chunk.js') && manifest.hasOwnProperty(key)) {
         // finding their paths on the disk
-        let chunkScriptUri = vscode.Uri.file(path.join(this.config.extensionPath, 'build', manifest[key])).with({
-          scheme: 'vscode-resource'
-        });
+        let chunkScriptUri = webview.asWebviewUri(
+          vscode.Uri.file(path.join(this.config.extensionPath, 'build', manifest[key]))
+        );
+
         // push the chunk Uri to the list of chunks
         chunkScriptsUri.push(chunkScriptUri);
       }
     }
 
     const runtimescriptPathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', runtimeScript));
-    const runtimescriptUri = runtimescriptPathOnDisk.with({
-      scheme: 'vscode-resource'
-    });
+    const runtimescriptUri = webview.asWebviewUri(runtimescriptPathOnDisk);
     const mainScriptPathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', mainScript));
-    const mainScriptUri = mainScriptPathOnDisk.with({
-      scheme: 'vscode-resource'
-    });
+    const mainScriptUri = webview.asWebviewUri(mainScriptPathOnDisk);
 
     const stylePathOnDisk = vscode.Uri.file(path.join(this.config.extensionPath, 'build', mainStyle));
-    const styleUri = stylePathOnDisk.with({ scheme: 'vscode-resource' });
+    const styleUri = webview.asWebviewUri(stylePathOnDisk);
 
     return `<!DOCTYPE html>
                 <html lang="en">
                 <head>
                     <meta charset="utf-8">
                     <link rel="stylesheet" type="text/css" href="${styleUri}">
-                    <base href="${vscode.Uri.file(path.join(this.config.extensionPath, 'build')).with({
-                      scheme: 'vscode-resource'
-                    })}/">
+                    <base href="${webview.asWebviewUri(
+                      vscode.Uri.file(path.join(this.config.extensionPath, 'build'))
+                    )}/">
                 </head>
     
                 <body>

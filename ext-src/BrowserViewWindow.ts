@@ -54,7 +54,7 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
       retainContextWhenHidden: true,
       localResourceRoots: [vscode.Uri.file(path.join(this.config.extensionPath, 'build'))]
     });
-    this._panel.webview.html = this.contentProvider.getContent();
+    this._panel.webview.html = this.contentProvider.getContent(this._panel.webview);
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
     this._panel.webview.onDidReceiveMessage(
       (msg) => {
