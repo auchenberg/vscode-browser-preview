@@ -229,6 +229,7 @@
     }
   },
   "dependencies": {
+    "@chiragrupani/karma-chromium-edge-launcher": "^2.1.0",
     "amplitude": "^4.0.1",
     "browser-viewport-device-descriptions": "^1.1.0",
     "element-to-source": "^1.0.1",
@@ -236,7 +237,6 @@
     "eventemitter2": "^5.0.1",
     "get-port": "^4.1.0",
     "karma-chrome-launcher": "^3.1.0",
-    "@chiragrupani/karma-chromium-edge-launcher": "^2.1.0",
     "lodash": "^4.17.15",
     "mixpanel": "^0.11.0",
     "os-name": "^3.1.0",
