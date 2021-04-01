@@ -64,7 +64,6 @@ export class Telemetry {
   }
 
   configurationChanged(e: vscode.ConfigurationChangeEvent) {
-    vscode.window.showInformationMessage('Updated');
     this.getSettingFromConfig();
   }
 
