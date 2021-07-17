@@ -58,6 +58,25 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
     this._panel.webview.onDidReceiveMessage(
       (msg) => {
+        if (msg.type === 'extension.clearFavicon') {
+          if (this._panel) {
+            this._panel.iconPath = vscode.Uri.file(path.join(this.config.extensionPath, 'resources/icon.svg'));
+            return;
+          }
+        }
+        if (msg.type === 'extension.updateFavicon') {
+          if (this.browserPage && this._panel) {
+            this.handleFaviconRetrieval().then(
+              (faviconDataUrl) => {
+                if (faviconDataUrl) {
+                  this._panel!.iconPath = vscode.Uri.parse(faviconDataUrl);
+                }
+              },
+              () => {} // ignore if no favicon is available
+            );
+            return; // let promise run in the background
+          }
+        }
         if (msg.type === 'extension.updateTitle') {
           if (this._panel) {
             this._panel.title = msg.params.title;
@@ -165,6 +184,36 @@ export class BrowserViewWindow extends EventEmitter.EventEmitter2 {
     }
     this.emit('disposed');
     this.removeAllListeners();
+  }
+
+  private async handleFaviconRetrieval() {
+    return this.browserPage!.page.evaluate(() =>
+      Promise.all(
+        Array.from(document.querySelectorAll('link[rel~="icon"]'))
+          .map((element) => element.getAttribute('href'))
+          .filter((href) => !!href)
+          .map((href) => new URL(href!, window.location.origin).toString())
+          .filter((url) => !!url)
+          .map((url) =>
+            fetch(url!)
+              .then((r: Response) => r.blob())
+              .then(
+                (blob: Blob) =>
+                  new Promise<string>((resolve) => {
+                    let reader = new FileReader();
+                    reader.onload = () => {
+                      const faviconDataUrl = String(reader.result);
+                      resolve(faviconDataUrl);
+                    };
+                    reader.readAsDataURL(blob);
+                  })
+              )
+          )
+      )
+    ).then(
+      (faviconDataUrlList: string[]) =>
+        faviconDataUrlList.filter((dataUrl) => !!dataUrl).sort((a, b) => b!.length - a!.length)[0] // longest dataUrl
+    );
   }
 
   private handleOpenFileRequest(params: any) {

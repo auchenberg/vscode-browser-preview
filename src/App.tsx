@@ -88,6 +88,9 @@ class App extends React.Component<any, IState> {
     };
 
     this.connection = new Connection();
+
+    this.connection.send('extension.clearFavicon');
+
     this.onToolbarActionInvoked = this.onToolbarActionInvoked.bind(this);
     this.onViewportChanged = this.onViewportChanged.bind(this);
 
@@ -102,6 +105,8 @@ class App extends React.Component<any, IState> {
       var isMainFrame = !frame.parentId;
 
       if (isMainFrame) {
+        this.connection.send('extension.clearFavicon');
+
         this.requestNavigationHistory();
         this.updateState({
           ...this.state,
@@ -115,6 +120,8 @@ class App extends React.Component<any, IState> {
     });
 
     this.connection.on('Page.loadEventFired', (result: any) => {
+      this.connection.send('extension.updateFavicon');
+
       this.updateState({
         ...this.state,
         viewportMetadata: {
