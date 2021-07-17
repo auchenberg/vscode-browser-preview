@@ -54,6 +54,7 @@ export default class Browser extends EventEmitter {
     this.browser = await puppeteer.launch({
       executablePath: chromePath,
       args: chromeArgs,
+      ignoreDefaultArgs: ['--mute-audio'],
       ignoreHTTPSErrors
     });
   }
