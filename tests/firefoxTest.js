@@ -3,8 +3,7 @@ const puppeteer = require('puppeteer');
 (async () => {
   const browser = await puppeteer.launch({
     product: 'firefox',
-    executablePath: 'C:/Program Files/Firefox Developer Edition/firefox.exe',
-    headless: false
+    executablePath: 'C:/Program Files/Firefox Developer Edition/firefox.exe'
   });
   const page = await browser.newPage();
   await page.goto('http://example.com');
