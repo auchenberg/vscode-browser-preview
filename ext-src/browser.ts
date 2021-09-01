@@ -36,7 +36,9 @@ export default class Browser extends EventEmitter {
     // Detect remote debugging port
     this.remoteDebugPort = await getPort({ port: 9222, host: '127.0.0.1' });
     if (shouldUseFirefox) {
-      var arg = `--start-debugger-server ${this.remoteDebugPort}`;
+      var arg = '--start-debugger-server';
+      chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
+      chromeArgs.push('-wait-for-browser');
     } else {
       var arg = `--remote-debugging-port=${this.remoteDebugPort}`;
     }
