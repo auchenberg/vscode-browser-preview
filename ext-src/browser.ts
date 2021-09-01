@@ -51,12 +51,12 @@ export default class Browser extends EventEmitter {
 
     let extensionSettings = vscode.workspace.getConfiguration('browser-preview');
     let ignoreHTTPSErrors = extensionSettings.get<boolean>('ignoreHttpsErrors');
-    let shouldUseFirefox = extensionSettings.get<boolean>('firefoxMode')
-    if (shouldUseFirefox){
+    let shouldUseFirefox = extensionSettings.get<boolean>('firefoxMode');
+    if (shouldUseFirefox) {
       this.browser = await puppeteer.launch({
         executablePath: chromePath,
         args: chromeArgs,
-        product: "firefox"
+        product: 'firefox',
         ignoreHTTPSErrors
       });
     } else {
