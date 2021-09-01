@@ -38,7 +38,6 @@ export default class Browser extends EventEmitter {
     if (shouldUseFirefox) {
       var arg = '--start-debugger-server';
       chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
-      chromeArgs.push('-wait-for-browser');
     } else {
       var arg = `--remote-debugging-port=${this.remoteDebugPort}`;
     }
