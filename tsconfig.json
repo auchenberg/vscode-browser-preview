@@ -15,8 +15,7 @@
     "noEmit": true,
     "jsx": "preserve",
     "sourceMap": true,
-    "outDir": "build",
-    "strictNullChecks": false
+    "outDir": "build"
   },
   "include": ["src"]
 }

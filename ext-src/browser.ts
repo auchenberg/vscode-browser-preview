@@ -38,7 +38,6 @@ export default class Browser extends EventEmitter {
     if (shouldUseFirefox) {
       var arg = '--start-debugger-server';
       chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
-      chromeArgs.push('--enable-features=NetworkService,NetworkServiceInProcess');
     } else {
       var arg = `--remote-debugging-port=${this.remoteDebugPort}`;
     }
@@ -63,7 +62,6 @@ export default class Browser extends EventEmitter {
         executablePath: chromePath,
         args: chromeArgs,
         product: 'firefox',
-        headless: false,
         ignoreHTTPSErrors
       });
     } else {
