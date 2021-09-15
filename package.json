@@ -1,6 +1,6 @@
 {
   "name": "vscode-browser-preview",
-  "displayName": "Browser Preview",
+  "displayName": "[Deprecated] Browser Preview",
   "categories": [
     "Other"
   ],
@@ -9,7 +9,7 @@
     "email": "kenneth@auchenberg.dk",
     "name": "Kenneth Auchenberg"
   },
-  "description": "A real browser preview inside your editor that you can debug.",
+  "description": "This extension is deprecated in favor of the Live Preview extension.",
   "publisher": "auchenberg",
   "engines": {
     "vscode": "^1.30.0"
