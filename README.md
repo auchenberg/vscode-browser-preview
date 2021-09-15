@@ -1,3 +1,8 @@
+## :rotating_light: Important 
+This extension has been deprecated in favor of the [Live Preview extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server). The Live Preview extension is under active development and has much of the same functionality, including an embedded preview and external browser debugging. You can install the Live Preview extension and safely uninstall or disable this Browser Preview extension.
+
+Please file any issues you encounter in the [Live Preview repository](https://github.com/microsoft/vscode-livepreview).
+
 <h1 align="center">
   <br>
     <img src="https://github.com/auchenberg/vscode-browser-preview/blob/master/resources/icon_128.png?raw=true" alt="logo" width="100">
