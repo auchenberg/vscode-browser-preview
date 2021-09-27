@@ -1,7 +1,9 @@
-## :rotating_light: Important 
-This extension has been deprecated in favor of the [Live Preview extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server). The Live Preview extension is under active development and has much of the same functionality, including an embedded preview and external browser debugging. You can install the Live Preview extension and safely uninstall or disable this Browser Preview extension.
+## :rotating_light: Deprecation Notice 
+This extension has been deprecated in favor of the [Live Preview extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server).
 
-Please file any issues you encounter in the [Live Preview repository](https://github.com/microsoft/vscode-livepreview).
+The Live Preview extension is under active development and has much of the same functionality, including an embedded preview and external browser debugging. You can install the Live Preview extension and safely uninstall or disable this Browser Preview extension. Please file any issues you encounter in the [Live Preview repository](https://github.com/microsoft/vscode-livepreview).
+
+<hr />
 
 <h1 align="center">
   <br>
