@@ -19,7 +19,7 @@
     "workspace"
   ],
   "license": "MIT",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "main": "./build/ext-src/extension.js",
   "activationEvents": [
     "onView:targetTree",
