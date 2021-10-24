@@ -30,10 +30,18 @@ export default class Browser extends EventEmitter {
     if (this.config.chromeExecutable) {
       chromePath = this.config.chromeExecutable;
     }
-
+    let extensionSettings = vscode.workspace.getConfiguration('browser-preview');
+    let ignoreHTTPSErrors = extensionSettings.get<boolean>('ignoreHttpsErrors');
+    let shouldUseFirefox = extensionSettings.get<boolean>('firefoxMode');
     // Detect remote debugging port
     this.remoteDebugPort = await getPort({ port: 9222, host: '127.0.0.1' });
-    chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
+    if (shouldUseFirefox) {
+      chromeArgs.push(`--remote-debugging-port=${this.remoteDebugPort}`);
+      chromeArgs.push('-wait-for-browser');
+    } else {
+      var arg = `--remote-debugging-port=${this.remoteDebugPort}`;
+    }
+    chromeArgs.push(arg);
 
     if (!chromePath) {
       this.telemetry.sendEvent('error', {
@@ -49,13 +57,21 @@ export default class Browser extends EventEmitter {
       chromeArgs.push('--no-sandbox');
     }
 
-    let extensionSettings = vscode.workspace.getConfiguration('browser-preview');
-    let ignoreHTTPSErrors = extensionSettings.get<boolean>('ignoreHttpsErrors');
-    this.browser = await puppeteer.launch({
-      executablePath: chromePath,
-      args: chromeArgs,
-      ignoreHTTPSErrors
-    });
+    if (shouldUseFirefox) {
+      this.browser = await puppeteer.launch({
+        executablePath: chromePath,
+        args: chromeArgs,
+        product: 'firefox',
+        headless: false,
+        ignoreHTTPSErrors
+      });
+    } else {
+      this.browser = await puppeteer.launch({
+        executablePath: chromePath,
+        args: chromeArgs,
+        ignoreHTTPSErrors
+      });
+    }
   }
 
   public async newPage(): Promise<BrowserPage> {
