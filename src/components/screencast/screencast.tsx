@@ -84,6 +84,7 @@ class Screencast extends React.Component<any, any> {
           onMouseUp={this.handleMouseEvent}
           onMouseMove={this.handleMouseEvent}
           onClick={this.handleMouseEvent}
+          onDoubleClick={this.handleMouseEvent}
           onWheel={this.handleMouseEvent}
           onKeyDown={this.handleKeyEvent}
           onKeyUp={this.handleKeyEvent}
@@ -248,6 +249,11 @@ class Screencast extends React.Component<any, any> {
   private handleMouseEvent(event: any) {
     if (this.props.isInspectEnabled) {
       if (event.type === 'click') {
+        const position = this.convertIntoScreenSpace(event, this.state);
+        this.props.onInspectElement({
+          position: position
+        });
+      } else if (event.type === 'dblclick') {
         const position = this.convertIntoScreenSpace(event, this.state);
         this.props.onInspectElement({
           position: position
