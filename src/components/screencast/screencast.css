@@ -1,7 +1,6 @@
 .screencast {
   height: 100%;
   width: 100%;
-  display: inline;
   image-rendering: pixelated; /* Disables interpolation. See https://stackoverflow.com/questions/7615009/disable-interpolation-when-scaling-a-canvas */
 }
 
