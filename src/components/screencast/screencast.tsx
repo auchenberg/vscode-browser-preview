@@ -70,7 +70,8 @@ class Screencast extends React.Component<any, any> {
 
   public render() {
     let canvasStyle = {
-      cursor: this.viewportMetadata ? this.viewportMetadata.cursor : 'auto'
+      cursor: this.viewportMetadata ? this.viewportMetadata.cursor : 'auto',
+      display: this.state.display
     };
 
     return (
@@ -84,6 +85,7 @@ class Screencast extends React.Component<any, any> {
           onMouseUp={this.handleMouseEvent}
           onMouseMove={this.handleMouseEvent}
           onClick={this.handleMouseEvent}
+          onDoubleClick={this.handleMouseEvent}
           onWheel={this.handleMouseEvent}
           onKeyDown={this.handleKeyEvent}
           onKeyUp={this.handleKeyEvent}
@@ -121,6 +123,12 @@ class Screencast extends React.Component<any, any> {
     canvasElement.width = canvasWidth * devicePixelRatio;
     canvasElement.height = canvasHeight * devicePixelRatio;
     this.canvasContext.scale(devicePixelRatio, devicePixelRatio);
+    //判断canvasHeight和canvasElement.height的大小
+    if (canvasHeight > canvasElement.height) {
+      this.setState({ display: 'inline' });
+    } else {
+      this.setState({ display: 'block' });
+    }
 
     // Render checkerboard
     this.canvasContext.save();
@@ -248,6 +256,11 @@ class Screencast extends React.Component<any, any> {
   private handleMouseEvent(event: any) {
     if (this.props.isInspectEnabled) {
       if (event.type === 'click') {
+        const position = this.convertIntoScreenSpace(event, this.state);
+        this.props.onInspectElement({
+          position: position
+        });
+      } else if (event.type === 'dblclick') {
         const position = this.convertIntoScreenSpace(event, this.state);
         this.props.onInspectElement({
           position: position
